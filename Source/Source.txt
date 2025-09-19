@@ -1,0 +1,3 @@
+Um diretório chamado 'Source' onde será colocado
+todo o código de desenvolvimento da aplicação.
+

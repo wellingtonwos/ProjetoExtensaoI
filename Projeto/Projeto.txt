@@ -1,0 +1,2 @@
+Um diretório chamado 'Projeto' que deverá conter o arquivo de gestão do projeto
+feito no LibreProject e um arquivo chamado diário para registro da evolução semanal do projeto;
