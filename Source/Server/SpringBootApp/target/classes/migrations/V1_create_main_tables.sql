@@ -3,7 +3,7 @@ CREATE TABLE Categoria (
     nome VARCHAR(255) UNIQUE NOT NULL
 );
 
-CREATE TABLE Fornecedor (
+CREATE TABLE Marca (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(255) UNIQUE NOT NULL
 );
@@ -21,7 +21,7 @@ CREATE TABLE Produto (
     unidade_medida VARCHAR(2) CHECK (unidade_medida IN ('KG', 'UN')),
     codigo INTEGER UNIQUE NOT NULL,
     fk_Categoria_id INTEGER,
-    fk_Fornecedor_id INTEGER
+    fk_Marca_id INTEGER
 );
 
 CREATE TABLE Compra (
@@ -54,8 +54,8 @@ ALTER TABLE Produto ADD CONSTRAINT FK_Produto_2
     ON DELETE CASCADE;
 
 ALTER TABLE Produto ADD CONSTRAINT FK_Produto_3
-    FOREIGN KEY (fk_Fornecedor_id)
-    REFERENCES Fornecedor (id)
+    FOREIGN KEY (fk_Marca_id)
+    REFERENCES Marca (id)
     ON DELETE CASCADE;
 
 ALTER TABLE Venda ADD CONSTRAINT FK_Venda_2
