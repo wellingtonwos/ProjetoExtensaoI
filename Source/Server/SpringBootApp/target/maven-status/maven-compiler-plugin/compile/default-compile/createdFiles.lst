@@ -1,1 +1,8 @@
+com\example\SpringBootApp\model\Brand.class
+com\example\SpringBootApp\model\Sale.class
+com\example\SpringBootApp\model\User.class
+com\example\SpringBootApp\model\Category.class
+com\example\SpringBootApp\model\Item.class
 com\example\SpringBootApp\JuniorPrimeBeefApplication.class
+com\example\SpringBootApp\model\Purchase.class
+com\example\SpringBootApp\model\Product.class
