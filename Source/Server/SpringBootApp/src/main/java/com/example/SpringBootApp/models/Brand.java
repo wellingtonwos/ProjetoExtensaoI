@@ -1,11 +1,11 @@
-package com.example.SpringBootApp.model;
+package com.example.SpringBootApp.models;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.time.LocalDate;
+
 import java.util.List;
 
 @Entity
@@ -13,15 +13,15 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "compra")
-public class Purchase {
+@Table(name = "marca")
+public class Brand {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "data")
-    private LocalDate date;
+    @Column(name = "nome")
+    private String name;
 
-    @OneToMany(mappedBy = "purchase", fetch = FetchType.LAZY)
-    private List<Item> items;
+    @OneToMany(mappedBy = "brand", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Product> products;
 }

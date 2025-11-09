@@ -1,4 +1,4 @@
-package com.example.SpringBootApp.model;
+package com.example.SpringBootApp.models;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
