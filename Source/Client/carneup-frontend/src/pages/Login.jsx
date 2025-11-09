@@ -1,7 +1,6 @@
-import React from 'react'
-import { useState } from 'react'
-import { Container, Card, Form, Button } from 'react-bootstrap'
-// import api from '../services/api'
+import React, { useState } from 'react'
+import { Container, Card, Form, Button, Alert } from 'react-bootstrap'
+// import { api } from '../services/api'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
 
@@ -24,24 +23,22 @@ export default function Login() {
 	// 			toast.success('Login successful')
 	// 			navigate('/')
 	// 		} else {
-	// 			toast.error('No token returned from server')
+	// 			toast.error('Nnehum token recebido do servidor.')
 	// 		}
 	// 	} catch (err) {
 	// 		console.error(err)
-	// 		toast.error('Login failed. Check credentials.')
+	// 		toast.error('Falha no login. Verifique seus acessos.')
 	// 	}
 	// }
 	async function handleSubmit(e) {
 		e.preventDefault()
 
-		// Mock simple auth
 		if (form.username.trim() && form.password.trim()) {
-			// simula sucesso
 			localStorage.setItem('token', 'mock-token-123')
-			toast.success('Login successful (mock)')
+			toast.success('Login bem sucedido')
 			navigate('/')
 		} else {
-			toast.error('Please fill in both fields')
+			toast.error('Por favor, preencha todos os campos.')
 		}
 	}
 
@@ -55,14 +52,14 @@ export default function Login() {
 					<Card.Title className='mb-3'>Login</Card.Title>
 					<Form onSubmit={handleSubmit}>
 						<Form.Group className='mb-3'>
-							<Form.Label>Username</Form.Label>
+							<Form.Label>Usuário</Form.Label>
 							<Form.Control
 								value={form.username}
 								onChange={(e) => setForm({ ...form, username: e.target.value })}
 							/>
 						</Form.Group>
 						<Form.Group className='mb-3'>
-							<Form.Label>Password</Form.Label>
+							<Form.Label>Senha</Form.Label>
 							<Form.Control
 								type='password'
 								value={form.password}
@@ -70,7 +67,7 @@ export default function Login() {
 							/>
 						</Form.Group>
 						<div className='d-grid'>
-							<Button type='submit'>Sign in</Button>
+							<Button type='submit'>Entrar</Button>
 						</div>
 					</Form>
 				</Card.Body>

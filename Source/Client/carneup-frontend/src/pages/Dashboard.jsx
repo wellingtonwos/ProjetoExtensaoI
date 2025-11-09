@@ -1,3 +1,4 @@
+import React from 'react';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
 
@@ -6,16 +7,16 @@ export default function Dashboard() {
 
 	return (
 		<Container className='mt-4'>
-			<h3>Welcome to CarneUp</h3>
-			<p>Select an action below:</p>
+			<h3>Bem vindo ao Junior Prime Beef</h3>
+			<p>Selecione uma das opções abaixo:</p>
 			<Row className='g-3 mt-2'>
 				<Col md={3}>
 					<Card className='h-100'>
 						<Card.Body className='d-flex flex-column'>
-							<Card.Title>Stock Management</Card.Title>
-							<Card.Text>Register and manage products and purchases.</Card.Text>
+							<Card.Title>Gerenciamento de estoque</Card.Title>
+							<Card.Text>Registre e controle produtos e compras.</Card.Text>
 							<div className='mt-auto'>
-								<Button onClick={() => navigate('/stock')}>Open</Button>
+								<Button onClick={() => navigate('/stock')}>Abrir</Button>
 							</div>
 						</Card.Body>
 					</Card>
@@ -23,12 +24,12 @@ export default function Dashboard() {
 				<Col md={3}>
 					<Card className='h-100'>
 						<Card.Body className='d-flex flex-column'>
-							<Card.Title>Sales (POS)</Card.Title>
+							<Card.Title>Vendas</Card.Title>
 							<Card.Text>
-								Open the point of sale to record sales quickly.
+								Abra o sistema de vendas
 							</Card.Text>
 							<div className='mt-auto'>
-								<Button onClick={() => navigate('/sales')}>Open</Button>
+								<Button onClick={() => navigate('/sales')}>Abrir</Button>
 							</div>
 						</Card.Body>
 					</Card>
@@ -36,10 +37,10 @@ export default function Dashboard() {
 				<Col md={3}>
 					<Card className='h-100'>
 						<Card.Body className='d-flex flex-column'>
-							<Card.Title>Reports</Card.Title>
-							<Card.Text>View sales and stock reports.</Card.Text>
+							<Card.Title>Relatórios</Card.Title>
+							<Card.Text>Veja os relatórios/histórico das vendas realizadas</Card.Text>
 							<div className='mt-auto'>
-								<Button onClick={() => navigate('/reports')}>Open</Button>
+								<Button onClick={() => navigate('/reports')}>Abrir</Button>
 							</div>
 						</Card.Body>
 					</Card>
@@ -47,10 +48,10 @@ export default function Dashboard() {
 				<Col md={3}>
 					<Card className='h-100'>
 						<Card.Body className='d-flex flex-column'>
-							<Card.Title>Settings</Card.Title>
-							<Card.Text>Basic system settings and users.</Card.Text>
+							<Card.Title>Configurações</Card.Title>
+							<Card.Text>Configurações de sistema e usuários</Card.Text>
 							<div className='mt-auto'>
-								<Button disabled>Open</Button>
+								<Button disabled>Abrir</Button>
 							</div>
 						</Card.Body>
 					</Card>

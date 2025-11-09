@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
 	Container,
 	Card,
@@ -28,7 +28,10 @@ export default function StockManagement() {
 	})
 
 	useEffect(() => {
-		fetchLists()
+		// fetchLists()
+		setProducts([])
+		setSuppliers([])
+		setCategories([])
 	}, [])
 
 	async function fetchLists() {
@@ -43,7 +46,7 @@ export default function StockManagement() {
 			setCategories(cRes.data || [])
 		} catch (err) {
 			console.error(err)
-			toast.error('Failed to fetch lists')
+			toast.error('Falha ao buscar listas')
 		}
 	}
 
@@ -59,13 +62,32 @@ export default function StockManagement() {
 				new_category: form.new_category || null,
 				new_supplier: form.new_supplier || null,
 			}
-			const res = await api.post('/products', payload)
-			toast.success('Product created')
+			// const res = await api.post('/products', payload)
+			toast.success('Produto adicionado com sucesso')
 			setShowModal(false)
-			fetchLists()
+			// fetchLists()
+
+			const newProduct = {
+				id: Date.now(),
+				name: payload.name,
+				measuring_unit: payload.measuring_unit,
+				code: payload.code,
+				supplier: { name: payload.new_supplier || 'N/A' },
+				category: { name: payload.new_category || 'N/A' },
+			}
+			setProducts([...products, newProduct])
+			setForm({
+				name: '',
+				measuring_unit: 'kg',
+				code: '',
+				id_category: '',
+				id_supplier: '',
+				new_supplier: '',
+				new_category: '',
+			})
 		} catch (err) {
 			console.error(err)
-			toast.error('Failed to create product')
+			toast.error('Falha ao criar produto')
 		}
 	}
 
@@ -73,25 +95,25 @@ export default function StockManagement() {
 		<Container className='mt-4'>
 			<Row>
 				<Col md={8}>
-					<h3>Stock Management</h3>
+					<h3>Gerenciamento de Estoque</h3>
 					<Card>
 						<Card.Body>
 							<div className='d-flex justify-content-between mb-2'>
-								<div>Products</div>
+								<div>Produtos</div>
 								<div>
 									<Button onClick={() => setShowModal(true)}>
-										New Product
+										Novo Produto
 									</Button>
 								</div>
 							</div>
 							<Table striped hover responsive>
 								<thead>
 									<tr>
-										<th>Name</th>
-										<th>Unit</th>
-										<th>Code</th>
-										<th>Supplier</th>
-										<th>Category</th>
+										<th>Nome</th>
+										<th>Unidade</th>
+										<th>Código</th>
+										<th>Fornecedor</th>
+										<th>Categoria</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -109,26 +131,26 @@ export default function StockManagement() {
 						</Card.Body>
 					</Card>
 				</Col>
-				<Col md={4}>
+				{/* <Col md={4}>
 					<Card>
 						<Card.Body>
-							<h5>Quick actions</h5>
+							<h5>Ações rápidas</h5>
 							<Button className='mb-2' block onClick={() => setShowModal(true)}>
-								Add product
+								Adicionar produto
 							</Button>
 						</Card.Body>
 					</Card>
-				</Col>
+				</Col> */}
 			</Row>
 
 			<Modal show={showModal} onHide={() => setShowModal(false)}>
 				<Modal.Header closeButton>
-					<Modal.Title>New Product</Modal.Title>
+					<Modal.Title>Novo produto</Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
 					<Form onSubmit={handleCreate}>
 						<Form.Group className='mb-2'>
-							<Form.Label>Name</Form.Label>
+							<Form.Label>Nome</Form.Label>
 							<Form.Control
 								value={form.name}
 								onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -136,7 +158,7 @@ export default function StockManagement() {
 							/>
 						</Form.Group>
 						<Form.Group className='mb-2'>
-							<Form.Label>Unit</Form.Label>
+							<Form.Label>Unidade de medida</Form.Label>
 							<Form.Select
 								value={form.measuring_unit}
 								onChange={(e) =>
@@ -144,11 +166,11 @@ export default function StockManagement() {
 								}
 							>
 								<option value='kg'>kg</option>
-								<option value='un'>unit</option>
+								<option value='un'>unidade</option>
 							</Form.Select>
 						</Form.Group>
 						<Form.Group className='mb-2'>
-							<Form.Label>Code</Form.Label>
+							<Form.Label>Código</Form.Label>
 							<Form.Control
 								value={form.code}
 								onChange={(e) => setForm({ ...form, code: e.target.value })}
@@ -156,14 +178,14 @@ export default function StockManagement() {
 						</Form.Group>
 
 						<Form.Group className='mb-2'>
-							<Form.Label>Supplier</Form.Label>
+							<Form.Label>Fornecedor</Form.Label>
 							<Form.Select
 								value={form.id_supplier}
 								onChange={(e) =>
 									setForm({ ...form, id_supplier: e.target.value })
 								}
 							>
-								<option value=''>Select or type new</option>
+								<option value=''>Selecione ou crie um novo</option>
 								{suppliers.map((s) => (
 									<option key={s.id} value={s.id}>
 										{s.name}
@@ -173,7 +195,7 @@ export default function StockManagement() {
 							{!form.id_supplier && (
 								<Form.Control
 									className='mt-2'
-									placeholder='New supplier name'
+									placeholder='Novo nome do fornecedor'
 									value={form.new_supplier}
 									onChange={(e) =>
 										setForm({ ...form, new_supplier: e.target.value })
@@ -183,14 +205,14 @@ export default function StockManagement() {
 						</Form.Group>
 
 						<Form.Group className='mb-2'>
-							<Form.Label>Category</Form.Label>
+							<Form.Label>Categoria</Form.Label>
 							<Form.Select
 								value={form.id_category}
 								onChange={(e) =>
 									setForm({ ...form, id_category: e.target.value })
 								}
 							>
-								<option value=''>Select or type new</option>
+								<option value=''>Selecione ou crie um novo</option>
 								{categories.map((c) => (
 									<option key={c.id} value={c.id}>
 										{c.name}
@@ -200,7 +222,7 @@ export default function StockManagement() {
 							{!form.id_category && (
 								<Form.Control
 									className='mt-2'
-									placeholder='New category name'
+									placeholder='Novo nome da categoria'
 									value={form.new_category}
 									onChange={(e) =>
 										setForm({ ...form, new_category: e.target.value })
@@ -210,7 +232,7 @@ export default function StockManagement() {
 						</Form.Group>
 
 						<div className='d-grid'>
-							<Button type='submit'>Create</Button>
+							<Button type='submit'>Cadastrar</Button>
 						</div>
 					</Form>
 				</Modal.Body>

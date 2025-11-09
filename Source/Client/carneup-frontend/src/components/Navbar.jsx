@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 import { Navbar, Container, Nav, Button } from 'react-bootstrap'
 import { LinkContainer } from 'react-router-bootstrap'
 
@@ -15,7 +15,7 @@ export default function TopNavbar() {
 		<Navbar bg='dark' variant='dark' expand='lg'>
 			<Container>
 				<LinkContainer to='/'>
-					<Navbar.Brand>CarneUp</Navbar.Brand>
+					<Navbar.Brand>Junior Prime Beef</Navbar.Brand>
 				</LinkContainer>
 				<Navbar.Toggle />
 				<Navbar.Collapse className='justify-content-end'>
@@ -23,20 +23,23 @@ export default function TopNavbar() {
 						{token ? (
 							<>
 								<LinkContainer to='/stock'>
-									<Nav.Link>Stock</Nav.Link>
+									<Nav.Link>Estoque</Nav.Link>
 								</LinkContainer>
 								<LinkContainer to='/sales'>
-									<Nav.Link>Sales</Nav.Link>
+									<Nav.Link>Vendas</Nav.Link>
 								</LinkContainer>
 								<LinkContainer to='/reports'>
-									<Nav.Link>Reports</Nav.Link>
+									<Nav.Link>Relatórios</Nav.Link>
+								</LinkContainer>
+								<LinkContainer to='/suppliers'>
+									<Nav.Link>Fornecedores</Nav.Link>
 								</LinkContainer>
 							</>
 						) : null}
 					</Nav>
 					{token ? (
 						<Button variant='outline-light' onClick={handleLogout}>
-							Logout
+							Sair
 						</Button>
 					) : null}
 				</Navbar.Collapse>
