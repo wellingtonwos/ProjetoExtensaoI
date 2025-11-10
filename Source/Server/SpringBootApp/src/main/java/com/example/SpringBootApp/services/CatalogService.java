@@ -1,7 +1,10 @@
 package com.example.SpringBootApp.services;
 
+import com.example.SpringBootApp.DTOs.BrandCreateDTO;
+import com.example.SpringBootApp.DTOs.CategoryCreateDTO;
 import com.example.SpringBootApp.DTOs.ProductCreateDTO;
 import com.example.SpringBootApp.exceptions.BusinessException;
+import com.example.SpringBootApp.exceptions.ResourceAlreadyExistsException;
 import com.example.SpringBootApp.exceptions.ResourceNotFoundException;
 import com.example.SpringBootApp.models.Brand;
 import com.example.SpringBootApp.models.Category;
@@ -34,7 +37,7 @@ public class CatalogService {
                 .orElseThrow(() -> new ResourceNotFoundException("Brand not found"));
 
         if (productRepository.existsByCode(productDTO.getCode())) {
-            throw new BusinessException("Product code already exists");
+            throw new ResourceAlreadyExistsException("Product code already exists");
         }
 
         if (!productDTO.getUnitMeasurement().equals("KG") && !productDTO.getUnitMeasurement().equals("UN")) {
@@ -49,5 +52,27 @@ public class CatalogService {
         product.setBrand(brand);
 
         return productRepository.save(product);
+    }
+
+    public Category createCategory(CategoryCreateDTO categoryDTO) {
+        if (categoryRepository.existsByName(categoryDTO.getName())) {
+            throw new ResourceAlreadyExistsException("Category name already exists");
+        }
+
+        Category category = new Category();
+        category.setName(categoryDTO.getName());
+
+        return categoryRepository.save(category);
+    }
+
+    public Brand createBrand(BrandCreateDTO brandDTO) {
+        if (brandRepository.existsByName(brandDTO.getName())) {
+            throw new ResourceAlreadyExistsException("Brand name already exists");
+        }
+
+        Brand brand = new Brand();
+        brand.setName(brandDTO.getName());
+
+        return brandRepository.save(brand);
     }
 }

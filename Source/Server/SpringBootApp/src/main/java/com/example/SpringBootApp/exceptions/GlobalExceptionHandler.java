@@ -20,8 +20,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException ex) {
-        ErrorResponse error = new ErrorResponse(403, ex.getMessage());
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+        ErrorResponse error = new ErrorResponse(422, ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error);
+    }
+
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleResourceAlreadyExistsException(BusinessException ex) {
+        ErrorResponse error = new ErrorResponse(409, ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -31,8 +37,8 @@ public class GlobalExceptionHandler {
                 errors.put(error.getField(), error.getDefaultMessage()));
 
         String errorMessage = "Validation failed: " + String.join(", ", errors.values());
-        ErrorResponse error = new ErrorResponse(403, errorMessage);
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+        ErrorResponse error = new ErrorResponse(400, errorMessage);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
     @ExceptionHandler(Exception.class)
