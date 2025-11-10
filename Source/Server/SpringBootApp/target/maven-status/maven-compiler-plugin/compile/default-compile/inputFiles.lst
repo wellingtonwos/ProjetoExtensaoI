@@ -1,3 +1,9 @@
+C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\controllers\ProductController.java
+C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\DTOs\ProductCreateDTO.java
+C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\exceptions\BusinessException.java
+C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\exceptions\ErrorResponse.java
+C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\exceptions\GlobalExceptionHandler.java
+C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\exceptions\ResourceNotFoundException.java
 C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\JuniorPrimeBeefApplication.java
 C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\models\Brand.java
 C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\models\Category.java
@@ -13,3 +19,4 @@ C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Sourc
 C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\repositories\PurchaseRepository.java
 C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\repositories\SaleRepository.java
 C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\repositories\UserRepository.java
+C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\services\CatalogService.java
