@@ -305,15 +305,12 @@ Para alcançar os objetivos propostos, o \textit{CarneUp} atende a um conjunto d
     \hline
     \endlastfoot
 
-    % --- Requisitos de Gestão de Vendas (Componente) ---
     RF01 & O sistema deve permitir o registro de vendas através da leitura do código de barras gerado pela balança. \\ 
     \hline
     RF02 & O sistema deve calcular automaticamente o valor total da venda ao capturar o peso e o valor unitário do item lido via código de barras. \\ 
     \hline
     RF08 & O sistema deve gerar relatórios diários de vendas, detalhando a quantidade e o valor total vendido. \\ 
     \hline
-
-    % --- Requisitos de Gestão de Produtos (Estoque) (Componente) ---
     RF03 & O sistema deve permitir o registro de novas entradas de estoque (compras), incluindo valor de custo, fornecedor e validade. \\ 
     \hline
     RF05 & O sistema deve calcular a margem de lucro de cada peça de carne vendida (Valor de Venda - Valor de Custo). \\ 
@@ -322,88 +319,90 @@ Para alcançar os objetivos propostos, o \textit{CarneUp} atende a um conjunto d
     \hline
     RF07 & O sistema deve permitir o descarte de peças de estoque (baixa) e registrar o motivo do descarte (ex: vencimento, perda de qualidade). \\ 
     \hline
-
-    % --- Requisitos de Gestão de Compras (Componente) ---
     RF04 & O sistema deve permitir a busca e visualização de peças de estoque por fornecedor. \\ 
     \hline
-    RF09 & O sistema deve gerenciar o cadastro completo de fornecedores e seus respectivos contatos. \\ 
+    RF09 & O sistema deve gerenciar o cadastro completo de fornecedores e seus respectivos contatos. \\
     \hline
-
-    % --- Requisitos de Gestão de Autenticação (Componente) [CORREÇÃO] ---
     RF10 & O sistema deve controlar o acesso através de autenticação de usuário (login/senha) e gerenciar o ciclo de vida da sessão. \\ 
     \hline
     RF11 & O sistema deve permitir o cadastro de diferentes perfis de usuários (ex: Operador de Caixa, Gerente) com níveis de permissão distintos. \\
     \hline
 \end{longtable}
 
-A Tabela 2 apresenta as regras de negócio obrigatórias, que se referem a regras e restrições de operação.
+\subsection{Regras de Negócio}
+
+As regras de negócio (RN) representam as restrições, políticas e condições operacionais que ditam o funcionamento interno do sistema e garantem sua aderência aos processos específicos de um açougue. Elas são cruciais para manter a integridade dos dados, controlar o fluxo de estoque e assegurar a precisão financeira.
+
+A Tabela \ref{tab:requisitos_rn} detalha as regras obrigatórias do sistema \textit{CarneUp}. É importante notar que cada regra está diretamente ligada a um ou mais Requisitos Funcionais (RF) ou Não Funcionais (RNF) definidos anteriormente, estabelecendo as condições sob as quais as funcionalidades de venda, estoque e custo são executadas.
 
 \begin{longtable}{|>{\Centering}m{1.5cm}|>{\RaggedRight}m{9cm}|>{\Centering}m{4cm}|}
-    \caption{Requisitos Não Funcionais (RN) - Regras de Negócio}
-    \label{tab:requisitos_rn}\\
-    \hline
-    \textbf{Código} & \textbf{Descrição} & \textbf{Requisito Relacionado} \\ 
-    \hline
-    \endfirsthead
+\caption{Regras de Negócio (RN)}
+\label{tab:requisitos_rn}\\ % <-- Rótulo corrigido para ser o único usado
+ \hline
+ \textbf{Código} & \textbf{Descrição} & \textbf{Requisito Relacionado} \\
+ \hline
+ \endfirsthead
 
-    \multicolumn{3}{c}%
-    {{\bfseries \tablename\ \thetable{} -- continuação}} \\
-    \hline
-    \textbf{Código} & \textbf{Descrição} & \textbf{Requisito Relacionado} \\ 
-    \hline
-    \endhead
-    \hline
-    \multicolumn{3}{|r|}{{Continua...}} \\
-    \hline
-    \endfoot
-    \hline
-    \endlastfoot
-    
-    RN01 & A venda só pode ser registrada se o código de barras lido for reconhecido e o item tiver estoque disponível. & RF01, RF02 \\ 
-    \hline
-    RN02 & O valor de custo por peça deve ser registrado no momento da entrada no estoque para cálculo de margem de lucro. & RF03, RF05 \\ 
-    \hline
-    RN03 & Peças com validade expirada devem ser automaticamente bloqueadas para venda e movidas para a lista de descarte. & RF07, RNF01 \\ 
-    \hline
-    RN04 & O sistema deve manter o histórico de fornecedores para cada peça de carne no estoque para fins de análise de custo e consulta. & RF04 \\ 
-    \hline
-    RN05 & A peça de carne vendida deve ter seu estoque subtraído em tempo real no momento do registro da venda. & RF02, RNF01 \\ 
-    \hline
+ \multicolumn{3}{c}%
+ {{\bfseries \tablename\ \thetable{} -- continuação}} \\
+ \hline
+ \textbf{Código} & \textbf{Descrição} & \textbf{Requisito Relacionado} \\
+ \hline
+ \endhead
+ \hline
+ \multicolumn{3}{|r|}{{Continua...}} \\
+ \hline
+ \endfoot
+ \hline
+ \endlastfoot
+
+ RN01 & A venda só pode ser registrada se o código de barras lido for reconhecido e o item tiver estoque disponível. & RF01, RF02 \\
+ \hline
+ RN02 & O valor de custo por peça deve ser registrado no momento da entrada no estoque para cálculo de margem de lucro. & RF03, RF05 \\
+ \hline
+ RN03 & Peças com validade expirada devem ser automaticamente bloqueadas para venda e movidas para a lista de descarte. & RF07, RNF01 \\
+ \hline
+ RN04 & O sistema deve manter o histórico de fornecedores para cada peça de carne no estoque para fins de análise de custo e consulta. & RF04 \\
+ \hline
+ RN05 & A peça de carne vendida deve ter seu estoque subtraído em tempo real no momento do registro da venda. & RF02, RNF01 \\
+ \hline
 \end{longtable}
 
-A Tabela 3 detalha os requisitos não funcionais que definem atributos de qualidade do software, como performance, usabilidade e segurança.
+Os Requisitos Não Funcionais (RNF) especificam os critérios que podem ser usados para julgar a operação de um sistema, em vez de comportamentos específicos. Diferentemente dos Requisitos Funcionais (RF), que definem o que o sistema deve fazer, os RNFs definem quão bem ele deve realizar suas funções, estabelecendo atributos de qualidade, usabilidade, desempenho e segurança.
+
+Estes atributos são cruciais para o sistema \textit{CarneUp}, pois garantem que ele seja rápido o suficiente para um Ponto de Venda (PDV), escalável para acompanhar o crescimento do açougue e seguro para proteger dados financeiros. A Tabela \ref{tab:requisitos_rnf} detalha estes requisitos, organizados por código, seu módulo de impacto e a descrição que quantifica ou qualifica a expectativa de qualidade do software.
 
 \begin{longtable}{|>{\Centering}m{1.5cm}|>{\Centering}m{3cm}|>{\RaggedRight}m{10cm}|}
-    \caption{Requisitos Não Funcionais (RNF) - Atributos de Qualidade}
-    \label{tab:requisitos_rnf}\\
-    \hline
-    \textbf{Código} & \textbf{Módulo} & \textbf{Descrição} \\ 
-    \hline
-    \endfirsthead
+ \caption{Requisitos Não Funcionais (RNF)}
+ \label{tab:requisitos_rnf}\\
+ \hline
+\textbf{Código} & \textbf{Módulo} & \textbf{Descrição} \\
+\hline
+ \endfirsthead
 
-    \multicolumn{3}{c}%
-    {{\bfseries \tablename\ \thetable{} -- continuação}} \\
-    \hline
-    \textbf{Código} & \textbf{Módulo} & \textbf{Descrição} \\ 
-    \hline
-    \endhead
-    \hline
-    \multicolumn{3}{|r|}{{Continua...}} \\
-    \hline
-    \endfoot
-    \hline
-    \endlastfoot
+ \multicolumn{3}{c}%
+ {{\bfseries \tablename\ \thetable{} -- continuação}} \\
+ \hline
+\textbf{Código} & \textbf{Módulo} & \textbf{Descrição} \\
+ \hline
+ \endhead
+ \hline
+ \multicolumn{3}{|r|}{{Continua...}} \\
+ \hline
+ \endfoot
+ \hline
+ \endlastfoot
 
-    RNF01 & Performance & O registro de venda e a baixa de estoque devem ser processados em no máximo 2 segundos para visar o fluxo rápido de caixa. \\ 
-    \hline
-    RNF02 & Escalabilidade & O sistema deve ser capaz de suportar picos de até 10 usuários simultâneos (caixas + gerentes) sem degradação perceptível de performance. \\ 
-    \hline
-    RNF03 & Usabilidade & A interface de registro de vendas deve ser intuitiva e otimizada para telas de toque e leitores de código de barras. \\ 
-    \hline
-    RNF04 & Segurança & Todos os dados sensíveis (informações financeiras, cadastros) devem ser armazenados de forma criptografada (ex: senhas via bcrypt, dados via SSL). \\ 
-    \hline
-    RNF05 & Manutenibilidade & O código deve seguir uma convenção de código (\textit{Code Convention}) e utilizar logs detalhados para facilitar a identificação e correção de erros. \\ 
-    \hline
+ RNF01 & Performance & O registro de venda e a baixa de estoque devem ser processados em no máximo 2 segundos para visar o fluxo rápido de caixa. \\
+ \hline
+ RNF02 & Escalabilidade & O sistema deve ser capaz de suportar picos de até 10 usuários simultâneos (caixas + gerentes) sem degradação perceptível de performance. \\
+ \hline
+ RNF03 & Usabilidade & A interface de registro de vendas deve ser intuitiva e otimizada para telas de toque e leitores de código de barras. \\
+ \hline
+ RNF04 & Segurança & Todos os dados sensíveis (informações financeiras, cadastros) devem ser armazenados de forma criptografada (ex: senhas via bcrypt, dados via SSL). \\
+ \hline
+ RNF05 & Manutenibilidade & O código deve seguir uma convenção de código (\textit{Code Convention}) e utilizar logs detalhados para facilitar a identificação e correção de erros. \\
+ \hline
 \end{longtable}
 
 \section{Problema e Solução Proposta}
@@ -535,42 +534,18 @@ O projeto será desenvolvido por uma equipe de cinco membros, com papéis defini
         \hline
     \end{tabular}
 \end{table}
-%FIGURA 1 SUBSTITUIDA POR TABELA
-% ---
- % \begin{figure}[htb]
-	%\begin{center}
-	 %   \includegraphics[scale=0.5]{Imagens/Responsabilidades_Papeis_Atividades.png}
-       % \caption{\label Responsabilidades / Papéis / Atividades}
-	%\end{center}
-%\end{figure}
-
 
 % ---
 \section{Metodologias de gestão e desenvolvimento}
 % ---
-%ALTERAÇÕES NA SECÇÃO 2 PEDIDAS PELO PROFESSOR, TEXTO ANTIGO ESTA COMENTADO
 O projeto foi planejado para ter uma duração total de aproximadamente 2,5 meses, iniciando em 6 de Setembro de 2025 e com previsão de conclusão em 31 de Outubro de 2025. Essa duração é ditada pelos Marcos Fixos de Entrega.
 
 O desenvolvimento do CarneUp adota a metodologia ágil Scrum, organizada em ciclos de trabalho curtos chamados Sprints. Dada a restrição temporal imposta pelos marcos de entrega acadêmica, o projeto foi dividido em 4 Sprints principais com duração variável (aproximadamente 10 a 14 dias úteis) para focar na entrega dos marcos fixos. O foco não é no número de Sprints, mas sim no cumprimento dos marcos de entrega, apresentado na tabela 3, que guiam o ritmo do projeto.
 
-%O projeto utilizará a metodologia Scrum para o desenvolvimento e a gestão de projetos.
-
-% ---
-%---\subsection{Scrum / Sprints }
-% ---
-%O Scrum é uma metodologia ágil que permite à equipe se auto-organizar e fazer mudanças de forma rápida, em resposta a novos requisitos ou feedback do cliente. Ele se baseia em ciclos de trabalho chamados Sprints e em três papéis principais (Scrum Master, Product Owner e Time de Desenvolvimento) \cite{scrum20}, garantindo clareza e foco na entrega de valor contínuo. A escolha do Scrum se deve à sua capacidade de lidar com a evolução dos requisitos e garantir entregas incrementais do sistema CarneUp ao longo do tempo. 
-
-%O desenvolvimento do CarneUp adota a metodologia ágil Scrum, organizada em ciclos de trabalho curtos chamados Sprints. Dada a restrição temporal imposta pelos marcos de entrega acadêmica, o projeto foi dividido em 4 Sprints principais com duração variável (aproximadamente 10 a 14 dias úteis) para focar na entrega dos marcos fixos, conforme a tabela detalhada na seção 3.2.1.1.
-%O foco não é no número de Sprints, mas sim no cumprimento dos seguintes marcos de entrega que guiam o ritmo do projeto:
-
-
-% Tabela dos Marcos de Entrega
 \begin{table}[h!]
     \centering
     \caption{Marcos de Entrega do Projeto \textit{CarneUp}}
     \label{tab:marcos_entrega}
-    
-    % Definição das colunas: m{2.5cm} para Data (centralizado) e m{11cm} para Atividade (alinhado à esquerda)
     \begin{tabular}{|>{\Centering}m{2.5cm}|>{\RaggedRight}m{11cm}|}
         \hline
         \textbf{Data} & \textbf{Marco de Entrega / Atividade} \\ 
@@ -590,19 +565,7 @@ O desenvolvimento do CarneUp adota a metodologia ágil Scrum, organizada em cicl
 \section{Repositório da aplicação}
 % ---
 
-% ---
-%SUBSEÇÃO ELIMINADA
-%\subsection{Definição do Repositório da Aplicação}
-% ---
-
 O projeto utilizará o GitHub como plataforma de versionamento de código e colaboração. O GitHub permite o controle detalhado das alterações de código (commits), facilitando o trabalho em equipe, a revisão de código (Pull Requests) e o rastreamento de problemas (Issues).
-
-
-% ---
-%SUBSEÇÃO ELIMINADA
-%\subsection{Link do Repositório e Especificações para Acesso}
-% ---
-%Plataforma: GitHub
 
 Link: https://github.com/wellingtonwos/ProjetoExtensaoI
 Acesso: O repositório será privado durante o desenvolvimento e pode ser tornado público (ou manter-se privado com acesso via convite) após a Entrega Final. Para fins de avaliação, os colaboradores deverão ser convidados a ter acesso "Read" ou "Collaborator".
@@ -611,54 +574,58 @@ Acesso: O repositório será privado durante o desenvolvimento e pode ser tornad
 % ----------------------------------------------------------
 % CAPÍTULO 3: DESENVOLVIMENTO (SEÇÃO 4 NO ORIGINAL)
 % ----------------------------------------------------------
-\chapter{Desenvolvimento Do Projeto}\label{cap:desenvolvimento} % <<< CORREÇÃO: Label única
+\chapter{Desenvolvimento Do Projeto}\label{cap:desenvolvimento}
 
+O projeto \textit{CarneUp} abrange o desenvolvimento de uma aplicação web completa, projetada especificamente para digitalizar e otimizar a gestão de açougues de pequeno e médio porte, com foco nas operações de Vendas, Compras e Estoque. A arquitetura e as tecnologias foram selecionadas para garantir a rastreabilidade detalhada do produto e a alta performance no Ponto de Venda (PDV), endereçando diretamente a ineficiência da gestão analógica.
 
-% ---
-\section{Escopo do Projeto}
-% ---
+\section{Arquitetura e Modularidade do Sistema}
 
-CarneUp abrange o desenvolvimento de uma aplicação web completa para a gestão de 
-açougues de pequeno e médio porte, com foco nas operações de Vendas, Compras e Estoque.
-% ---
-\subsection{Regras de Negócio}
-% ---
-  \begin{figure}[htb]
-	\centering
-	    \includegraphics[width=0.9\linewidth]{Imagens/Regras_de_Negocio.png} % <<< CORREÇÃO: scale substituído
-        \caption{Regras de Negócio} % <<< CORREÇÃO: Sintaxe
-	    \label{fig:regras_negocio} % <<< CORREÇÃO: Sintaxe
-	\end{figure}
+O \textit{CarneUp} foi concebido sob uma arquitetura de aplicação web em três camadas (Front-end, Back-end e Banco de Dados), visando clareza na separação de responsabilidades, manutenibilidade e escalabilidade (RNF02).
 
-% ---
-\subsection{Requisitos Funcionais}
-% ---
+\subsection{Módulos de Negócio}
 
-  \begin{figure}[htb]
-	\centering
-	    \includegraphics[width=0.7\linewidth]{Imagens/Requisitos_Funcionais.png} % <<< CORREÇÃO: scale substituído
-        \caption{Requisitos Funcionais} % <<< CORREÇÃO: Sintaxe
-	    \label{fig:req_funcionais} % <<< CORREÇÃO: Sintaxe
-	\end{figure}
+O Back-end é o core transacional do sistema e está logicamente dividido em módulos que se comunicam via API RESTful, cada um responsável por um pilar da gestão:
 
-% ---
-\subsection{Requisitos Não Funcionais}
-% ---
+\begin{itemize}
+    \item \textbf{Módulo de Gestão de Vendas (PDV):} Focado na eficiência do caixa (RNF01), este módulo gerencia o registro rápido de vendas. Sua principal característica é a integração com a leitura de código de barras da balança, permitindo a captura automática do item, peso e valor, e garantindo a baixa de estoque em tempo real (RF01, RF02).
+    \item \textbf{Módulo de Estoque e Rastreabilidade:} É o elemento central do sistema. Ele permite o registro da entrada de estoque com informações cruciais para a análise de custo e rastreabilidade: valor de custo, fornecedor e data de validade (RF03). O módulo também é responsável pela emissão de alertas automáticos quando a validade das peças está próxima (RF06), sendo vital na estratégia de redução de desperdício.
+    \item \textbf{Módulo de Gestão de Compras e Fornecedores:} Gerencia o cadastro completo dos fornecedores (RF09) e mantém o histórico de compra de cada lote de carne, permitindo o cálculo da margem de lucro por peça (RF05).
+    \item \textbf{Módulo de Autenticação e Usuários:} Controla o acesso ao sistema via login/senha e implementa o gerenciamento de diferentes perfis de usuários (Operador de Caixa, Gerente), garantindo que apenas usuários autorizados tenham acesso às funcionalidades específicas (RF10, RF11).
+\end{itemize}
 
-.
-\begin{figure}[htb]
-	\centering
-	    \includegraphics[width=0.7\linewidth]{Imagens/Requisitos_Nao_Funcionais.png} % <<< CORREÇÃO: scale substituído
-        \caption{Requisitos Não Funcionais} % <<< CORREÇÃO: Sintaxe
-	    \label{fig:req_nao_funcionais} % <<< CORREÇÃO: Sintaxe
-	\end{figure}
+\section{Escolhas Tecnológicas (Tech Stack)}
 
+A seleção da pilha tecnológica foi baseada na busca por performance, segurança e robustez.
+
+\begin{itemize}
+    \item \textbf{Front-end (Apresentação):} Foi escolhido o \textbf{React} para a construção da interface. Esta biblioteca permite a criação de uma experiência de usuário reativa, modular e otimizada para telas de toque e leitores de código de barras, o que atende ao requisito de usabilidade no PDV (RNF03).
+    \item \textbf{Back-end (Aplicação):} A lógica de negócios é implementada em \textbf{Java com o framework Spring Boot}. Esta combinação é ideal para sistemas transacionais de missão crítica, como controle de estoque e vendas, oferecendo alta segurança e performance na execução das regras de negócio (RNF01).
+    \item \textbf{Banco de Dados (Dados):} O \textbf{PostgreSQL} foi definido como o Sistema Gerenciador de Banco de Dados (SGBD) principal. Sua reputação de robustez, integridade transacional e confiabilidade é fundamental para armazenar dados financeiros e de estoque de forma segura e duradoura (RNF04).
+\end{itemize}
+
+\section{Infraestrutura e Segurança na Nuvem}
+
+O projeto será implantado na \textbf{Amazon Web Services (AWS)}, que oferece o modelo de Software as a Service (SaaS) e garante a infraestrutura necessária para suportar picos de uso e a expansão futura.
+
+\begin{itemize}
+    \item \textbf{Hospedagem e Escalabilidade:} A plataforma AWS garante que o sistema possa suportar picos de até 10 usuários simultâneos (RNF02) sem degradação de performance, por meio de serviços de computação elástica.
+    \item \textbf{Segurança de Dados em Trânsito:} A comunicação entre o Front-end e o Back-end será totalmente blindada pelo protocolo \textbf{HTTPS}, com terminação SSL/TLS configurada no Load Balancer da AWS. Isso é mandatório para proteger credenciais de acesso (bcrypt) e dados financeiros contra interceptação (RNF04).
+    \item \textbf{Manutenibilidade:} A utilização de serviços de logging nativos do Spring Boot (SLF4J/Logback) será implementada para rastrear transações e facilitar a identificação e correção de erros, conforme o requisito de manutenibilidade (RNF05).
+\end{itemize}
 
 % ---
+
 \section{Histórias de Usuário}
-% ---
-Como a metodologia de desenvolvimento escolhida é o Scrum, as funcionalidades serão expressas através de Histórias de Usuário.
-% ---
+
+Uma História de Usuário segue o formato padronizado "Como um [papel do usuário], eu quero [realizar uma tarefa], para que [obter um benefício]", transformando requisitos complexos em narrativas simples e orientadas ao valor. No contexto do \textit{CarneUp}, as Histórias mapeiam diretamente a jornada do produto no açougue, atacando os pontos de dor identificados:
+\begin{itemize}
+    \item \textbf{Eficiência no PDV:} Focando no operador de caixa para garantir a agilidade e precisão nas vendas (ex: US01).
+    \item \textbf{Rastreabilidade e Prevenção de Perdas:} Atendendo ao gerente para controlar validade, fornecedor e descarte (ex: US02, US03, US05).
+    \item \textbf{Análise Estratégica:} Apoiando o proprietário na visualização do desempenho financeiro através da margem de lucro (ex: US04).
+\end{itemize}
+
+As histórias a seguir detalham o escopo do Mínimo Produto Viável (MVP), garantindo que as entregas agreguem o máximo valor aos usuários em cada ciclo de desenvolvimento.
+
 \subsection{Descrição das Histórias de Usuário}
 % ---
 \begin{itemize}
@@ -669,8 +636,6 @@ Como a metodologia de desenvolvimento escolhida é o Scrum, as funcionalidades s
 O operador deve confirmar a venda e o estoque deve ser atualizado.
         \end{itemize}
 \end{itemize}
-
-% <<< CORREÇÃO: Bloco US01 duplicado removido daqui
 
 \begin{itemize}
     \item US02: Inclusão de Estoque com Rastreabilidade (RF03, RF04)
@@ -709,164 +674,105 @@ O sistema deve exigir a seleção do motivo e a data do descarte.
 \end{itemize}
 
 % ---
-\section{Arquitetura}
-% ---
-
-% <<< CORREÇÃO: Texto padronizado para Java/Spring Boot
-O CarneUp utilizará uma arquitetura de aplicação web de três camadas (Front-end, Back-end e Banco de Dados), implantada na nuvem da AWS.
-O Front-end será desenvolvido em React e se comunicará com o Back-end via API RESTful.
-O Back-end será construído utilizando Java com Spring Boot.
-O banco de dados PostgreSQL será o coração do sistema para garantir a integridade transacional dos dados de estoque e venda.
-A escolha da AWS garante escalabilidade e alta disponibilidade.
-
-% ---
-\subsection{Diagrama da Arquitetura}
-% ---
-% Adicionar diagrama se houver
-% \begin{figure}[htb]
-% 	\centering
-% 	\includegraphics[width=0.9\linewidth]{Imagens/Diagrama_Arquitetura.png}
-% 	\caption{Diagrama da Arquitetura}
-% 	\label{fig:arquitetura}
-% \end{figure}
-
-% ---
-\section{Tecnologias}
-% ---
-
-Foram escolhidas para garantir robustez, performance e facilidade de manutenção.
-% ---
-\subsection{Front-end}
-% ---
-
-\begin{itemize}
-    \item React: Biblioteca JavaScript para construção de interfaces de usuário reativas e componentizadas.
-Permite a criação de um Front-end rápido e modular (RNF03).
-    
-    \item Bootstrap: Framework de Front-end para design responsivo e consistente.
-Acelera o desenvolvimento da interface.
-\end{itemize}
-
-% ---
-\subsection{Back-end}
-% ---
-
-\begin{itemize}
-    \item A linguagem principal do Back-end será Java, utilizando o framework Spring Boot.
-O Spring Boot é ideal para construir microsserviços e sistemas transacionais de alta segurança e performance, como o módulo de registro de vendas e controle de estoque.
-\end{itemize}
-
-% ---
-\subsection{Banco de Dados}
-% ---
-\begin{itemize}
-    \item PostgreSQL: Sistema de gerenciamento de banco de dados relacional robusto e confiável, fundamental para a integridade dos dados de vendas e estoque (RNF04).
-\end{itemize}
-% ---
-\subsection{Infraestrutura}
-% ---
-
-\begin{itemize}
-    \item AWS (Amazon Web Services): Plataforma de computação em nuvem que fornecerá os serviços de hospedagem e deployment.
-\end{itemize}
-
-% ---
-\section{Logs}
-% ---
-
-Será utilizada a biblioteca de logging nativa do Spring Boot (como SLF4J/Logback) para registrar logs de erro, transação e alertas de validade (RF05).
-% ---
 \section{Segurança, Privacidade e Legislação}
-% ---
 
+A segurança e a privacidade dos dados representam um pilar não funcional crítico para o sucesso e a longevidade do sistema \textit{CarneUp}. Em um ambiente transacional como o Ponto de Venda (PDV) de um açougue, a integridade dos dados financeiros (custos, vendas, margem de lucro) e a confidencialidade das credenciais de acesso (operadores e gerentes) são inegociáveis. Um sistema de gestão deve ser inerentemente resistente a vulnerabilidades, garantindo que a informação seja protegida em todas as suas fases: desde o trânsito da máquina do cliente até o servidor, até o seu armazenamento permanente no banco de dados.
 
-% ---
+O projeto aborda estas exigências por meio de uma estratégia de segurança em múltiplas camadas, focada em mitigar os riscos mais comuns da web, conforme detalhado no Requisito Não Funcional RNF04. A implementação técnica integra o uso de algoritmos robustos de \textit{hash} para proteção de senhas e a criptografia de comunicação \textit{end-to-end}, aproveitando os recursos nativos da infraestrutura de \textit{cloud} da AWS para assegurar o mais alto nível de proteção contra interceptação e adulteração. Tais medidas são fundamentais para construir a confiança do usuário e manter a conformidade com as melhores práticas de segurança da informação no ambiente de varejo.
 \subsection{Critérios de Segurança e Privacidade}
-% ---
+
+A estratégia de segurança do \textit{CarneUp} está fundamentada em dois pilares essenciais: proteção dos dados em repouso (armazenados) e proteção dos dados em trânsito (durante a comunicação). O Requisito Não Funcional RNF04 exige o uso de técnicas de criptografia para todos os dados sensíveis, garantindo a integridade e a confidencialidade do sistema.
+
+\subsubsection{Proteção de Dados em Repouso}
+
+Para garantir a confidencialidade das credenciais de acesso, o sistema adotará a seguinte medida para dados armazenados:
 \begin{itemize}
-    \item Criptografia de Senhas: Utilização de bcrypt para armazenar as senhas dos usuários (administradores/caixas) no banco de dados (RNF04).
+    \item \textbf{Criptografia de Senhas:} Utilização do algoritmo de hash \textbf{bcrypt} para armazenar as senhas dos usuários (administradores e caixas) no banco de dados. Esta técnica de \textit{hashing} salgado impede a recuperação da senha original mesmo em caso de comprometimento da base de dados (RNF04).
 \end{itemize}
-% ---
-\subsubsection{Criptografia em Trânsito: SSL/HTTPS}
-% ---
-O protocolo HTTPS (HyperText Transfer Protocol Secure) é essencial para o projeto CarneUp, pois garante a segurança das comunicações entre o navegador do usuário (cliente) e o servidor de aplicação (Back-end).
-O HTTPS é, fundamentalmente, o protocolo HTTP combinado com a camada de segurança SSL/TLS (Secure Sockets Layer/Transport Layer Security).
-Essa combinação cria um link criptografado que protege os dados transmitidos contra interceptação e adulteração, garantindo a confidencialidade e a integridade das informações.
-\begin{alineas}
-    \item Critérios de Segurança e Conformidade
-            A implementação do SSL/TLS no CarneUp atende a critérios cruciais para um sistema de gestão:
-    \begin{itemize}
-        \item Proteção de Credenciais: Durante o login e autenticação, as senhas (mesmo que criptografadas no banco de dados) são protegidas durante o trânsito da máquina do cliente até o servidor, impedindo ataques de sniffing ou Man-in-the-Middle.
-        \item Integridade dos Dados de Venda: Garante que os dados financeiros críticos — como o valor final de uma venda, o valor de custo de um produto ou a atualização de estoque — não possam ser modificados por terceiros maliciosos durante a transmissão.
-        \item Confiança do Usuário: O ícone de cadeado na barra de endereço (\url{HTTPS}) reforça a confiabilidade e o compromisso da aplicação com a segurança dos dados. % <<< CORREÇÃO: \usepackage{xurl} vai consertar o overflow
-    \end{itemize}
 
-    \item Implantação na Infraestrutura AWS
-        Na arquitetura do CarneUp, a proteção HTTPS será implementada utilizando os serviços nativos da Amazon Web Services (AWS), garantindo alta disponibilidade e gerenciamento facilitado:
+\subsubsection{Criptografia em Trânsito: SSL/TLS (HTTPS)}
 
-        \begin{itemize}
-            \item Certificado SSL/TLS: Será utilizado um certificado SSL/TLS (emitido via AWS Certificate Manager - ACM, ou adquirido) para autenticar a identidade do domínio do CarneUp.
-            \item Terminação SSL: A terminação (ou offloading) SSL será configurada em um Load Balancer (como o Application Load Balancer - ALB) ou no serviço de distribuição de conteúdo (AWS CloudFront, se utilizado), que são pontos de entrada para o tráfego.
-            Isso permite que a carga de criptografia/descriptografia seja removida dos servidores de Back-end (Spring Boot), melhorando o desempenho da aplicação (RNF01). % <<< CORREÇÃO: Node.js/Python trocado por Spring Boot
-            \item Comunicação Interna: Embora a criptografia seja mais crítica na comunicação externa (cliente-servidor), a comunicação interna entre os serviços (Back-end e PostgreSQL/AWS RDS) também pode ser configurada para usar conexões criptografadas, assegurando a segurança end-to-end em toda a infraestrutura.
-        \end{itemize}
+O protocolo HTTPS (\textit{HyperText Transfer Protocol Secure}) é essencial para o projeto \textit{CarneUp}, pois garante a segurança das comunicações entre o navegador do usuário e o servidor de aplicação (\textit{Back-end}). O HTTPS é o protocolo HTTP combinado com a camada de segurança SSL/TLS (\textit{Secure Sockets Layer/Transport Layer Security}), criando um link criptografado que protege os dados transmitidos contra interceptação e adulteração.
 
-        Em suma, a obrigatoriedade do protocolo HTTPS é uma medida fundamental que blinda a aplicação contra as vulnerabilidades mais comuns da web, protegendo informações sensíveis em conformidade com as melhores práticas de segurança da informação (RNF04).
-\end{alineas}
+\paragraph{Critérios de Segurança e Conformidade}
+A implementação do SSL/TLS no \textit{CarneUp} atende a critérios cruciais para um sistema de gestão:
+\begin{itemize}
+    \item \textbf{Proteção de Credenciais:} As senhas são protegidas durante o trânsito da máquina do cliente até o servidor, impedindo ataques de \textit{sniffing} ou \textit{Man-in-the-Middle}.
+    \item \textbf{Integridade dos Dados de Venda:} Garante que os dados financeiros críticos (valor final da venda, custo do produto ou atualização de estoque) não possam ser modificados por terceiros maliciosos durante a transmissão.
+    \item \textbf{Confiança do Usuário:} O ícone de cadeado na barra de endereço (\url{HTTPS}) reforça a confiabilidade e o compromisso da aplicação com a segurança dos dados.
+\end{itemize}
+
+\paragraph{Implantação na Infraestrutura AWS}
+Na arquitetura do \textit{CarneUp}, a proteção HTTPS será implementada utilizando os serviços nativos da Amazon Web Services (AWS), garantindo alta disponibilidade e gerenciamento facilitado:
+\begin{itemize}
+    \item \textbf{Certificado SSL/TLS:} Será utilizado um certificado SSL/TLS (emitido via AWS Certificate Manager - ACM, ou adquirido) para autenticar a identidade do domínio.
+    \item \textbf{Terminação SSL (\textit{Offloading}):} A terminação SSL será configurada no Application Load Balancer (ALB), o ponto de entrada do tráfego. Isso permite que a carga de criptografia/descriptografia seja removida dos servidores de \textit{Back-end} (Spring Boot), melhorando o desempenho da aplicação (RNF01).
+    \item \textbf{Comunicação Interna:} A comunicação interna entre os serviços (\textit{Back-end} e PostgreSQL/AWS RDS) será configurada para usar conexões criptografadas, assegurando a segurança \textit{end-to-end} em toda a infraestrutura.
+\end{itemize}
+
+Em suma, a obrigatoriedade do protocolo HTTPS é uma medida fundamental que blinda a aplicação contra as vulnerabilidades mais comuns da web, protegendo informações sensíveis em conformidade com as melhores práticas de segurança da informação (RNF04).
     
 
-% ---
 \subsection{Observância à Legislação}
-% ---
-Embora o sistema trate principalmente de dados do negócio (estoque, vendas), o CarneUp está em observância com a Lei Geral de Proteção de Dados (LGPD) no tratamento dos dados pessoais de seus usuários (proprietários, gerentes, caixas).
+
+Embora o sistema \textit{CarneUp} trate primariamente de dados do negócio (estoque, vendas e custos), ele processa dados pessoais de seus usuários internos (proprietários, gerentes e caixas), atuando como operador e controlador desses dados. Dessa forma, o desenvolvimento adere integralmente aos princípios e diretrizes da \textbf{Lei Geral de Proteção de Dados (LGPD) – Lei nº 13.709/2018}. A observância legal não se limita apenas à proteção, mas à construção de um sistema ético e transparente.
+
+\paragraph{Princípios de Proteção e Transparência}
+O projeto materializa a conformidade com a LGPD nos seguintes pontos de design:
+
 \begin{itemize}
-    \item Princípio da Finalidade: Coleta apenas dos dados estritamente necessários para o funcionamento do sistema (nome, e-mail, senha criptografada).
-    \item Logs e Rastreabilidade: Manutenção de logs para auditoria de acesso e alterações, conforme exigido por regulamentos de segurança.
-    \item Consentimento: O registro de usuário administrador implica na aceitação da política de privacidade e uso do sistema.
-    \item
+    \item \textbf{Princípio da Finalidade e Necessidade:} A coleta de dados é limitada estritamente ao necessário para a autenticação e gestão de permissões do sistema (nome, e-mail e credenciais de login). Nenhum dado sensível (como dados biométricos ou financeiros pessoais) é processado, aplicando o conceito de \textbf{minimização de dados}.
     
+    \item \textbf{Segurança da Informação (\textit{Privacy by Design}):} Todas as medidas técnicas de segurança, como a \textbf{criptografia em repouso (bcrypt)} e a \textbf{criptografia em trânsito (SSL/HTTPS)}, são o mecanismo técnico para cumprir o Artigo 46 da LGPD, garantindo que os dados pessoais estejam protegidos contra acessos não autorizados e incidentes de segurança.
+    
+    \item \textbf{Transparência e Rastreabilidade (\textit{Accountability}):}
+    \begin{itemize}
+        \item O sistema mantém \textbf{logs de auditoria} robustos e imutáveis no banco de dados (PostgreSQL/AWS RDS), registrando o acesso e alterações feitas por cada usuário (caixa ou gerente). Isso permite a rastreabilidade completa e o cumprimento de obrigações de prestação de contas.
+        \item O \textbf{Consentimento} é obtido de forma clara: o registro de novos usuários administradores implica na aceitação da política de privacidade e uso do sistema, que detalha como os dados de login serão tratados.
+    \end{itemize}
+    
+    \item \textbf{Direitos do Titular:} Dada a natureza da aplicação (sistema interno de gestão), a arquitetura é projetada para permitir que o administrador do açougue (controlador primário) possa, a qualquer momento, atender a solicitações dos titulares de dados, como a \textbf{exclusão de conta} de um ex-funcionário ou a \textbf{consulta} aos seus dados cadastrais.
 \end{itemize}
-% ---
+
 \section{Modelo de Banco de Dados}
-% ---
-% ---
+
+O modelo de banco de dados é a espinha dorsal do \textit{CarneUp}, sendo o responsável por garantir a integridade, a consistência e a rastreabilidade dos dados, requisitos críticos para a gestão de perecíveis. A escolha por um modelo relacional é mandatória para suportar as transações de alta frequência no Ponto de Venda (PDV) e permitir cálculos financeiros complexos, como a margem de lucro por peça. A tecnologia \textbf{PostgreSQL} (conforme definido na arquitetura) é ideal para este modelo, dada a sua robustez, consistência transacional e capacidade de gerenciar volumes de dados de inventário.
+
 \subsection{Modelo Entidade Relacionamento (MER / DER)}
-% ---
-O modelo será centrado nas entidades de Estoque, Vendas e Fornecedores.
+
+O Modelo Entidade Relacionamento (MER) do \textit{CarneUp} foi concebido para atender diretamente às Regras de Negócio e Histórias de Usuário, centrando-se nos fluxos de Estoque, Vendas e Compras. A estrutura relacional assegura que cada transação seja ligada de forma unívoca a uma peça de estoque, permitindo auditoria completa, cálculos precisos de custo e o gerenciamento eficaz da validade do produto. O modelo é composto pelas seguintes entidades principais, cujas responsabilidades espelham os requisitos do projeto:
+
 \begin{itemize}
-    \item Entidade Estoque (Peça): Armazena dados do produto em estoque (código de barras, peso, valor de custo, fornecedor, validade).
-    \item Entidade Venda: Armazena o registro de cada transação (peça vendida, valor final, data/hora, operador).
-    \item Entidade Fornecedor: Armazena dados de contato e histórico do fornecedor.
+    \item \textbf{Entidade Estoque (Peça):} É a entidade central para a rastreabilidade. Armazena dados essenciais do produto em estoque, incluindo o \textit{código de barras} (chave para o PDV - US01), \textit{peso}, \textit{data de validade} (crítico para US03/RN03), \textit{valor de custo} (base para RF05/US04) e a chave estrangeira do Fornecedor.
+    \item \textbf{Entidade Venda:} Representa a transação completa. Armazena os metadados da transação (valor total, data/hora e operador de caixa), sendo a entidade-mãe para o detalhamento dos itens vendidos.
+    \item \textbf{Entidade ItemVenda (Nova Entidade de Relacionamento):} Esta entidade conecta a Venda à Peça de Estoque. É vital, pois é onde se registra o valor final de venda do item e se realiza a baixa de estoque em tempo real (RN05), facilitando o cálculo da margem de lucro de cada item na transação (US04).
+    \item \textbf{Entidade Fornecedor:} Armazena os dados de contato e histórico de compras. É ligada à Entidade Estoque, permitindo a rastreabilidade da origem do produto (RF04/US02).
 \end{itemize}
 
-
-% ---
 \subsection{Diagrama Entidade Relacionamento (DER)}
-% ---
 
-  \begin{figure}[htb]
+O Diagrama Entidade Relacionamento (DER) a seguir (Figura \ref{fig:der}) representa a estrutura lógica do banco de dados, ilustrando as entidades, atributos e os relacionamentos definidos no MER.
+
+\begin{figure}[htb]
 	\centering
-	    \includegraphics[width=0.9\linewidth]{Imagens/DER.jpg} % <<< CORREÇÃO: scale substituído
-        \caption{Diagrama Entidade Relacionamento (DER)} % <<< CORREÇÃO: Sintaxe
-	    \label{fig:der} % <<< CORREÇÃO: Sintaxe
+	    \includegraphics[width=0.9\linewidth]{Imagens/DER.jpg}
+         \caption{Diagrama Entidade Relacionamento (DER)}
+	    \label{fig:der}
 	\end{figure}
-
-
-
 % ---
 % <<< CORREÇÃO: Seção 4.8 e 4.8.1 removidas por serem contraditórias e redundantes.
 % A duração correta (2,5 meses) já está definida no Capítulo 3.
 % ---
 
 % ---
-\section{Dicionário de Dados}
+%\section{Dicionário de Dados}
 
-  \begin{figure}[htb]
-	\centering
-	    \includegraphics[width=\linewidth]{Imagens/Dicionario_de_Dados.png} % <<< CORREÇÃO: scale substituído por width=\linewidth para corrigir overflow
-        \caption{Dicionário de Dados} % <<< CORREÇÃO: Sintaxe
-	    \label{fig:dicionario_dados} % <<< CORREÇÃO: Sintaxe
-	\end{figure}
+%  \begin{figure}[htb]
+%	\centering
+%	    \includegraphics[width=\linewidth]{Imagens/Dicionario_de_Dados.png} % <<< CORREÇÃO: scale substituído por width=\linewidth para corrigir overflow
+%        \caption{Dicionário de Dados} % <<< CORREÇÃO: Sintaxe
+%	    \label{fig:dicionario_dados} % <<< CORREÇÃO: Sintaxe
+%	\end{figure}
 
 
 % ---
