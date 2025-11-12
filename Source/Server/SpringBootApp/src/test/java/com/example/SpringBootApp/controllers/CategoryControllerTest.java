@@ -2,9 +2,9 @@ package com.example.SpringBootApp.controllers;
 
 import com.example.SpringBootApp.DTOs.CategoryCreateDTO;
 import com.example.SpringBootApp.models.Category;
-import com.example.SpringBootApp.services.CatalogService;
 import com.example.SpringBootApp.exceptions.ResourceAlreadyExistsException;
 import com.example.SpringBootApp.exceptions.GlobalExceptionHandler;
+import com.example.SpringBootApp.services.CatalogService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

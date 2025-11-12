@@ -12,22 +12,20 @@ import com.example.SpringBootApp.models.Product;
 import com.example.SpringBootApp.repositories.BrandRepository;
 import com.example.SpringBootApp.repositories.CategoryRepository;
 import com.example.SpringBootApp.repositories.ProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class CatalogService {
 
-    @Autowired
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
 
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
 
-    @Autowired
-    private BrandRepository brandRepository;
+    private final BrandRepository brandRepository;
 
     public Product createProduct(ProductCreateDTO productDTO) {
         Category category = categoryRepository.findById(productDTO.getCategoryId())
