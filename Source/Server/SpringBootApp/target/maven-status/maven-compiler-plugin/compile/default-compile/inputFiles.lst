@@ -1,9 +1,12 @@
 C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\controllers\BrandController.java
 C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\controllers\CategoryController.java
 C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\controllers\ProductController.java
+C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\controllers\PurchaseController.java
 C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\DTOs\BrandCreateDTO.java
 C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\DTOs\CategoryCreateDTO.java
 C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\DTOs\ProductCreateDTO.java
+C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\DTOs\PurchaseCreateDTO.java
+C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\DTOs\PurchaseItemDTO.java
 C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\exceptions\BusinessException.java
 C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\exceptions\ErrorResponse.java
 C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\exceptions\GlobalExceptionHandler.java
@@ -28,3 +31,4 @@ C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Sourc
 C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\repositories\SaleRepository.java
 C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\repositories\UserRepository.java
 C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\services\CatalogService.java
+C:\Users\gugug\OneDrive\Área de Trabalho\JuniorPrimeBeef\ProjetoExtensaoI\Source\Server\SpringBootApp\src\main\java\com\example\SpringBootApp\services\InventoryService.java

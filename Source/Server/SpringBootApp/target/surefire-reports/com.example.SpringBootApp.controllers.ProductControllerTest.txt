@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.example.SpringBootApp.controllers.ProductControllerTest
 -------------------------------------------------------------------------------
-Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.343 s -- in com.example.SpringBootApp.controllers.ProductControllerTest
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.312 s -- in com.example.SpringBootApp.controllers.ProductControllerTest

@@ -25,16 +25,19 @@ public class InventoryService {
     private final ProductRepository productRepository;
 
     public Purchase createPurchase(PurchaseCreateDTO purchaseDTO) {
+        for (PurchaseItemDTO itemDTO : purchaseDTO.getItems()) {
+            productRepository.findById(itemDTO.getProductId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + itemDTO.getProductId()));
+        }
+
         Purchase purchase = new Purchase();
         purchase.setDate(purchaseDTO.getDate() != null ? purchaseDTO.getDate() : LocalDate.now());
 
         Purchase savedPurchase = purchaseRepository.save(purchase);
 
         List<Item> items = new ArrayList<>();
-
         for (PurchaseItemDTO itemDTO : purchaseDTO.getItems()) {
-            Product product = productRepository.findById(itemDTO.getProductId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + itemDTO.getProductId()));
+            Product product = productRepository.findById(itemDTO.getProductId()).get();
 
             Item item = new Item();
             item.setQuantity(itemDTO.getQuantity());
