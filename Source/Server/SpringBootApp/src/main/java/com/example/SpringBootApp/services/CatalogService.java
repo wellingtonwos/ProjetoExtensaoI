@@ -40,10 +40,6 @@ public class CatalogService {
             throw new ResourceAlreadyExistsException("Product code already exists");
         }
 
-        if (!productDTO.getUnitMeasurement().equals("KG") && !productDTO.getUnitMeasurement().equals("UN")) {
-            throw new BusinessException("Unit measurement must be KG or UN");
-        }
-
         Product product = new Product();
         product.setName(productDTO.getName());
         product.setUnitMeasurement(productDTO.getUnitMeasurement());

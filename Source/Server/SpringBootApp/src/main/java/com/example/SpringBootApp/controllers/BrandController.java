@@ -6,6 +6,8 @@ import com.example.SpringBootApp.services.CatalogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +16,9 @@ import java.net.URI;
 
 @RestController
 @RequestMapping("/brands")
+@AllArgsConstructor
 public class BrandController {
 
-    @Autowired
     private CatalogService catalogService;
 
     @Operation(summary = "Create a new brand")
@@ -26,7 +28,7 @@ public class BrandController {
             @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
     @PostMapping
-    public ResponseEntity<?> createBrand(@RequestBody BrandCreateDTO brandDTO) {
+    public ResponseEntity<?> createBrand(@Valid @RequestBody BrandCreateDTO brandDTO) {
         Brand brand = catalogService.createBrand(brandDTO);
         return ResponseEntity.created(URI.create("/brands/" + brand.getId())).build();
     }

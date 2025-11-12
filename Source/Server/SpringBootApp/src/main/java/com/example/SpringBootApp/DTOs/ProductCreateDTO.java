@@ -1,5 +1,6 @@
 package com.example.SpringBootApp.DTOs;
 
+import com.example.SpringBootApp.models.UnitMeasurement;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -17,8 +18,8 @@ public class ProductCreateDTO {
     private String name;
 
     @Schema(description = "Unit of measurement", example = "KG", allowableValues = {"KG", "UN"})
-    @NotBlank(message = "Unit measurement is required")
-    private String unitMeasurement;
+    @NotNull(message = "Unit measurement is required")
+    private UnitMeasurement unitMeasurement;
 
     @Schema(description = "Unique product code", example = "1001")
     @NotNull(message = "Code is required")

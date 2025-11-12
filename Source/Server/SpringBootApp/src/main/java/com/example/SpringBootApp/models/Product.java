@@ -19,8 +19,9 @@ public class Product {
     @Column(name = "nome")
     private String name;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "unidade_medida")
-    private String unitMeasurement;
+    private UnitMeasurement unitMeasurement;
 
     @Column(name = "codigo")
     private Integer code;

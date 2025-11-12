@@ -6,6 +6,8 @@ import com.example.SpringBootApp.services.CatalogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +16,9 @@ import java.net.URI;
 
 @RestController
 @RequestMapping("/categories")
+@AllArgsConstructor
 public class CategoryController {
 
-    @Autowired
     private CatalogService catalogService;
 
     @Operation(summary = "Create a new category")
@@ -26,7 +28,7 @@ public class CategoryController {
             @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
     @PostMapping
-    public ResponseEntity<?> createCategory(@RequestBody CategoryCreateDTO categoryDTO) {
+    public ResponseEntity<?> createCategory(@Valid @RequestBody CategoryCreateDTO categoryDTO) {
         Category category = catalogService.createCategory(categoryDTO);
         return ResponseEntity.created(URI.create("/categories/" + category.getId())).build();
     }
