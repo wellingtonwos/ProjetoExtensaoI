@@ -1,4 +1,4 @@
-% ---
+
 %\documentclass[
 	% -- opções da classe memoir --
 %	12pt,				% tamanho da fonte
@@ -777,123 +777,197 @@ O Diagrama Entidade Relacionamento (DER) a seguir (Figura \ref{fig:der}) represe
 
 % ---
 % ----------------------------------------------------------
-% CAPÍTULO 4: VIABILIDADE (SEÇÃO 5 NO ORIGINAL)
+% CAPÍTULO 4: VIABILIDADE FINANCEIRA
 % ----------------------------------------------------------
-\chapter{Viabilidade Financeira}\label{cap:viabilidade} % <<< CORREÇÃO: Label única
+\chapter{Viabilidade Financeira}\label{cap:viabilidade}
 
-A análise de viabilidade financeira simula a sustentabilidade do projeto em um período de 2,5 meses, considerando custos de mão de obra (MO) e infraestrutura.
-% ---
-\section{Custos}
-% ---
-A estimativa de custos de Mão de Obra (MO) é baseada em uma média de taxa horária (R\$ 50,00) para 5 desenvolvedores, limitados a 80 horas/mês cada, durante a nova duração total de 2,5 meses.
-% ---
-\subsection{Detalhamento dos Custos de Desenvolvimento (Mão de Obra)}
-% ---
+O presente capítulo tem como objetivo delinear a viabilidade econômico-financeira do projeto \textsf{CarneUp}, elemento fundamental para garantir a sustentabilidade de longo prazo e a escalabilidade do sistema após a sua implantação. Esta análise transcende a perspectiva puramente técnica, focando na conversão do Produto Mínimo Viável (MVP) em um modelo de negócio rentável e competitivo no mercado de açougues de pequeno e médio porte.
 
-Foi calculado com base em 5 membros da equipe, trabalhando uma média de 80 horas/mês, durante os 2,5 meses.
+Este estudo de caso se concentra na quantificação do Investimento Inicial requerido para o desenvolvimento, simulando a alocação de recursos durante os 2,5 meses de duração do projeto. A análise é estruturada nas seguintes etapas:
+
+% ---
+\section{Custos}\label{sec:custos}
+
+A estimativa de custos representa o Investimento Inicial (Capital de Giro) necessário para a fase de desenvolvimento e entrega do Produto Mínimo Viável (MVP) do \textsf{CarneUp}. Estes custos foram categorizados em duas vertentes principais: Mão de Obra (MO) e Infraestrutura, conforme detalhado nas subseções a seguir.
+
+\subsection{Detalhamento dos Custos de Desenvolvimento (Mão de Obra)}\label{sub:custos_mo}
+
+O custo de Mão de Obra (MO) é a componente de maior peso no investimento inicial, sendo diretamente proporcional ao esforço total da equipe de desenvolvimento. O cálculo baseou-se na estimativa de horas de trabalho necessárias para o período de 2,5 meses, aplicando-se uma taxa horária média ponderada.
+
 \begin{itemize}
-        
-    \item Esforço Total: 1.000 horas (5 membros x 80 horas/mês x 2,5 meses).
-    \item  Custo Horário Médio: R\$ 50,00.
+    \item Esforço Total Estimado: 1.000 horas (5 desenvolvedores $\times$ 80 horas/mês $\times$ 2,5 meses).
+    \item Custo Horário Médio (\textit{Loaded Rate}): R\$ 50,00.
     \item Custo Total de MO: R\$ 50.000,00.
 \end{itemize}
 
-% ---
-\subsection{Custos de Infraestrutura}
-% ---
-Os custos operacionais de infraestrutura (manutenção e hospedagem) são projetados a partir da utilização de serviços cloud (AWS), que oferecem um modelo de pagamento por uso, minimizando o investimento inicial:
-\begin{itemize}
-    
-\item Custo Mensal Estimado (AWS + Domínio): R\$ 400,00.
-\item Custo Acumulado (2,5 meses de Desenvolvimento): R\$ 1.000,00.
+\subsection{Custos de Infraestrutura e Operacionais}\label{sub:custos_infra}
 
-\end{itemize}
-Investimento Inicial Necessário
-O investimento inicial total para o desenvolvimento e entrega do Projeto Final é de R\$ 51.000,00.
-% ---
-\section{Receitas}
-% ---
-CarneUp é baseado em Software as a Service (SaaS), focado em receita recorrente e escalabilidade\cite{aws_saas}.
+Os custos de infraestrutura consideram a utilização de serviços em nuvem (AWS) e domínios essenciais para o ambiente de desenvolvimento e testes. A escolha pelo modelo \textit{pay-as-you-go} minimiza o investimento de capital (Capex) em hardware, concentrando-o em custos operacionais (Opex).
+
 \begin{itemize}
-    \item Modelo: Assinatura mensal por açougue.
-    \item Preço por Assinatura: R\$ 250,00 mensais por unidade (açougue).
-\end{itemize}
-A receita é escalável e diretamente ligada à aquisição de novos clientes após a Entrega Final (Mês 3 em diante).
-% ---
-\section{Cenário Realista}
-% ---
-Projeta uma taxa de adoção prudente, levando em consideração os desafios de implementação de novos sistemas em pequenos e médios varejistas.
-\begin{itemize}
-    \item Adoção: 5 novos clientes no Mês 3 (Novembro/2025), com crescimento de 5 clientes por mês nos períodos subsequentes.
-    \item Ponto de Equilíbrio (Break-even Point): O custo inicial de R\$ 51.000,00 é recuperado no Mês 7 (Março/2026).
-Este é um prazo excelente, dado o alto investimento inicial em MO.
+    \item Custo Mensal Estimado (AWS + Domínio): R\$ 400,00.
+    \item Custo Acumulado (2,5 meses de Desenvolvimento): R\$ 1.000,00.
 \end{itemize}
 
+\subsection{Investimento Inicial Consolidado}\label{sub:investimento_consolidado}
 
-% ---
-\section{Cenário Otimista}
-% ---
+O investimento total necessário para a conclusão e entrega do MVP é consolidado na Tabela \ref{tab:custos_iniciais}.
 
-Considera uma alta aceitação do produto no mercado, impulsionada pela facilidade de uso e pelo foco no problema de rastreabilidade do açougue.
+% --- Tabela formatada em ABNT ---
+\begin{table}[!htb]
+    \centering
+    \caption{Consolidação dos Custos Iniciais do Projeto}
+    \label{tab:custos_iniciais}
+    \begin{tabular}{|l|c|c|}
+        \hline
+        \textbf{Natureza do Custo} & \textbf{Valor (R\$)} & \textbf{Participação (\%)} \\
+        \hline\hline
+        Mão de Obra (Desenvolvimento) & 50.000,00 & 98,04\% \\
+        \hline
+        Infraestrutura (AWS, Domínio) & 1.000,00 & 1,96\% \\
+        \hline\hline
+        \textbf{INVESTIMENTO INICIAL TOTAL} & \textbf{51.000,00} & \textbf{100,00\%} \\
+        \hline
+    \end{tabular}
+    \flushleft{\footnotesize Fonte: Elaborado pelo autor (2025).}
+\end{table}
+
+Conforme apresentado na Tabela \ref{tab:custos_iniciais}, o Investimento Inicial Total do projeto é de R\$ 51.000,00. O custo com Mão de Obra representa a parcela predominante deste valor, indicando a natureza intensiva em capital humano do desenvolvimento de software.
+
+\subsection{Custos de Infraestrutura}\label{sub:custos_infra}
+
+Os custos operacionais de infraestrutura (manutenção e hospedagem) são projetados a partir da utilização de serviços \textit{cloud} (AWS), que oferecem um modelo de pagamento por uso, minimizando o investimento inicial:
+
 \begin{itemize}
-    \item Adoção: 10 novos clientes no Mês 3, com crescimento de 10 clientes por mês nos períodos subsequentes.
-    \item Ponto de Equilíbrio (Break-even Point): Atingido no Mês 5 (Janeiro/2026).
+    \item Custo Mensal Estimado (AWS + Domínio): R\$ 400,00.
+    \item Custo Acumulado (2,5 meses de Desenvolvimento): R\$ 1.000,00.
 \end{itemize}
-% ---
-\section{Cenário Pessimista}
-% ---
-Pressupõe uma adoção lenta, devido à inércia do mercado ou dificuldades na validação da proposta de valor.
+
+O Investimento Inicial Total necessário para o desenvolvimento e entrega do Projeto Final é de R\$ 51.000,00.
+
+\section{Receitas}\label{sec:receitas}
+
+O modelo de monetização do \textsf{CarneUp} é baseado no conceito de \textit{Software as a Service} (SaaS), fundamentado na receita recorrente e na escalabilidade intrínseca à arquitetura multi-tenant \cite{aws_saas}. Esta estratégia está alinhada com a Proposta de Valor do sistema, que entrega rastreabilidade e gestão de estoque em troca de uma taxa de serviço mensal.
+
+A Tabela \ref{tab:modelo_receita} detalha a estrutura de precificação adotada para o mercado-alvo de açougues de pequeno e médio porte.
+
+\begin{table}[!htb]
+    \centering
+    \caption{Estrutura de Receita Recorrente (SaaS)}
+    \label{tab:modelo_receita}
+    \begin{tabular}{|l|l|}
+        \hline
+        \textbf{Componente} & \textbf{Detalhe} \\
+        \hline\hline
+        Modelo de Cobrança & Assinatura Mensal (Recorrente) \\
+        \hline
+        Unidade de Cobrança & Por Unidade (Açougue/Loja) \\
+        \hline
+        Preço por Assinatura & R\$ 250,00/mês \\
+        \hline
+    \end{tabular}
+    \flushleft{\footnotesize Fonte: Elaborado pelo autor (2025).}
+\end{table}
+
+A natureza escalável do modelo SaaS implica que a Receita Operacional Mensal (ROM) é diretamente proporcional à aquisição e retenção de novos clientes. A geração de receita líquida inicia-se no Mês 3 (Entrega Final do MVP), sendo o fator de crescimento principal para a recuperação do investimento inicial.
+
+\section{Análise de Cenários}\label{sec:cenarios}
+
+Para validar a sustentabilidade financeira do projeto, foi realizada uma Análise de Sensibilidade, simulando três cenários distintos de adoção do produto pelo mercado-alvo. O objetivo primário é determinar o Ponto de Equilíbrio (\textit{Break-even Point}), que representa o momento em que a Receita Acumulada iguala o Investimento Inicial de R\$ 51.000,00, marcando o início da recuperação de capital.
+
+\subsection{Cenário Realista}\label{sub:cenario_realista}
+
+Este cenário projeta uma taxa de adoção prudente, alinhada com os desafios típicos de implementação de novos sistemas (curva de aprendizado e inércia) em pequenos e médios varejistas.
+
 \begin{itemize}
-    \item Adoção: 2 novos clientes no Mês 3, com crescimento de apenas 2 clientes por mês nos períodos subsequentes.
-    \item Ponto de Equilíbrio (Break-even Point): Atingido no Mês 12 (Outubro/2026).
+    \item Adoção Base: 5 novos clientes no Mês 3 (Novembro/2025).
+    \item Crescimento: Acréscimo de 5 novos clientes por mês nos períodos subsequentes (crescimento linear).
+    \item Ponto de Equilíbrio (\textit{Break-even Point}): O investimento é recuperado no \textbf{Mês 7 (Março/2026)}.
 \end{itemize}
-% ---
+O prazo de recuperação de capital de sete meses é considerado satisfatório, dado o alto percentual de investimento direcionado à Mão de Obra.
+
+\subsection{Cenário Otimista}\label{sub:cenario_otimista}
+
+O cenário otimista considera uma alta taxa de aceitação do mercado (\textit{Early Adopters}), impulsionada pela facilidade de uso do \textsf{CarneUp} e pelo foco assertivo na solução do problema de rastreabilidade (Proposta de Valor).
+
+\begin{itemize}
+    \item Adoção Base: 10 novos clientes no Mês 3 (Novembro/2025).
+    \item Crescimento: Acréscimo de 10 novos clientes por mês nos períodos subsequentes.
+    \item Ponto de Equilíbrio (\textit{Break-even Point}): Atingido no \textbf{Mês 5 (Janeiro/2026)}.
+\end{itemize}
+
+\subsection{Cenário Pessimista}\label{sub:cenario_pessimista}
+
+O cenário pessimista pressupõe uma adoção lenta e cautelosa, decorrente de possíveis barreiras de entrada, resistência à mudança ou dificuldades inesperadas na validação da proposta de valor.
+
+\begin{itemize}
+    \item Adoção Base: 2 novos clientes no Mês 3 (Novembro/2025).
+    \item Crescimento: Acréscimo de 2 novos clientes por mês nos períodos subsequentes.
+    \item Ponto de Equilíbrio (\textit{Break-even Point}): Atingido no \textbf{Mês 12 (Outubro/2026)}.
+\end{itemize}
+
+\subsection{Consolidação da Análise de Sensibilidade}\label{sub:tabela_cenarios}
+
+A Tabela \ref{tab:analise_sensibilidade} resume os parâmetros de crescimento e os respectivos pontos de equilíbrio, fornecendo uma visão consolidada do risco de mercado e da projeção de retorno.
+
+% --- Tabela formatada em ABNT (Correção: Colunas de largura fixa para alinhamento) ---
+\begin{table}[!htb]
+    \centering
+    \caption{Resumo da Análise de Sensibilidade e Ponto de Equilíbrio}
+    \label{tab:analise_sensibilidade}
+    % Colunas: 1 (Cenário) alinhada à esquerda, 3 colunas de dados com largura fixa e conteúdo centralizado.
+    \begin{tabular}{p{2.5cm} >{\centering\arraybackslash}p{3.5cm} >{\centering\arraybackslash}p{3cm} >{\centering\arraybackslash}p{3cm}}
+        \hline % Linha superior
+        \textbf{Cenário} & \textbf{Adoção Mensal Base (Clientes)} & \textbf{Crescimento Mensal ($\Delta$)} & \textbf{Ponto de Equilíbrio (Mês)} \\
+        \hline\hline % Linha dupla para separar cabeçalho
+        Pessimista & 2 & +2 & 12 (Out/2026) \\
+        Realista & 5 & +5 & 7 (Mar/2026) \\
+        Otimista & 10 & +10 & 5 (Jan/2026) \\
+        \hline % Linha inferior
+    \end{tabular}
+    \flushleft{\footnotesize Fonte: Elaborado pelo autor (2025).}
+\end{table}
 
 % ----------------------------------------------------------
-% CAPÍTULO 5: CONCLUSÃO (SEÇÃO 6 NO ORIGINAL)
+% CAPÍTULO 5: CONSIDERAÇÕES FINAIS
 % ----------------------------------------------------------
-\chapter{Considerações Finais}\label{cap:conclusao} % <<< CORREÇÃO: Label única
+\chapter{Considerações Finais}\label{cap:conclusao}
 
-O desenvolvimento do CarneUp foi concluído, resultando em uma aplicação que resolve o problema central da gestão de açougues de pequeno e médio porte: a rastreabilidade e o controle de validade do estoque de carnes.
-O projeto demonstrou a viabilidade técnica da integração de tecnologias modernas para atender a um nicho de mercado específico.
-% ---
-\section{Dificuldades, Escolhas e Descartes}
-% ---
+O presente Trabalho de Conclusão de Curso (TCC) alcançou seu objetivo geral, que era desenvolver o \textsf{CarneUp}, um Sistema de Gestão focado na rastreabilidade e no controle de perecibilidade de estoque para açougues de pequeno e médio porte.
 
-As dificuldades enfrentadas pelo projeto não foram de ordem de integração de hardware, mas sim desafios de gestão e complexidade de dados:
+Com a entrega do Produto Mínimo Viável (MVP), o projeto demonstrou a viabilidade técnica da integração de tecnologias modernas para atender ao problema de ineficiência na gestão analógica. A solução implementada propõe-se a atender às exigências do mercado e fornece um controle de validade e lote mais eficaz, validando a premissa de que a tecnologia pode mitigar riscos operacionais no core business do varejo de carnes.
+
+\section{Conclusão dos Resultados e Análise Crítica}\label{sec:analise_critica}
+
+Esta seção sintetiza os principais resultados alcançados, as decisões estratégicas tomadas e o alinhamento do projeto com sua proposta de valor, incluindo a validação financeira.
+
+\subsection{Alinhamento com a Proposta de Valor e Viabilidade}\label{sub:alinhamento_viabilidade}
+
+O \textsf{CarneUp} não apenas cumpriu seus requisitos técnicos, como também validou uma alta viabilidade econômica. Conforme detalhado no Capítulo \ref{cap:viabilidade}, a análise de sensibilidade projeta a recuperação do Investimento Inicial de R\$ 51.000,00 em um prazo excelente de sete meses no Cenário Realista.
+
+Essa performance é um indicativo de que a solução é economicamente sustentável e possui um modelo de negócios (SaaS) com potencial de escalabilidade. A decisão de utilizar o PostgreSQL foi fundamental para oferecer a robustez e a integridade transacional exigidas para dados financeiros e de estoque, aspectos que buscam assegurar a confiança do usuário no sistema.
+
+\subsection{Dificuldades e Lições Aprendidas}\label{sub:licoes_aprendidas}
+
+O desenvolvimento foi marcado por desafios que exigiram adaptação metodológica e rigor na gestão de escopo.
 
 \begin{itemize}
-    \item Restrição Temporal e Marcos Fixos: A principal dificuldade foi a condensação do cronograma para apenas 2,5 meses, imposta pelos Marcos Fixos de Entrega Acadêmica (20/09, 10/10 e 31/10/2025).
-Essa restrição exigiu um controle rigoroso do escopo.
-    \item Modelagem de Diagramas e Banco de Dados (MER/DER): Encontramos problemas na fase de modelagem, pois a rastreabilidade completa da carne exige um controle de estoque complexo.
-Tivemos que refinar repetidamente os diagramas (MER/DER) para garantir que o sistema rastreasse as informações essenciais.
+    \item Restrição Temporal e Escopo: A principal dificuldade foi a condensação do cronograma para apenas 2,5 meses, imposta pelos Marcos Fixos de Entrega Acadêmica (20/09, 10/10 e 31/10/2025). Essa restrição exigiu uma priorização agressiva e um controle rigoroso do escopo.
+    \item Modelagem de Dados Complexa: A rastreabilidade por lote e validade demandou um esforço significativo na fase de modelagem, com refinamentos repetidos nos diagramas (MER/DER). Isso evidenciou a complexidade inerente à representação de processos de estoque perecível.
 \end{itemize}
 
-Escolhas Cruciais
+A adoção da Metodologia \textit{Scrum} permitiu a entrega incremental em Sprints curtas, um fator que foi determinante para a conclusão do MVP dentro do prazo.
 
-As escolhas tecnológicas e metodológicas foram determinantes para o sucesso do projeto no prazo estabelecido:
+\section{Limitações e Trabalhos Futuros}\label{sec:trabalhos_futuros}
+
+As limitações impostas pelo prazo rigoroso resultaram em funcionalidades que foram deliberadamente postergadas, estabelecendo o escopo para a Fase 2 do projeto, que será objeto de Trabalhos Futuros.
+
 \begin{itemize}
-    \item Metodologia Scrum: A adoção do Scrum permitiu a entrega incremental em Sprints curtas, garantindo que os marcos fixos fossem atingidos (Desenho, POC e MVP) através de priorização ágil.
-    \item PostgreSQL: O uso do PostgreSQL foi essencial para a segurança dos dados, oferecendo a robustez e a integridade transacional exigidas para dados financeiros e de estoque.
+    \item Módulo de Contabilidade Completa: O foco foi mantido no core business (Venda, Estoque e Custo da Peça). Módulos avançados de geração de balancetes ou integração contábil foram adiados.
+    \item Suporte a Múltiplas Filiais: O sistema foi dimensionado inicialmente para um único açougue. A expansão para uma arquitetura multi-filial será o foco principal para a otimização da escalabilidade do produto no futuro.
 \end{itemize}
 
-Funcionalidades Descartadas
-
-Para garantir a entrega do MVP dentro do prazo rigoroso e focar na funcionalidade principal do açougue, algumas funcionalidades foram deliberadamente adiadas para a Fase 2:
-\begin{itemize}
-    \item Módulo de Contabilidade Completa: O foco foi mantido no core business (Venda, Estoque e Custo da Peça).
-Módulos avançados de geração de balancetes ou integração contábil foram adiados.
-    \item Múltiplas Filiais: O sistema foi dimensionado para um único açougue para simplificar a lógica de estoque e as permissões, garantindo que o tempo fosse focado na rastreabilidade por lote.
-\end{itemize}
-
-
-
-% ----------------------------------------------------------
-% Finaliza a parte no bookmark do PDF
-% para que se inicie o bookmark na raiz
-% e adiciona espaço de parte no Sumário
-% ----------------------------------------------------------
-
+O desenvolvimento subsequente deve incluir a implementação dessas funcionalidades, a otimização contínua da interface do usuário (UI) baseada em *feedback* de clientes e a implementação de métricas de retenção para o modelo SaaS.
 
 % ----------------------------------------------------------
 % ELEMENTOS PÓS-TEXTUAIS
@@ -905,7 +979,4 @@ Módulos avançados de geração de balancetes ou integração contábil foram a
 % Referências bibliográficas
 % ----------------------------------------------------------
 \bibliography{Referencias}
-
-
-
 \end{document}
