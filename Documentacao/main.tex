@@ -723,13 +723,6 @@ O projeto materializa a conformidade com a LGPD nos seguintes pontos de design:
 \begin{itemize}
     \item \textbf{Princípio da Finalidade e Necessidade:} A coleta de dados é limitada estritamente ao necessário para a autenticação e gestão de permissões do sistema (nome, e-mail e credenciais de login). Nenhum dado sensível (como dados biométricos ou financeiros pessoais) é processado, aplicando o conceito de \textbf{minimização de dados}.
     
-    \item \textbf{Segurança da Informação (\textit{Privacy by Design}):} Todas as medidas técnicas de segurança, como a \textbf{criptografia em repouso (bcrypt)} e a \textbf{criptografia em trânsito (SSL/HTTPS)}, são o mecanismo técnico para cumprir o Artigo 46 da LGPD, garantindo que os dados pessoais estejam protegidos contra acessos não autorizados e incidentes de segurança.
-    
-    \item \textbf{Transparência e Rastreabilidade (\textit{Accountability}):}
-    \begin{itemize}
-        \item O sistema mantém \textbf{logs de auditoria} robustos e imutáveis no banco de dados (PostgreSQL/AWS RDS), registrando o acesso e alterações feitas por cada usuário (caixa ou gerente). Isso permite a rastreabilidade completa e o cumprimento de obrigações de prestação de contas.
-        \item O \textbf{Consentimento} é obtido de forma clara: o registro de novos usuários administradores implica na aceitação da política de privacidade e uso do sistema, que detalha como os dados de login serão tratados.
-    \end{itemize}
     
     \item \textbf{Direitos do Titular:} Dada a natureza da aplicação (sistema interno de gestão), a arquitetura é projetada para permitir que o administrador do açougue (controlador primário) possa, a qualquer momento, atender a solicitações dos titulares de dados, como a \textbf{exclusão de conta} de um ex-funcionário ou a \textbf{consulta} aos seus dados cadastrais.
 \end{itemize}
@@ -933,7 +926,7 @@ A Tabela \ref{tab:analise_sensibilidade} resume os parâmetros de crescimento e 
 % ----------------------------------------------------------
 \chapter{Considerações Finais}\label{cap:conclusao}
 
-O presente Trabalho de Conclusão de Curso (TCC) alcançou seu objetivo geral, que era desenvolver o \textsf{CarneUp}, um Sistema de Gestão focado na rastreabilidade e no controle de perecibilidade de estoque para açougues de pequeno e médio porte.
+O presente projeto alcançou seu objetivo geral, que era desenvolver o \textsf{CarneUp}, um Sistema de Gestão focado na rastreabilidade e no controle de perecibilidade de estoque para açougues de pequeno e médio porte.
 
 Com a entrega do Produto Mínimo Viável (MVP), o projeto demonstrou a viabilidade técnica da integração de tecnologias modernas para atender ao problema de ineficiência na gestão analógica. A solução implementada propõe-se a atender às exigências do mercado e fornece um controle de validade e lote mais eficaz, validando a premissa de que a tecnologia pode mitigar riscos operacionais no core business do varejo de carnes.
 
