@@ -33,7 +33,7 @@
 \usepackage[T1]{fontenc}		% Selecao de codigos de fonte.
 \usepackage[utf8]{inputenc}		% Codificacao do documento (conversão automática dos acentos)
 \usepackage{lastpage}			% Usado pela Ficha catalográfica
-\usepackage{indentfirst}		% Indenta o primeiro parágrafo de cada seção.
+\usepackage{indentfirst}		% Indenta o primeiro parágrafo de cada seção.   
 \usepackage{xcolor}             % Controle das cores (mais moderno)
 \usepackage{graphicx}			% Inclusão de gráficos
 \usepackage{microtype} 			% para melhorias de justificação
@@ -259,30 +259,30 @@ Diante desse cenário, a relevância do \textit{CarneUp} reside na necessidade u
 
 \chapter {Escopo e Objetivos}
 
-O Escopo do projeto abrange a criação de um sistema web focado nas operações de retaguarda (back-office) e no ponto de venda (PDV) de açougues. O sistema tem como foco principal o controle de estoque e o controle financeiro detalhado de cada peça de carne.
+O Escopo do projeto abrange a criação de um sistema web focado nas operações de retaguarda (back-office) e no ponto de venda (PDV) de açougues que vendem carnes e outros produtos. O sistema tem como foco principal o controle de estoque de itens perecíveis e não perecíveis e o controle financeiro detalhado de cada peça de carne.
 
 \textbf{O projeto abrange:}
 \begin{itemize}
-    \item Gestão de Vendas (PDV) com integração de código de barras.
-    \item Controle de Estoque (Entrada/Saída), incluindo fornecedor, valor de custo e validade.
+    \item Gestão de Vendas (PDV) com integração de código de barras. É possível realizar vendas mesmo sem o código de barras, inserindo o item manualmente.
+    \item Controle de Estoque (Entrada/Saída), incluindo marca, valor de custo e validade (para perecíveis).
     \item Emissão de alertas de validade.
-    \item Geração de relatórios básicos de vendas.
-    \item Gestão de usuários e controle de sessão (Autenticação). % <<< ESTE ITEM
+    \item Geração de relatórios básicos de vendas, com filtros por período.
+    \item Gestão de usuários: Perfis de Administrador e Operador.
     \item Aplicação de padrões de acessibilidade (WCAG) na interface web.
 \end{itemize}
 
 Os objetivos específicos do projeto incluem:
 
 \begin{itemize}
-    \item Gerenciar Vendas: Permitir o registro rápido e eficiente de vendas de carnes.
-    \item Controle de Estoque: Fornecer uma visão em tempo real do estoque de carnes, incluindo o controle das peças vendidas, suas validades e fornecedores.
+    \item Gerenciar Vendas: Permitir o registro rápido e eficiente de vendas de carnes e outros produtos.
+    \item Controle de Estoque: Fornecer uma visão em tempo real do estoque, incluindo o controle das peças vendidas, suas validades (quando aplicável) e marcas.
     \item Digitalização de Pesagem: Integrar-se com códigos de barras gerados pela balança para capturar automaticamente o valor e o peso da peça no momento da venda.
-    \item Otimização de Compras: Registrar o valor pago nas carnes e seus fornecedores para análises de custo.
+    \item Otimização de Compras: Registrar o valor pago nos itens e suas marcas para análises de custo.
 \end{itemize}
 
 \section{Requisitos do Sistema}
 
-Para alcançar os objetivos propostos, o \textit{CarneUp} atende a um conjunto de requisitos funcionais (RF) e não funcionais (RNF e RN). Os requisitos funcionais estão detalhados na Tabela 1, agrupados de acordo com os principais componentes de gestão definidos nos diagramas de arquitetura: \textbf{Gestão de Vendas}, \textbf{Gestão de Produtos (Estoque)}, \textbf{Gestão de Compras} e \textbf{Gestão de Autenticação}.
+Para alcançar os objetivos propostos, o \textit{CarneUp} atende a um conjunto de requisitos funcionais (RF) e não funcionais (RNF e RN). Os requisitos funcionais estão detalhados na Tabela 1, agrupados de acordo com os principais componentes de gestão definidos nos diagramas de arquitetura: \textbf{Gestão de Vendas}, \textbf{Gestão de Produtos (Estoque)}, \textbf{Gestão de Compras/Marca} e \textbf{Gestão de Autenticação}.
 
 \begin{longtable}{|>{\Centering}m{1.5cm}|>{\RaggedRight}m{13cm}|}
     \caption{Requisitos Funcionais (RF)}
@@ -305,141 +305,133 @@ Para alcançar os objetivos propostos, o \textit{CarneUp} atende a um conjunto d
     \hline
     \endlastfoot
 
-    RF01 & O sistema deve permitir o registro de vendas através da leitura do código de barras gerado pela balança. \\ 
+    RF01 & O sistema deve permitir o registro de vendas através da leitura do código de barras gerado pela balança ou pela inserção manual do item. \\ 
     \hline
-    RF02 & O sistema deve calcular automaticamente o valor total da venda ao capturar o peso e o valor unitário do item lido via código de barras. \\ 
+    RF02 & O sistema deve calcular automaticamente o valor total da venda ao capturar o peso e o valor unitário do item lido via código de barras ou inserido manualmente. \\ 
     \hline
-    RF08 & O sistema deve gerar relatórios diários de vendas, detalhando a quantidade e o valor total vendido. \\ 
+    RF03 & O sistema deve permitir o registro de novas entradas de estoque (compras), incluindo valor de custo, marca e validade (para perecíveis). \\  
     \hline
-    RF03 & O sistema deve permitir o registro de novas entradas de estoque (compras), incluindo valor de custo, fornecedor e validade. \\ 
+    RF04 & O sistema deve calcular a margem de lucro de cada peça de carne/item vendido (Valor de Venda - Valor de Custo). \\
     \hline
-    RF05 & O sistema deve calcular a margem de lucro de cada peça de carne vendida (Valor de Venda - Valor de Custo). \\ 
+    RF05 & O sistema deve emitir um alerta visual no painel para o administrador quando a validade de uma peça de estoque estiver a 7 dias ou menos do vencimento. \\ 
     \hline
-    RF06 & O sistema deve emitir um alerta visual e via e-mail para o administrador quando a validade de uma peça de estoque estiver a 7 dias ou menos do vencimento. \\ 
+    RF06 & O sistema deve permitir o descarte de peças de estoque (baixa) em caso de vencimento ou perda de qualidade. \\ 
     \hline
-    RF07 & O sistema deve permitir o descarte de peças de estoque (baixa) e registrar o motivo do descarte (ex: vencimento, perda de qualidade). \\ 
+    RF07 & O sistema deve permitir a busca e visualização de peças de estoque por marca. \\ 
     \hline
-    RF04 & O sistema deve permitir a busca e visualização de peças de estoque por fornecedor. \\ 
+    RF08 & O sistema deve gerenciar o cadastro completo de marcas. \\
     \hline
-    RF09 & O sistema deve gerenciar o cadastro completo de fornecedores e seus respectivos contatos. \\
+    RF09 & O sistema deve permitir a visualização de relatórios de vendas, com filtros por período e itens. \\
     \hline
     RF10 & O sistema deve controlar o acesso através de autenticação de usuário (login/senha) e gerenciar o ciclo de vida da sessão. \\ 
     \hline
-    RF11 & O sistema deve permitir o cadastro de diferentes perfis de usuários (ex: Operador de Caixa, Gerente) com níveis de permissão distintos. \\
+    RF11 & O sistema deve permitir o cadastro de diferentes perfis de usuários: \textbf{Administrador} e \textbf{Operador}. \\
     \hline
 \end{longtable}
 
 \subsection{Regras de Negócio}
 
-As regras de negócio (RN) representam as restrições, políticas e condições operacionais que ditam o funcionamento interno do sistema e garantem sua aderência aos processos específicos de um açougue. Elas são cruciais para manter a integridade dos dados, controlar o fluxo de estoque e assegurar a precisão financeira.
+As regras de negócio (RN) representam as restrições, políticas e condições operacionais que ditam o funcionamento interno do sistema e garantem sua aderência aos processos específicos de um açougue.
 
-A Tabela \ref{tab:requisitos_rn} detalha as regras obrigatórias do sistema \textit{CarneUp}. É importante notar que cada regra está diretamente ligada a um ou mais Requisitos Funcionais (RF) ou Não Funcionais (RNF) definidos anteriormente, estabelecendo as condições sob as quais as funcionalidades de venda, estoque e custo são executadas.
+A Tabela \ref{tab:requisitos_rn} detalha as regras obrigatórias do sistema \textit{CarneUp}.
 
 \begin{longtable}{|>{\Centering}m{1.5cm}|>{\RaggedRight}m{9cm}|>{\Centering}m{4cm}|}
 \caption{Regras de Negócio (RN)}
 \label{tab:requisitos_rn}\\ % <-- Rótulo corrigido para ser o único usado
- \hline
- \textbf{Código} & \textbf{Descrição} & \textbf{Requisito Relacionado} \\
- \hline
- \endfirsthead
+    \hline
+    \textbf{Código} & \textbf{Descrição} & \textbf{Requisito Relacionado} \\
+    \hline
+    \endfirsthead
 
- \multicolumn{3}{c}%
- {{\bfseries \tablename\ \thetable{} -- continuação}} \\
- \hline
- \textbf{Código} & \textbf{Descrição} & \textbf{Requisito Relacionado} \\
- \hline
- \endhead
- \hline
- \multicolumn{3}{|r|}{{Continua...}} \\
- \hline
- \endfoot
- \hline
- \endlastfoot
+    \multicolumn{3}{c}%
+    {{\bfseries \tablename\ \thetable{} -- continuação}} \\
+    \hline
+    \textbf{Código} & \textbf{Descrição} & \textbf{Requisito Relacionado} \\
+    \hline
+    \endhead
+    \hline
+    \multicolumn{3}{|r|}{{Continua...}} \\
+    \hline
+    \endfoot
+    \hline
+    \endlastfoot
 
- RN01 & A venda só pode ser registrada se o código de barras lido for reconhecido e o item tiver estoque disponível. & RF01, RF02 \\
- \hline
- RN02 & O valor de custo por peça deve ser registrado no momento da entrada no estoque para cálculo de margem de lucro. & RF03, RF05 \\
- \hline
- RN03 & Peças com validade expirada devem ser automaticamente bloqueadas para venda e movidas para a lista de descarte. & RF07, RNF01 \\
- \hline
- RN04 & O sistema deve manter o histórico de fornecedores para cada peça de carne no estoque para fins de análise de custo e consulta. & RF04 \\
- \hline
- RN05 & A peça de carne vendida deve ter seu estoque subtraído em tempo real no momento do registro da venda. & RF02, RNF01 \\
- \hline
+    RN01 & A venda pode ser registrada pela leitura do código de barras ou pela inserção manual do item, mas só será concluída se o item tiver estoque disponível. & RF01, RF02 \\
+    \hline
+    RN02 & O valor de custo por peça/item deve ser registrado no momento da entrada no estoque para cálculo de margem de lucro. & RF03, RF04 \\
+    \hline
+    RN03 & Peças/itens com validade expirada devem ser automaticamente bloqueados para venda e movidos para a lista de descarte. & RF06, RNF01 \\
+    \hline
+    RN04 & O sistema deve manter o histórico de marcas para cada peça de carne/item no estoque para fins de análise de custo e consulta. & RF07 \\
+    \hline
 \end{longtable}
 
-Os Requisitos Não Funcionais (RNF) especificam os critérios que podem ser usados para julgar a operação de um sistema, em vez de comportamentos específicos. Diferentemente dos Requisitos Funcionais (RF), que definem o que o sistema deve fazer, os RNFs definem quão bem ele deve realizar suas funções, estabelecendo atributos de qualidade, usabilidade, desempenho e segurança.
-
-Estes atributos são cruciais para o sistema \textit{CarneUp}, pois garantem que ele seja rápido o suficiente para um Ponto de Venda (PDV), escalável para acompanhar o crescimento do açougue e seguro para proteger dados financeiros. A Tabela \ref{tab:requisitos_rnf} detalha estes requisitos, organizados por código, seu módulo de impacto e a descrição que quantifica ou qualifica a expectativa de qualidade do software.
+Os Requisitos Não Funcionais (RNF) especificam os critérios que podem ser usados para julgar a operação de um sistema, em vez de comportamentos específicos.
 
 \begin{longtable}{|>{\Centering}m{1.5cm}|>{\Centering}m{3cm}|>{\RaggedRight}m{10cm}|}
- \caption{Requisitos Não Funcionais (RNF)}
- \label{tab:requisitos_rnf}\\
- \hline
+    \caption{Requisitos Não Funcionais (RNF)}
+    \label{tab:requisitos_rnf}\\
+    \hline
 \textbf{Código} & \textbf{Módulo} & \textbf{Descrição} \\
 \hline
- \endfirsthead
+    \endfirsthead
 
- \multicolumn{3}{c}%
- {{\bfseries \tablename\ \thetable{} -- continuação}} \\
- \hline
+    \multicolumn{3}{c}%
+    {{\bfseries \tablename\ \thetable{} -- continuação}} \\
+    \hline
 \textbf{Código} & \textbf{Módulo} & \textbf{Descrição} \\
- \hline
- \endhead
- \hline
- \multicolumn{3}{|r|}{{Continua...}} \\
- \hline
- \endfoot
- \hline
- \endlastfoot
+    \hline
+    \endhead
+    \hline
+    \multicolumn{3}{|r|}{{Continua...}} \\
+    \hline
+    \endfoot
+    \hline
+    \endlastfoot
 
- RNF01 & Performance & O registro de venda e a baixa de estoque devem ser processados em no máximo 2 segundos para visar o fluxo rápido de caixa. \\
- \hline
- RNF02 & Escalabilidade & O sistema deve ser capaz de suportar picos de até 10 usuários simultâneos (caixas + gerentes) sem degradação perceptível de performance. \\
- \hline
- RNF03 & Usabilidade & A interface de registro de vendas deve ser intuitiva e otimizada para telas de toque e leitores de código de barras. \\
- \hline
- RNF04 & Segurança & Todos os dados sensíveis (informações financeiras, cadastros) devem ser armazenados de forma criptografada (ex: senhas via bcrypt, dados via SSL). \\
- \hline
- RNF05 & Manutenibilidade & O código deve seguir uma convenção de código (\textit{Code Convention}) e utilizar logs detalhados para facilitar a identificação e correção de erros. \\
- \hline
+    RNF01 & Performance & O registro de venda e a baixa de estoque devem ser processados em no máximo 2 segundos para visar o fluxo rápido de caixa. \\
+    \hline
+    RNF02 & Escalabilidade & O sistema deve ser capaz de suportar picos de até 10 usuários simultâneos (Operadores + Administradores) sem degradação perceptível de performance. \\
+    \hline
+    RNF03 & Usabilidade & A interface de registro de vendas deve ser intuitiva e otimizada para telas de toque e leitores de código de barras. \\
+    \hline
+    RNF04 & Segurança & Todos os dados sensíveis (informações financeiras, cadastros) devem ser armazenados de forma segura (ex: senhas via bcrypt, dados via SSL/TLS). \\
+    \hline
+    RNF05 & Manutenibilidade & O código deve seguir uma convenção de código (\textit{Code Convention}) para facilitar a identificação e correção de erros. \\
+    \hline
 \end{longtable}
 
 \section{Problema e Solução Proposta}
 
-O problema central abordado pelo \textit{CarneUp} é a gestão predominantemente analógica e ineficiente encontrada em açougues de pequeno e médio porte. Nesses estabelecimentos, operações críticas como o controle de vendas, o registro de compras, o controle de validade e o acompanhamento de estoque são realizados manualmente, seja em cadernos ou planilhas.
+O problema central abordado pelo \textit{CarneUp} é a gestão predominantemente analógica e ineficiente encontrada em açougues de pequeno e médio porte. Nestes estabelecimentos, a falta de controle de estoque detalhado (por marca, validade) e a dificuldade na mensuração da margem de lucro por item resultam em desperdício de estoque e perda de dados valiosos.
 
-Esta prática manual é altamente suscetível a erros e acarreta diversas ineficiências operacionais e financeiras: dificulta o controle de custos por fornecedor, impede uma análise precisa da margem de lucro por corte e leva a perdas diretas por estoque vencido. A ausência de um sistema digital, portanto, resulta na falta de dados confiáveis para a tomada de decisões estratégicas.
-
-Para endereçar essa lacuna de gestão, a solução proposta é o \textit{CarneUp}. Trata-se de uma aplicação web desenhada para digitalizar e centralizar a gestão de estoque e vendas do açougue. Com foco na facilidade de uso para o público-alvo, o sistema prioriza a eficiência operacional no Ponto de Venda (PDV) e o controle detalhado das peças de carne, resolvendo diretamente os desafios de controle de custo, validade e registro de vendas.
+Para endereçar essa lacuna, a solução proposta é o \textit{CarneUp}: uma aplicação web desenhada para digitalizar e centralizar a gestão de estoque e vendas de todos os produtos do açougue.
 
 As funcionalidades chave do \textit{CarneUp} são:
 
 \begin{itemize}
-    \item Registro de Vendas Otimizado: Utilização de códigos de barras da balança para preenchimento automático de valor e peso da peça vendida.
-    \item Controle de Custo por Fornecedor: Registro de dados como fornecedor, valor de compra e validade de cada lote de carne.
-    \item Controle de Estoque Inteligente: Emissão de alertas de validade próxima e visualização clara das peças em estoque.
+    \item Registro de Vendas Otimizado: Utilização de códigos de barras da balança (ou entrada manual) para preenchimento automático de valor e peso da peça vendida.
+    \item Controle de Custo por Marca: Registro de dados como marca, valor de compra e validade de cada lote.
+    \item Controle de Estoque Inteligente: Emissão de alertas visuais de validade próxima e visualização clara das peças em estoque.
 \end{itemize}
 
 
 \section{Justificativa}
 
-A relevância do \textit{CarneUp} se justifica pela necessidade de modernização do setor de açougues de pequeno e médio porte. Ao fornecer uma solução digital acessível, o \textit{CarneUp} contribui diretamente para:
+A relevância do \textit{CarneUp} se justifica pela necessidade de modernização do setor. Ao fornecer uma solução digital acessível, o \textit{CarneUp} contribui diretamente para:
 
 \begin{itemize}
-    \item Controle Financeiro: O registro do valor pago por peça permite uma análise de custo precisa, otimizando a margem de lucro e identificando os cortes mais rentáveis.
+    \item Controle Financeiro: O registro do valor pago por peça/item permite uma análise de custo precisa, otimizando a margem de lucro e identificando os itens mais rentáveis.
     
     \item Redução de Desperdício: O controle de validade digitalizado ajuda a reduzir as perdas de estoque devido ao vencimento.
     
     \item Eficiência Operacional: A automação do registro de vendas via código de barras acelera o atendimento e minimiza a chance de erros no caixa.
 \end{itemize}
 
-A inexistência de um sistema digital que combine controle de estoque detalhado (fornecedor, valor de compra, validade) com uma interface de PDV eficiente para açougues menores torna o \textit{CarneUp} uma ferramenta estratégica para a competitividade desses negócios.
-
 % ---
 \section{Análise da Concorrência}
 % ---
-O CarneUp se posiciona contra sistemas de gestão (PDV) mais genéricos, que não possuem a granularidade necessária para o controle de carnes com base em peso variável, validade e fornecedor, sendo adaptados para o segmento de açougues.
+O CarneUp se posiciona contra sistemas de gestão (PDV) mais genéricos, adaptados para o segmento de açougues, mas que não possuem a granularidade necessária para o controle de carnes com base em peso variável, validade e marca.
 
 \subsection{Concorrente 1: ConnectPlug}
 
@@ -448,12 +440,12 @@ O ConnectPlug é um sistema de PDV (Ponto de Venda) e gestão comercial mais abr
 \begin{itemize}
     \item Foco: Solução completa de gestão comercial.
 
-    \item Diferencial (para o CarneUp): Pode ser adaptado para açougues, mas pode não ter o foco e a profundidade no **controle de custos por peça** (valor de compra, fornecedor, validade individualizada) que o CarneUp busca.
+    \item Diferencial (para o CarneUp): Pode ser adaptado para açougues, mas pode não ter o foco e a profundidade no **controle de custos por peça** (valor de compra, marca, validade individualizada) que o CarneUp busca.
 \end{itemize}
 
 \subsection{Concorrente 2: Aliar Sistemas}
 
-A Aliar Sistemas offers soluções específicas para o varejo de carnes, com foco em açougues e frigoríficos. Seu sistema inclui gestão de produção, **controle de lotes** e controle de estoque. \cite{aliar}
+A Aliar Sistemas oferece soluções específicas para o varejo de carnes, com foco em açougues e frigoríficos. Seu sistema inclui gestão de produção, **controle de lotes** e controle de estoque. \cite{aliar}
 
 \begin{itemize}
     \item Foco: Soluções específicas para o setor de carnes.
@@ -468,7 +460,7 @@ A SOFTClass oferece software de gestão para diversos segmentos do varejo, inclu
 \begin{itemize}
     \item Foco: Solução de gestão empresarial para varejo.
 
-    \item Semelhante ao ConnectPlug, pode ser mais um sistema de PDV adaptado, carecendo da simplicidade e do foco no ciclo de vida da carne (compra/validade/fornecedor) que é o diferencial do CarneUp.
+    \item Semelhante ao ConnectPlug, pode ser mais um sistema de PDV adaptado, carecendo da simplicidade e do foco no ciclo de vida da carne (compra/validade/marca) que é o diferencial do CarneUp.
 \end{itemize}
 
 
@@ -482,10 +474,10 @@ O quadro abaixo resume as principais funcionalidades e destaca o diferencial do 
     \begin{tabularx}{\linewidth}{|>{\RaggedRight}p{4cm}|c|c|c|c|}
         \hline
         \textbf{Funcionalidade} & \textbf{CarneUp} & \textbf{ConnectPlug} & \textbf{Aliar Sistemas} & \textbf{SOFTClass} \\ \hline
-        Registro de Vendas & X & X & X & X \\ \hline
+        Registro de Vendas (Manual ou Cód. Barras) & X & X & X & X \\ \hline
         Controle Básico de Estoque & X & X & X & X \\ \hline
         Captura de Valor/Peso por Código de Barras da Balança & X & X & X & X \\ \hline
-        \textbf{Controle Detalhado (Fornecedor e Custo por Peça)} & X & X & - & - \\ \hline
+        \textbf{Controle Detalhado (Marca e Custo por Peça)} & X & X & - & - \\ \hline
         Alertas de Validade por Peça/Lote & X & - & - & - \\ \hline
         Foco em Pequenos/Médios Açougues e Facilidade de Uso & X & - & - & X \\ \hline
     \end{tabularx}
@@ -498,7 +490,7 @@ O quadro abaixo resume as principais funcionalidades e destaca o diferencial do 
 % ----------------------------------------------------------
 \chapter{Gestão do Projeto}\label{cap_exemplos}
 % ACRESCENTADO PARAGRAFO INTRODUTORIO NO CAPITULO 2
-A presente seção detalha o planejamento, a organização e o controle das atividades essenciais para a execução do projeto, este capítulo estabelece a estrutura da equipe, define os papéis e responsabilidades dos membros, e descreve a metodologia ágil adotada, incluindo a estruturação do cronograma e os ciclos de desenvolvimento. Por fim, são apresentadas as ferramentas de versionamento e o acesso ao código-fonte.
+A presente seção detalha o planejamento, a organização e o controle das atividades essenciais para a execução do projeto. Este capítulo estabelece a estrutura da equipe, define os papéis e responsabilidades dos membros, e descreve a metodologia ágil adotada, incluindo a estruturação do cronograma e os ciclos de desenvolvimento. Por fim, são apresentadas as ferramentas de versionamento e o acesso ao código-fonte.
 
 
 % ---
@@ -526,9 +518,9 @@ O projeto será desenvolvido por uma equipe de cinco membros, com papéis defini
         \hline
         Desenvolvedor Full Stack & Gustavo Gouvea Andrade & Implementação das funcionalidades no front-end e back-end, integração com banco de dados. \\ 
         \hline
-        Desenvolvedor Front-end & Breno Dias Oliveira & Desenvolvimento da interface do usuário, usabilidade e responsividade. \\ 
+        Desenvolvedor Front-end & Pedro Augusto Silva Santos & Desenvolvimento da interface do usuário, usabilidade e responsividade. \\ % CORRIGIDO
         \hline
-        DBA / Desenvolvedor Back-end & Pedro Auguso Silva Santos & Modelagem e Administração do Banco de Dados, desenvolvimento de APIs e lógica de negócios. \\ 
+        DBA / Desenvolvedor Back-end & Breno Dias Oliveira & Modelagem e Administração do Banco de Dados, desenvolvimento de APIs e lógica de negócios. \\ % CORRIGIDO
         \hline
         DBA / Desenvolvedor Back-end & Wellington Oliveira de Sousa & Modelagem e Administração do Banco de Dados, desenvolvimento da documentação LateX. \\ 
         \hline
@@ -540,7 +532,7 @@ O projeto será desenvolvido por uma equipe de cinco membros, com papéis defini
 % ---
 O projeto foi planejado para ter uma duração total de aproximadamente 2,5 meses, iniciando em 6 de Setembro de 2025 e com previsão de conclusão em 31 de Outubro de 2025. Essa duração é ditada pelos Marcos Fixos de Entrega.
 
-O desenvolvimento do CarneUp adota a metodologia ágil Scrum, organizada em ciclos de trabalho curtos chamados Sprints. Dada a restrição temporal imposta pelos marcos de entrega acadêmica, o projeto foi dividido em 4 Sprints principais com duração variável (aproximadamente 10 a 14 dias úteis) para focar na entrega dos marcos fixos. O foco não é no número de Sprints, mas sim no cumprimento dos marcos de entrega, apresentado na tabela 3, que guiam o ritmo do projeto.
+O desenvolvimento do CarneUp adota a metodologia ágil Scrum, organizada em ciclos de trabalho curtos chamados Sprints. Dada a restrição temporal imposta pelos marcos de entrega acadêmica (Projeto Integrado - PI), o projeto foi dividido em 4 Sprints principais com duração variável (aproximadamente 10 a 14 dias úteis) para focar na entrega dos marcos fixos. O foco não é no número de Sprints, mas sim no cumprimento dos marcos de entrega, apresentado na tabela 3, que guiam o ritmo do projeto.
 
 \begin{table}[h!]
     \centering
@@ -569,14 +561,12 @@ O projeto utilizará o GitHub como plataforma de versionamento de código e cola
 
 Link: https://github.com/wellingtonwos/ProjetoExtensaoI
 Acesso: O repositório será privado durante o desenvolvimento e pode ser tornado público (ou manter-se privado com acesso via convite) após a Entrega Final. Para fins de avaliação, os colaboradores deverão ser convidados a ter acesso "Read" ou "Collaborator".
-
-
 % ----------------------------------------------------------
 % CAPÍTULO 3: DESENVOLVIMENTO (SEÇÃO 4 NO ORIGINAL)
 % ----------------------------------------------------------
 \chapter{Desenvolvimento Do Projeto}\label{cap:desenvolvimento}
 
-O projeto \textit{CarneUp} abrange o desenvolvimento de uma aplicação web completa, projetada especificamente para digitalizar e otimizar a gestão de açougues de pequeno e médio porte, com foco nas operações de Vendas, Compras e Estoque. A arquitetura e as tecnologias foram selecionadas para garantir a rastreabilidade detalhada do produto e a alta performance no Ponto de Venda (PDV), endereçando diretamente a ineficiência da gestão analógica.
+O projeto \textit{CarneUp} abrange o desenvolvimento de uma aplicação web completa, projetada especificamente para digitalizar e otimizar a gestão de açougues de pequeno e médio porte, com foco nas operações de Vendas, Compras e Estoque.
 
 \section{Arquitetura e Modularidade do Sistema}
 
@@ -584,13 +574,13 @@ O \textit{CarneUp} foi concebido sob uma arquitetura de aplicação web em três
 
 \subsection{Módulos de Negócio}
 
-O Back-end é o core transacional do sistema e está logicamente dividido em módulos que se comunicam via API RESTful, cada um responsável por um pilar da gestão:
+O Back-end é o core transacional do sistema e está logicamente dividido em módulos que se comunicam via API RESTful:
 
 \begin{itemize}
-    \item \textbf{Módulo de Gestão de Vendas (PDV):} Focado na eficiência do caixa (RNF01), este módulo gerencia o registro rápido de vendas. Sua principal característica é a integração com a leitura de código de barras da balança, permitindo a captura automática do item, peso e valor, e garantindo a baixa de estoque em tempo real (RF01, RF02).
-    \item \textbf{Módulo de Estoque e Rastreabilidade:} É o elemento central do sistema. Ele permite o registro da entrada de estoque com informações cruciais para a análise de custo e rastreabilidade: valor de custo, fornecedor e data de validade (RF03). O módulo também é responsável pela emissão de alertas automáticos quando a validade das peças está próxima (RF06), sendo vital na estratégia de redução de desperdício.
-    \item \textbf{Módulo de Gestão de Compras e Fornecedores:} Gerencia o cadastro completo dos fornecedores (RF09) e mantém o histórico de compra de cada lote de carne, permitindo o cálculo da margem de lucro por peça (RF05).
-    \item \textbf{Módulo de Autenticação e Usuários:} Controla o acesso ao sistema via login/senha e implementa o gerenciamento de diferentes perfis de usuários (Operador de Caixa, Gerente), garantindo que apenas usuários autorizados tenham acesso às funcionalidades específicas (RF10, RF11).
+    \item \textbf{Módulo de Gestão de Vendas (PDV):} Focado na eficiência do caixa (RNF01), gerencia o registro rápido de vendas. Sua principal característica é a integração com a leitura de código de barras da balança (ou inserção manual do item), permitindo a captura automática do item, peso e valor, e garantindo a baixa de estoque em tempo real (RF01, RF02).
+    \item \textbf{Módulo de Estoque e Rastreabilidade:} Permite o registro da entrada de estoque com informações cruciais para a análise de custo e rastreabilidade: valor de custo, marca e data de validade (RF03). O módulo é responsável pela emissão de alertas visuais quando a validade das peças está próxima (RF05).
+    \item \textbf{Módulo de Gestão de Marcas e Compras:} Gerencia o cadastro completo das marcas (RF08) e mantém o histórico de compra de cada lote, permitindo o cálculo da margem de lucro por peça (RF04).
+    \item \textbf{Módulo de Autenticação e Usuários:} Controla o acesso ao sistema via login/senha e implementa o gerenciamento dos perfis \textbf{Administrador} e \textbf{Operador}, garantindo que apenas usuários autorizados tenham acesso às funcionalidades específicas (RF10, RF11).
 \end{itemize}
 
 \section{Escolhas Tecnológicas (Tech Stack)}
@@ -599,7 +589,7 @@ A seleção da pilha tecnológica foi baseada na busca por performance, seguran�
 
 \begin{itemize}
     \item \textbf{Front-end (Apresentação):} Foi escolhido o \textbf{React} para a construção da interface. Esta biblioteca permite a criação de uma experiência de usuário reativa, modular e otimizada para telas de toque e leitores de código de barras, o que atende ao requisito de usabilidade no PDV (RNF03).
-    \item \textbf{Back-end (Aplicação):} A lógica de negócios é implementada em \textbf{Java com o framework Spring Boot}. Esta combinação é ideal para sistemas transacionais de missão crítica, como controle de estoque e vendas, oferecendo alta segurança e performance na execução das regras de negócio (RNF01).
+    \item \textbf{Back-end (Aplicação):} A lógica de negócios é implementada em \textbf{Java com o framework Spring Boot}. Esta combinação é ideal para sistemas transacionais de missão crítica, oferecendo alta segurança e performance na execução das regras de negócio (RNF01).
     \item \textbf{Banco de Dados (Dados):} O \textbf{PostgreSQL} foi definido como o Sistema Gerenciador de Banco de Dados (SGBD) principal. Sua reputação de robustez, integridade transacional e confiabilidade é fundamental para armazenar dados financeiros e de estoque de forma segura e duradoura (RNF04).
 \end{itemize}
 
@@ -609,7 +599,7 @@ O projeto será implantado na \textbf{Amazon Web Services (AWS)}, que oferece o 
 
 \begin{itemize}
     \item \textbf{Hospedagem e Escalabilidade:} A plataforma AWS garante que o sistema possa suportar picos de até 10 usuários simultâneos (RNF02) sem degradação de performance, por meio de serviços de computação elástica.
-    \item \textbf{Segurança de Dados em Trânsito:} A comunicação entre o Front-end e o Back-end será totalmente blindada pelo protocolo \textbf{HTTPS}, com terminação SSL/TLS configurada no Load Balancer da AWS. Isso é mandatório para proteger credenciais de acesso (bcrypt) e dados financeiros contra interceptação (RNF04).
+    \item \textbf{Segurança de Dados em Trânsito:} A comunicação entre o Front-end e o Back-end será totalmente blindada pelo protocolo \textbf{HTTPS}, com terminação SSL/TLS configurada no Load Balancer da AWS. Isso é mandatório para proteger credenciais de acesso e dados financeiros (RNF04).
     \item \textbf{Manutenibilidade:} A utilização de serviços de logging nativos do Spring Boot (SLF4J/Logback) será implementada para rastrear transações e facilitar a identificação e correção de erros, conforme o requisito de manutenibilidade (RNF05).
 \end{itemize}
 
@@ -617,129 +607,117 @@ O projeto será implantado na \textbf{Amazon Web Services (AWS)}, que oferece o 
 
 \section{Histórias de Usuário}
 
-Uma História de Usuário segue o formato padronizado "Como um [papel do usuário], eu quero [realizar uma tarefa], para que [obter um benefício]", transformando requisitos complexos em narrativas simples e orientadas ao valor. No contexto do \textit{CarneUp}, as Histórias mapeiam diretamente a jornada do produto no açougue, atacando os pontos de dor identificados:
-\begin{itemize}
-    \item \textbf{Eficiência no PDV:} Focando no operador de caixa para garantir a agilidade e precisão nas vendas (ex: US01).
-    \item \textbf{Rastreabilidade e Prevenção de Perdas:} Atendendo ao gerente para controlar validade, fornecedor e descarte (ex: US02, US03, US05).
-    \item \textbf{Análise Estratégica:} Apoiando o proprietário na visualização do desempenho financeiro através da margem de lucro (ex: US04).
-\end{itemize}
-
-As histórias a seguir detalham o escopo do Mínimo Produto Viável (MVP), garantindo que as entregas agreguem o máximo valor aos usuários em cada ciclo de desenvolvimento.
+As Histórias de Usuário a seguir detalham o escopo do Mínimo Produto Viável (MVP), garantindo que as entregas agreguem o máximo valor aos usuários em cada ciclo de desenvolvimento.
 
 \subsection{Descrição das Histórias de Usuário}
 % ---
 \begin{itemize}
-    \item US01: Registrar Venda com Código de Barras (RF01, RF02)
+    \item US01: Registrar Venda com ou sem Código de Barras (RF01, RF02)
         \begin{itemize}
-            \item Descrição: Como um operador de caixa, quero registrar uma venda lendo o código de barras da balança, para que o sistema preencha automaticamente o item, peso e valor, agilizando o atendimento.
-            \item Critérios de Aceitação: O código de barras deve ser lido pelo leitor, o sistema deve exibir o item e valor unitário.
-O operador deve confirmar a venda e o estoque deve ser atualizado.
+            \item Descrição: Como um operador de caixa, quero registrar uma venda lendo o código de barras da balança (ou inserindo o item manualmente), para que o sistema preencha automaticamente o item, peso e valor, agilizando o atendimento.
+            \item Critérios de Aceitação: O código de barras deve ser lido pelo leitor, ou o item deve ser selecionado manualmente. O sistema deve exibir o item e valor unitário. O operador deve confirmar a venda e o estoque deve ser atualizado.
         \end{itemize}
 \end{itemize}
 
 \begin{itemize}
-    \item US02: Inclusão de Estoque com Rastreabilidade (RF03, RF04)
+    \item US02: Inclusão de Estoque com Rastreabilidade (RF03, RF07)
         \begin{itemize}
-            \item Descrição: Como um gerente de compras, quero registrar a entrada de novas peças de carne, incluindo o fornecedor, valor de custo e data de validade, para que eu possa ter controle de rastreabilidade e calcular a margem de lucro.
-            \item Critérios de Aceitação: Deve haver um formulário com campos obrigatórios para Fornecedor, Data de Validade e Valor de Custo.
-O registro deve ser armazenado no banco de dados com todas as informações.
+            \item Descrição: Como um administrador, quero registrar a entrada de novas peças/itens, incluindo a marca, valor de custo e data de validade (para perecíveis), para que eu possa ter controle de rastreabilidade e calcular a margem de lucro.
+            \item Critérios de Aceitação: Deve haver um formulário com campos obrigatórios para Marca, Valor de Custo. O campo Data de Validade deve ser obrigatório para itens perecíveis. O registro deve ser armazenado no banco de dados com todas as informações.
         \end{itemize}
 \end{itemize}
 
 \begin{itemize}
-    \item US03: Alerta de Validade Próxima (RF06, RNF05)
+    \item US03: Alerta Visual de Validade Próxima (RF05)
         \begin{itemize}
-            \item Descrição: Como um gerente, quero receber um alerta no dashboard e por e-mail quando um item estiver a 7 dias do vencimento, para que eu possa tomar medidas (promoção/descarte) antes da perda total do produto.
-            \item Critérios de Aceitação: O alerta deve ser exibido no dashboard principal com destaque.
-Um e-mail deve ser enviado para o e-mail do gerente.
+            \item Descrição: Como um administrador, quero receber um alerta visual no dashboard quando um item estiver a 7 dias do vencimento, para que eu possa tomar medidas (promoção/descarte) antes da perda total do produto.
+            \item Critérios de Aceitação: O alerta deve ser exibido no dashboard principal com destaque visual.
         \end{itemize}
 \end{itemize}
 
 \begin{itemize}
-    \item US04: Visualização de Margem de Lucro (RF05)
+    \item US04: Visualização de Margem de Lucro (RF04)
         \begin{itemize}
-            \item Descrição: Como um proprietário, quero visualizar a margem de lucro por peça de carne vendida, para identificar quais cortes são mais rentáveis.
+            \item Descrição: Como um administrador, quero visualizar a margem de lucro por peça de carne/item vendido, para identificar quais itens são mais rentáveis.
             \item Critérios de Aceitação: Deve haver uma tela de relatório que liste as vendas e mostre a diferença (em R\$ e \% ) entre o valor de venda e o valor de custo.
         \end{itemize}
         
 \end{itemize}
 
 \begin{itemize}
-    \item US05: Gerenciamento de Descarte (RF07)
+    \item US05: Gerenciamento de Descarte (RF06)
         \begin{itemize}
-            \item Descrição: Como um gerente de estoque, quero registrar o descarte de uma peça, indicando o motivo (vencimento, estrago), para que o estoque seja baixado e o motivo da perda seja registrado para análise.
-            \item Critérios de Aceitação: A baixa de estoque deve ocorrer.
-O sistema deve exigir a seleção do motivo e a data do descarte.
+            \item Descrição: Como um administrador, quero registrar o descarte de uma peça/item (por vencimento ou estrago), para que o estoque seja baixado.
+            \item Critérios de Aceitação: A baixa de estoque deve ocorrer. O sistema deve registrar a data do descarte.
         \end{itemize}
 \end{itemize}
 
 % ---
 \section{Segurança, Privacidade e Legislação}
 
-A segurança e a privacidade dos dados representam um pilar não funcional crítico para o sucesso e a longevidade do sistema \textit{CarneUp}. Em um ambiente transacional como o Ponto de Venda (PDV) de um açougue, a integridade dos dados financeiros (custos, vendas, margem de lucro) e a confidencialidade das credenciais de acesso (operadores e gerentes) são inegociáveis. Um sistema de gestão deve ser inerentemente resistente a vulnerabilidades, garantindo que a informação seja protegida em todas as suas fases: desde o trânsito da máquina do cliente até o servidor, até o seu armazenamento permanente no banco de dados.
+A segurança e a privacidade dos dados representam um pilar não funcional crítico para o sucesso e a longevidade do sistema \textit{CarneUp}.
 
-O projeto aborda estas exigências por meio de uma estratégia de segurança em múltiplas camadas, focada em mitigar os riscos mais comuns da web, conforme detalhado no Requisito Não Funcional RNF04. A implementação técnica integra o uso de algoritmos robustos de \textit{hash} para proteção de senhas e a criptografia de comunicação \textit{end-to-end}, aproveitando os recursos nativos da infraestrutura de \textit{cloud} da AWS para assegurar o mais alto nível de proteção contra interceptação e adulteração. Tais medidas são fundamentais para construir a confiança do usuário e manter a conformidade com as melhores práticas de segurança da informação no ambiente de varejo.
 \subsection{Critérios de Segurança e Privacidade}
 
-A estratégia de segurança do \textit{CarneUp} está fundamentada em dois pilares essenciais: proteção dos dados em repouso (armazenados) e proteção dos dados em trânsito (durante a comunicação). O Requisito Não Funcional RNF04 exige o uso de técnicas de criptografia para todos os dados sensíveis, garantindo a integridade e a confidencialidade do sistema.
+A estratégia de segurança do \textit{CarneUp} está fundamentada em dois pilares essenciais: proteção dos dados em repouso (armazenados) e proteção dos dados em trânsito (durante a comunicação). O Requisito Não Funcional RNF04 exige o uso de técnicas de segurança para todos os dados sensíveis.
 
-\subsubsection{Proteção de Dados em Repouso}
+\subsubsection{Proteção de Dados em Repouso: Hashing de Senhas}
 
 Para garantir a confidencialidade das credenciais de acesso, o sistema adotará a seguinte medida para dados armazenados:
 \begin{itemize}
-    \item \textbf{Criptografia de Senhas:} Utilização do algoritmo de hash \textbf{bcrypt} para armazenar as senhas dos usuários (administradores e caixas) no banco de dados. Esta técnica de \textit{hashing} salgado impede a recuperação da senha original mesmo em caso de comprometimento da base de dados (RNF04).
+    \item \textbf{Hashing de Senhas:} Utilização do algoritmo de hash \textbf{bcrypt} para armazenar as senhas dos usuários (\textbf{Administradores} e \textbf{Operadores}) no banco de dados. Esta técnica de \textit{hashing} salgado impede a recuperação da senha original mesmo em caso de comprometimento da base de dados (RNF04).
 \end{itemize}
 
 \subsubsection{Criptografia em Trânsito: SSL/TLS (HTTPS)}
 
-O protocolo HTTPS (\textit{HyperText Transfer Protocol Secure}) é essencial para o projeto \textit{CarneUp}, pois garante a segurança das comunicações entre o navegador do usuário e o servidor de aplicação (\textit{Back-end}). O HTTPS é o protocolo HTTP combinado com a camada de segurança SSL/TLS (\textit{Secure Sockets Layer/Transport Layer Security}), criando um link criptografado que protege os dados transmitidos contra interceptação e adulteração.
+O protocolo HTTPS (\textit{HyperText Transfer Protocol Secure}) é essencial para o projeto \textit{CarneUp}, pois garante a segurança das comunicações entre o navegador do usuário e o servidor de aplicação. O HTTPS é o protocolo HTTP combinado com a camada de segurança SSL/TLS, criando um link criptografado.
 
 \paragraph{Critérios de Segurança e Conformidade}
 A implementação do SSL/TLS no \textit{CarneUp} atende a critérios cruciais para um sistema de gestão:
 \begin{itemize}
-    \item \textbf{Proteção de Credenciais:} As senhas são protegidas durante o trânsito da máquina do cliente até o servidor, impedindo ataques de \textit{sniffing} ou \textit{Man-in-the-Middle}.
+    \item \textbf{Proteção de Credenciais:} As senhas são protegidas durante o trânsito da máquina do cliente até o servidor.
     \item \textbf{Integridade dos Dados de Venda:} Garante que os dados financeiros críticos (valor final da venda, custo do produto ou atualização de estoque) não possam ser modificados por terceiros maliciosos durante a transmissão.
-    \item \textbf{Confiança do Usuário:} O ícone de cadeado na barra de endereço (\url{HTTPS}) reforça a confiabilidade e o compromisso da aplicação com a segurança dos dados.
 \end{itemize}
 
 \paragraph{Implantação na Infraestrutura AWS}
-Na arquitetura do \textit{CarneUp}, a proteção HTTPS será implementada utilizando os serviços nativos da Amazon Web Services (AWS), garantindo alta disponibilidade e gerenciamento facilitado:
+Na arquitetura do \textit{CarneUp}, a proteção HTTPS será implementada utilizando os serviços nativos da Amazon Web Services (AWS):
 \begin{itemize}
-    \item \textbf{Certificado SSL/TLS:} Será utilizado um certificado SSL/TLS (emitido via AWS Certificate Manager - ACM, ou adquirido) para autenticar a identidade do domínio.
+    \item \textbf{Certificado SSL/TLS:} Será utilizado um certificado SSL/TLS para autenticar a identidade do domínio.
     \item \textbf{Terminação SSL (\textit{Offloading}):} A terminação SSL será configurada no Application Load Balancer (ALB), o ponto de entrada do tráfego. Isso permite que a carga de criptografia/descriptografia seja removida dos servidores de \textit{Back-end} (Spring Boot), melhorando o desempenho da aplicação (RNF01).
-    \item \textbf{Comunicação Interna:} A comunicação interna entre os serviços (\textit{Back-end} e PostgreSQL/AWS RDS) será configurada para usar conexões criptografadas, assegurando a segurança \textit{end-to-end} em toda a infraestrutura.
 \end{itemize}
-
 Em suma, a obrigatoriedade do protocolo HTTPS é uma medida fundamental que blinda a aplicação contra as vulnerabilidades mais comuns da web, protegendo informações sensíveis em conformidade com as melhores práticas de segurança da informação (RNF04).
     
 
-\subsection{Observância à Legislação}
+\subsection{Observância à Legislação (LGPD)}
 
-Embora o sistema \textit{CarneUp} trate primariamente de dados do negócio (estoque, vendas e custos), ele processa dados pessoais de seus usuários internos (proprietários, gerentes e caixas), atuando como operador e controlador desses dados. Dessa forma, o desenvolvimento adere integralmente aos princípios e diretrizes da \textbf{Lei Geral de Proteção de Dados (LGPD) – Lei nº 13.709/2018}. A observância legal não se limita apenas à proteção, mas à construção de um sistema ético e transparente.
+Embora o sistema \textit{CarneUp} trate primariamente de dados do negócio, ele processa dados pessoais de seus usuários internos (administradores e operadores). Dessa forma, o desenvolvimento adere integralmente aos princípios e diretrizes da \textbf{Lei Geral de Proteção de Dados (LGPD) – Lei nº 13.709/2018}.
 
 \paragraph{Princípios de Proteção e Transparência}
 O projeto materializa a conformidade com a LGPD nos seguintes pontos de design:
 
 \begin{itemize}
-    \item \textbf{Princípio da Finalidade e Necessidade:} A coleta de dados é limitada estritamente ao necessário para a autenticação e gestão de permissões do sistema (nome, e-mail e credenciais de login). Nenhum dado sensível (como dados biométricos ou financeiros pessoais) é processado, aplicando o conceito de \textbf{minimização de dados}.
+    \item \textbf{Princípio da Finalidade e Necessidade:} A coleta de dados é limitada estritamente ao necessário para a autenticação e gestão de permissões do sistema (nome, e-mail e credenciais de login), aplicando o conceito de \textbf{minimização de dados}.
     
+    \item \textbf{Segurança da Informação (\textit{Privacy by Design}):} Todas as medidas técnicas de segurança, como o \textbf{hashing em repouso (bcrypt)} e a \textbf{criptografia em trânsito (SSL/HTTPS)}, são o mecanismo técnico para cumprir o Artigo 46 da LGPD, garantindo que os dados pessoais estejam protegidos.
     
-    \item \textbf{Direitos do Titular:} Dada a natureza da aplicação (sistema interno de gestão), a arquitetura é projetada para permitir que o administrador do açougue (controlador primário) possa, a qualquer momento, atender a solicitações dos titulares de dados, como a \textbf{exclusão de conta} de um ex-funcionário ou a \textbf{consulta} aos seus dados cadastrais.
+    \item \textbf{Direitos do Titular:} A arquitetura é projetada para permitir que o administrador do açougue possa, a qualquer momento, atender a solicitações dos titulares de dados, como a \textbf{exclusão de conta} de um ex-funcionário ou a \textbf{consulta} aos seus dados cadastrais.
 \end{itemize}
 
 \section{Modelo de Banco de Dados}
 
-O modelo de banco de dados é a espinha dorsal do \textit{CarneUp}, sendo o responsável por garantir a integridade, a consistência e a rastreabilidade dos dados, requisitos críticos para a gestão de perecíveis. A escolha por um modelo relacional é mandatória para suportar as transações de alta frequência no Ponto de Venda (PDV) e permitir cálculos financeiros complexos, como a margem de lucro por peça. A tecnologia \textbf{PostgreSQL} (conforme definido na arquitetura) é ideal para este modelo, dada a sua robustez, consistência transacional e capacidade de gerenciar volumes de dados de inventário.
+O modelo de banco de dados é a espinha dorsal do \textit{CarneUp}. A escolha por um modelo relacional e a tecnologia \textbf{PostgreSQL} é mandatória para suportar as transações de alta frequência no Ponto de Venda (PDV) e permitir cálculos financeiros complexos, como a margem de lucro por peça.
 
-\subsection{Modelo Entidade Relacionamento (MER / DER)}
+\subsection{Modelo Entidade Relacionamento (MER)}
 
-O Modelo Entidade Relacionamento (MER) do \textit{CarneUp} foi concebido para atender diretamente às Regras de Negócio e Histórias de Usuário, centrando-se nos fluxos de Estoque, Vendas e Compras. A estrutura relacional assegura que cada transação seja ligada de forma unívoca a uma peça de estoque, permitindo auditoria completa, cálculos precisos de custo e o gerenciamento eficaz da validade do produto. O modelo é composto pelas seguintes entidades principais, cujas responsabilidades espelham os requisitos do projeto:
+O Modelo Entidade Relacionamento (MER) do \textit{CarneUp} foi concebido para atender diretamente às Regras de Negócio, centrando-se nos fluxos de Estoque, Vendas e Compras. O modelo é composto pelas seguintes entidades principais:
 
 \begin{itemize}
-    \item \textbf{Entidade Estoque (Peça):} É a entidade central para a rastreabilidade. Armazena dados essenciais do produto em estoque, incluindo o \textit{código de barras} (chave para o PDV - US01), \textit{peso}, \textit{data de validade} (crítico para US03/RN03), \textit{valor de custo} (base para RF05/US04) e a chave estrangeira do Fornecedor.
-    \item \textbf{Entidade Venda:} Representa a transação completa. Armazena os metadados da transação (valor total, data/hora e operador de caixa), sendo a entidade-mãe para o detalhamento dos itens vendidos.
-    \item \textbf{Entidade ItemVenda (Nova Entidade de Relacionamento):} Esta entidade conecta a Venda à Peça de Estoque. É vital, pois é onde se registra o valor final de venda do item e se realiza a baixa de estoque em tempo real (RN05), facilitando o cálculo da margem de lucro de cada item na transação (US04).
-    \item \textbf{Entidade Fornecedor:} Armazena os dados de contato e histórico de compras. É ligada à Entidade Estoque, permitindo a rastreabilidade da origem do produto (RF04/US02).
+    \item \textbf{Entidade Produto:} Armazena dados de itens (carne, carvão, bebidas), incluindo o nome e o código de barras padrão (GTIN).
+    \item \textbf{Entidade Estoque (Lote/Item):} É a entidade central para a rastreabilidade. Armazena dados essenciais do lote em estoque, incluindo o \textit{peso/quantidade}, \textit{data de validade} (para perecíveis), \textit{valor de custo} e a chave estrangeira da Marca. Esta entidade é ligada ao Produto.
+    \item \textbf{Entidade Marca:} Armazena apenas o nome da marca para rastreabilidade de custo (substitui Fornecedor).
+    \item \textbf{Entidade Venda:} Representa a transação completa (data/hora e operador).
+    \item \textbf{Entidade ItemVenda:} Conecta a Venda à Peça/Lote de Estoque, registrando o valor final de venda e realizando a baixa de estoque em tempo real.
+    \item \textbf{Entidade Usuário:} Armazena os dados de login e o perfil de acesso (Administrador/Operador).
 \end{itemize}
 
 \subsection{Diagrama Entidade Relacionamento (DER)}
@@ -752,6 +730,58 @@ O Diagrama Entidade Relacionamento (DER) a seguir (Figura \ref{fig:der}) represe
          \caption{Diagrama Entidade Relacionamento (DER)}
 	    \label{fig:der}
 	\end{figure}
+
+% -----------------------------------------------------------------------------
+% FIGURA: Diagrama de Implantação
+% -----------------------------------------------------------------------------
+\subsection{Diagrama de Implantação}
+O Diagrama de Implantação (Figura \ref{fig:implantacao}) ilustra a distribuição física e lógica dos componentes, detalhando a comunicação entre as camadas de apresentação, aplicação e dados.
+
+O modelo de implantação utiliza um \textbf{Load Balancer (AWS ALB)} como ponto de entrada para distribuir o tráfego do Front-end (\textit{React}) para a camada de aplicação (\textit{Spring Boot}). Esta separação é crucial para:
+
+\begin{itemize}
+    \item \textbf{Segurança (RNF04):} O ALB é configurado para a \textbf{Terminação SSL/TLS (HTTPS)}, assegurando que todas as comunicações sejam criptografadas e protegendo o Back-end de exposição direta à internet.
+    \item \textbf{Dados:} O banco de dados \textbf{PostgreSQL} é gerenciado pelo \textbf{AWS RDS}, que fornece robustez transacional, backups automáticos e segurança para os dados de estoque e financeiros.
+    \item \textbf{Escalabilidade (RNF02):} A aplicação \textit{Back-end} é hospedada em instâncias elásticas (AWS EC2), permitindo o dimensionamento automático para lidar com picos de uso no Ponto de Venda (PDV).
+
+\end{itemize}
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=\linewidth]{Imagens/DiagramaImplantacao.jpg}
+    \caption{Diagrama de Implantação do Sistema CarneUp}
+    \label{fig:implantacao}
+\end{figure}
+% -----------------------------------------------------------------------------
+% FIGURA: Diagrama de Componentes
+% -----------------------------------------------------------------------------
+\subsection{Diagrama de Componentes}
+
+O Diagrama de Componentes (Figura \ref{fig:componentes}) oferece uma visão de alto nível da \textbf{estrutura interna do sistema}, ilustrando como os principais módulos lógicos interagem no *Back-end* (aplicação \textit{Spring Boot}). Ele demonstra a separação de responsabilidades (Front-end, Back-end e persistência) e o fluxo de comunicação via APIs REST, garantindo a manutenibilidade do código (RNF05).
+
+Os componentes são segregados em três camadas principais:
+
+\begin{itemize}
+    \item \textbf{Camada de Apresentação (Front-end):} É a interface \textit{React} que interage com o usuário (Administrador/Operador). Sua função é enviar e receber dados do Back-end através de requisições HTTP (APIs).
+
+    \item \textbf{Camada de Aplicação (Back-end/Spring Boot):} Contém os módulos centrais que implementam as Regras de Negócio (RN).
+    \begin{itemize}
+        \item \textbf{Módulo de Vendas (PDV):} Responsável por processar a venda (RF01), calcular o total e acionar a baixa de estoque.
+        \item \textbf{Módulo de Estoque:} Gerencia a entrada, rastreabilidade e controle de validade dos itens (RF03, RF05).
+        \item \textbf{Módulo de Autenticação:} Lida com o login/logout e as permissões de acesso (RF10, RF11).
+    \end{itemize}
+
+    \item \textbf{Camada de Dados (PostgreSQL):} Responsável pela persistência e integridade das informações. Todos os módulos de Back-end se comunicam com esta camada para realizar operações de CRUD (\textit{Create, Read, Update, Delete}).
+\end{itemize}
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=\linewidth]{Imagens/DiagramaComponentes.jpg}
+    \caption{Diagrama de Componentes Lógicos do Sistema}
+    \label{fig:componentes}
+\end{figure}
+% -----------------------------------------------------------------------------
+
 % ---
 % <<< CORREÇÃO: Seção 4.8 e 4.8.1 removidas por serem contraditórias e redundantes.
 % A duração correta (2,5 meses) já está definida no Capítulo 3.
@@ -768,15 +798,9 @@ O Diagrama Entidade Relacionamento (DER) a seguir (Figura \ref{fig:der}) represe
 %	\end{figure}
 
 
-% ---
-% ----------------------------------------------------------
-% CAPÍTULO 4: VIABILIDADE FINANCEIRA
-% ----------------------------------------------------------
 \chapter{Viabilidade Financeira}\label{cap:viabilidade}
 
-O presente capítulo tem como objetivo delinear a viabilidade econômico-financeira do projeto \textsf{CarneUp}, elemento fundamental para garantir a sustentabilidade de longo prazo e a escalabilidade do sistema após a sua implantação. Esta análise transcende a perspectiva puramente técnica, focando na conversão do Produto Mínimo Viável (MVP) em um modelo de negócio rentável e competitivo no mercado de açougues de pequeno e médio porte.
-
-Este estudo de caso se concentra na quantificação do Investimento Inicial requerido para o desenvolvimento, simulando a alocação de recursos durante os 2,5 meses de duração do projeto. A análise é estruturada nas seguintes etapas:
+O presente capítulo tem como objetivo delinear a viabilidade econômico-financeira do projeto \textsf{CarneUp}, focando no Investimento Inicial requerido para o desenvolvimento e entrega do Projeto Integrado (PI). Esta análise é baseada no modelo de \textbf{custo de projeto único} para o cliente-alvo (o açougue de pequeno porte).
 
 % ---
 \section{Custos}\label{sec:custos}
@@ -785,7 +809,7 @@ A estimativa de custos representa o Investimento Inicial (Capital de Giro) neces
 
 \subsection{Detalhamento dos Custos de Desenvolvimento (Mão de Obra)}\label{sub:custos_mo}
 
-O custo de Mão de Obra (MO) é a componente de maior peso no investimento inicial, sendo diretamente proporcional ao esforço total da equipe de desenvolvimento. O cálculo baseou-se na estimativa de horas de trabalho necessárias para o período de 2,5 meses, aplicando-se uma taxa horária média ponderada.
+O custo de Mão de Obra (MO) é a componente de maior peso no investimento inicial. O cálculo baseou-se na estimativa de horas de trabalho necessárias para o período de 2,5 meses, aplicando-se uma taxa horária média ponderada.
 
 \begin{itemize}
     \item Esforço Total Estimado: 1.000 horas (5 desenvolvedores $\times$ 80 horas/mês $\times$ 2,5 meses).
@@ -795,11 +819,12 @@ O custo de Mão de Obra (MO) é a componente de maior peso no investimento inici
 
 \subsection{Custos de Infraestrutura e Operacionais}\label{sub:custos_infra}
 
-Os custos de infraestrutura consideram a utilização de serviços em nuvem (AWS) e domínios essenciais para o ambiente de desenvolvimento e testes. A escolha pelo modelo \textit{pay-as-you-go} minimiza o investimento de capital (Capex) em hardware, concentrando-o em custos operacionais (Opex).
+Os custos de infraestrutura consideram a utilização de serviços em nuvem (AWS) e domínios essenciais para o ambiente de desenvolvimento e testes.
+% Ajuste do valor da AWS, conforme solicitado (reduzido para R$ 100/mês).
 
 \begin{itemize}
-    \item Custo Mensal Estimado (AWS + Domínio): R\$ 400,00.
-    \item Custo Acumulado (2,5 meses de Desenvolvimento): R\$ 1.000,00.
+    \item Custo Mensal Estimado (AWS + Domínio): R\$ 100,00.
+    \item Custo Acumulado (2,5 meses de Desenvolvimento): R\$ 250,00.
 \end{itemize}
 
 \subsection{Investimento Inicial Consolidado}\label{sub:investimento_consolidado}
@@ -815,137 +840,41 @@ O investimento total necessário para a conclusão e entrega do MVP é consolida
         \hline
         \textbf{Natureza do Custo} & \textbf{Valor (R\$)} & \textbf{Participação (\%)} \\
         \hline\hline
-        Mão de Obra (Desenvolvimento) & 50.000,00 & 98,04\% \\
+        Mão de Obra (Desenvolvimento) & 50.000,00 & 99,50\% \\
         \hline
-        Infraestrutura (AWS, Domínio) & 1.000,00 & 1,96\% \\
+        Infraestrutura (AWS, Domínio) & 250,00 & 0,50\% \\
         \hline\hline
-        \textbf{INVESTIMENTO INICIAL TOTAL} & \textbf{51.000,00} & \textbf{100,00\%} \\
+        \textbf{INVESTIMENTO INICIAL TOTAL} & \textbf{50.250,00} & \textbf{100,00\%} \\
         \hline
     \end{tabular}
     \flushleft{\footnotesize Fonte: Elaborado pelo autor (2025).}
 \end{table}
 
-Conforme apresentado na Tabela \ref{tab:custos_iniciais}, o Investimento Inicial Total do projeto é de R\$ 51.000,00. O custo com Mão de Obra representa a parcela predominante deste valor, indicando a natureza intensiva em capital humano do desenvolvimento de software.
-
-\subsection{Custos de Infraestrutura}\label{sub:custos_infra}
-
-Os custos operacionais de infraestrutura (manutenção e hospedagem) são projetados a partir da utilização de serviços \textit{cloud} (AWS), que oferecem um modelo de pagamento por uso, minimizando o investimento inicial:
-
-\begin{itemize}
-    \item Custo Mensal Estimado (AWS + Domínio): R\$ 400,00.
-    \item Custo Acumulado (2,5 meses de Desenvolvimento): R\$ 1.000,00.
-\end{itemize}
-
-O Investimento Inicial Total necessário para o desenvolvimento e entrega do Projeto Final é de R\$ 51.000,00.
-
-\section{Receitas}\label{sec:receitas}
-
-O modelo de monetização do \textsf{CarneUp} é baseado no conceito de \textit{Software as a Service} (SaaS), fundamentado na receita recorrente e na escalabilidade intrínseca à arquitetura multi-tenant \cite{aws_saas}. Esta estratégia está alinhada com a Proposta de Valor do sistema, que entrega rastreabilidade e gestão de estoque em troca de uma taxa de serviço mensal.
-
-A Tabela \ref{tab:modelo_receita} detalha a estrutura de precificação adotada para o mercado-alvo de açougues de pequeno e médio porte.
-
-\begin{table}[!htb]
-    \centering
-    \caption{Estrutura de Receita Recorrente (SaaS)}
-    \label{tab:modelo_receita}
-    \begin{tabular}{|l|l|}
-        \hline
-        \textbf{Componente} & \textbf{Detalhe} \\
-        \hline\hline
-        Modelo de Cobrança & Assinatura Mensal (Recorrente) \\
-        \hline
-        Unidade de Cobrança & Por Unidade (Açougue/Loja) \\
-        \hline
-        Preço por Assinatura & R\$ 250,00/mês \\
-        \hline
-    \end{tabular}
-    \flushleft{\footnotesize Fonte: Elaborado pelo autor (2025).}
-\end{table}
-
-A natureza escalável do modelo SaaS implica que a Receita Operacional Mensal (ROM) é diretamente proporcional à aquisição e retenção de novos clientes. A geração de receita líquida inicia-se no Mês 3 (Entrega Final do MVP), sendo o fator de crescimento principal para a recuperação do investimento inicial.
-
-\section{Análise de Cenários}\label{sec:cenarios}
-
-Para validar a sustentabilidade financeira do projeto, foi realizada uma Análise de Sensibilidade, simulando três cenários distintos de adoção do produto pelo mercado-alvo. O objetivo primário é determinar o Ponto de Equilíbrio (\textit{Break-even Point}), que representa o momento em que a Receita Acumulada iguala o Investimento Inicial de R\$ 51.000,00, marcando o início da recuperação de capital.
-
-\subsection{Cenário Realista}\label{sub:cenario_realista}
-
-Este cenário projeta uma taxa de adoção prudente, alinhada com os desafios típicos de implementação de novos sistemas (curva de aprendizado e inércia) em pequenos e médios varejistas.
-
-\begin{itemize}
-    \item Adoção Base: 5 novos clientes no Mês 3 (Novembro/2025).
-    \item Crescimento: Acréscimo de 5 novos clientes por mês nos períodos subsequentes (crescimento linear).
-    \item Ponto de Equilíbrio (\textit{Break-even Point}): O investimento é recuperado no \textbf{Mês 7 (Março/2026)}.
-\end{itemize}
-O prazo de recuperação de capital de sete meses é considerado satisfatório, dado o alto percentual de investimento direcionado à Mão de Obra.
-
-\subsection{Cenário Otimista}\label{sub:cenario_otimista}
-
-O cenário otimista considera uma alta taxa de aceitação do mercado (\textit{Early Adopters}), impulsionada pela facilidade de uso do \textsf{CarneUp} e pelo foco assertivo na solução do problema de rastreabilidade (Proposta de Valor).
-
-\begin{itemize}
-    \item Adoção Base: 10 novos clientes no Mês 3 (Novembro/2025).
-    \item Crescimento: Acréscimo de 10 novos clientes por mês nos períodos subsequentes.
-    \item Ponto de Equilíbrio (\textit{Break-even Point}): Atingido no \textbf{Mês 5 (Janeiro/2026)}.
-\end{itemize}
-
-\subsection{Cenário Pessimista}\label{sub:cenario_pessimista}
-
-O cenário pessimista pressupõe uma adoção lenta e cautelosa, decorrente de possíveis barreiras de entrada, resistência à mudança ou dificuldades inesperadas na validação da proposta de valor.
-
-\begin{itemize}
-    \item Adoção Base: 2 novos clientes no Mês 3 (Novembro/2025).
-    \item Crescimento: Acréscimo de 2 novos clientes por mês nos períodos subsequentes.
-    \item Ponto de Equilíbrio (\textit{Break-even Point}): Atingido no \textbf{Mês 12 (Outubro/2026)}.
-\end{itemize}
-
-\subsection{Consolidação da Análise de Sensibilidade}\label{sub:tabela_cenarios}
-
-A Tabela \ref{tab:analise_sensibilidade} resume os parâmetros de crescimento e os respectivos pontos de equilíbrio, fornecendo uma visão consolidada do risco de mercado e da projeção de retorno.
-
-% --- Tabela formatada em ABNT (Correção: Colunas de largura fixa para alinhamento) ---
-\begin{table}[!htb]
-    \centering
-    \caption{Resumo da Análise de Sensibilidade e Ponto de Equilíbrio}
-    \label{tab:analise_sensibilidade}
-    % Colunas: 1 (Cenário) alinhada à esquerda, 3 colunas de dados com largura fixa e conteúdo centralizado.
-    \begin{tabular}{p{2.5cm} >{\centering\arraybackslash}p{3.5cm} >{\centering\arraybackslash}p{3cm} >{\centering\arraybackslash}p{3cm}}
-        \hline % Linha superior
-        \textbf{Cenário} & \textbf{Adoção Mensal Base (Clientes)} & \textbf{Crescimento Mensal ($\Delta$)} & \textbf{Ponto de Equilíbrio (Mês)} \\
-        \hline\hline % Linha dupla para separar cabeçalho
-        Pessimista & 2 & +2 & 12 (Out/2026) \\
-        Realista & 5 & +5 & 7 (Mar/2026) \\
-        Otimista & 10 & +10 & 5 (Jan/2026) \\
-        \hline % Linha inferior
-    \end{tabular}
-    \flushleft{\footnotesize Fonte: Elaborado pelo autor (2025).}
-\end{table}
+Conforme apresentado na Tabela \ref{tab:custos_iniciais}, o Investimento Inicial Total do projeto é de R\$ 50.250,00.
 
 % ----------------------------------------------------------
 % CAPÍTULO 5: CONSIDERAÇÕES FINAIS
 % ----------------------------------------------------------
 \chapter{Considerações Finais}\label{cap:conclusao}
 
-O presente projeto alcançou seu objetivo geral, que era desenvolver o \textsf{CarneUp}, um Sistema de Gestão focado na rastreabilidade e no controle de perecibilidade de estoque para açougues de pequeno e médio porte.
+O presente Projeto Integrado (PI) alcançou seu objetivo geral, que era desenvolver o \textsf{CarneUp}, um Sistema de Gestão focado na rastreabilidade e no controle de perecibilidade de estoque para açougues de pequeno e médio porte.
 
 Com a entrega do Produto Mínimo Viável (MVP), o projeto demonstrou a viabilidade técnica da integração de tecnologias modernas para atender ao problema de ineficiência na gestão analógica. A solução implementada propõe-se a atender às exigências do mercado e fornece um controle de validade e lote mais eficaz, validando a premissa de que a tecnologia pode mitigar riscos operacionais no core business do varejo de carnes.
 
 \section{Conclusão dos Resultados e Análise Crítica}\label{sec:analise_critica}
 
-Esta seção sintetiza os principais resultados alcançados, as decisões estratégicas tomadas e o alinhamento do projeto com sua proposta de valor, incluindo a validação financeira.
+Esta seção sintetiza os principais resultados alcançados, as decisões estratégicas tomadas e o alinhamento do projeto com sua proposta de valor.
 
 \subsection{Alinhamento com a Proposta de Valor e Viabilidade}\label{sub:alinhamento_viabilidade}
 
-O \textsf{CarneUp} não apenas cumpriu seus requisitos técnicos, como também validou uma alta viabilidade econômica. Conforme detalhado no Capítulo \ref{cap:viabilidade}, a análise de sensibilidade projeta a recuperação do Investimento Inicial de R\$ 51.000,00 em um prazo excelente de sete meses no Cenário Realista.
-
-Essa performance é um indicativo de que a solução é economicamente sustentável e possui um modelo de negócios (SaaS) com potencial de escalabilidade. A decisão de utilizar o PostgreSQL foi fundamental para oferecer a robustez e a integridade transacional exigidas para dados financeiros e de estoque, aspectos que buscam assegurar a confiança do usuário no sistema.
+O \textsf{CarneUp} cumpriu seus requisitos técnicos, concentrando o foco em um sistema robusto e confiável. A decisão de utilizar o PostgreSQL foi fundamental para oferecer a robustez e a integridade transacional exigidas para dados financeiros e de estoque. O Investimento Inicial total estimado para o desenvolvimento do MVP foi de R\$ 50.250,00.
 
 \subsection{Dificuldades e Lições Aprendidas}\label{sub:licoes_aprendidas}
 
 O desenvolvimento foi marcado por desafios que exigiram adaptação metodológica e rigor na gestão de escopo.
 
 \begin{itemize}
-    \item Restrição Temporal e Escopo: A principal dificuldade foi a condensação do cronograma para apenas 2,5 meses, imposta pelos Marcos Fixos de Entrega Acadêmica (20/09, 10/10 e 31/10/2025). Essa restrição exigiu uma priorização agressiva e um controle rigoroso do escopo.
+    \item Restrição Temporal e Escopo: A principal dificuldade foi a condensação do cronograma para apenas 2,5 meses, imposta pelos Marcos Fixos de Entrega Acadêmica. Essa restrição exigiu uma priorização agressiva e um controle rigoroso do escopo.
     \item Modelagem de Dados Complexa: A rastreabilidade por lote e validade demandou um esforço significativo na fase de modelagem, com refinamentos repetidos nos diagramas (MER/DER). Isso evidenciou a complexidade inerente à representação de processos de estoque perecível.
 \end{itemize}
 
@@ -960,16 +889,326 @@ As limitações impostas pelo prazo rigoroso resultaram em funcionalidades que f
     \item Suporte a Múltiplas Filiais: O sistema foi dimensionado inicialmente para um único açougue. A expansão para uma arquitetura multi-filial será o foco principal para a otimização da escalabilidade do produto no futuro.
 \end{itemize}
 
-O desenvolvimento subsequente deve incluir a implementação dessas funcionalidades, a otimização contínua da interface do usuário (UI) baseada em *feedback* de clientes e a implementação de métricas de retenção para o modelo SaaS.
+O desenvolvimento subsequente deve incluir a implementação dessas funcionalidades e a otimização contínua da interface do usuário (UI) baseada em *feedback* de clientes.
 
 % ----------------------------------------------------------
 % ELEMENTOS PÓS-TEXTUAIS
-% ----------------------------------------------------------
-\postextual
+%
+% *** CERTIFIQUE-SE QUE ESTA É A PRIMEIRA E ÚNICA CHAMADA DE \postextual ***
+%
+\clearpage
+\postextual 
 % ----------------------------------------------------------
 
 % ----------------------------------------------------------
-% Referências bibliográficas
+% Referências bibliográficas (Primeiro elemento pós-textual)
 % ----------------------------------------------------------
 \bibliography{Referencias}
+\cleardoublepage
+
+% ----------------------------------------------------------
+% ANEXOS
+% ----------------------------------------------------------
+
+% Inicia o ambiente formal de Anexos (no plural)
+\begin{anexos}
+
+\chapter*{ANEXO A – PROJETO DE BANCO DE DADOS E DICIONÁRIO DE DADOS}
+% Note que a numeração das tabelas e figuras aqui será reiniciada para A.1, A.2, etc.
+
+O presente anexo detalha o projeto do banco de dados relacional (PostgreSQL) do sistema CarneUp, abrangendo os níveis de abstração, o modelo conceitual e o dicionário de dados (modelo lógico) completo.
+
+\section{Modelos de Abstração}
+
+A Tabela \ref{tab:modelos_abstracao} define os diferentes níveis de abstração utilizados no projeto do banco de dados.
+
+\begin{table}[htb]
+    \centering
+    \caption{Níveis de Abstração do Projeto de Banco de Dados}
+    \label{tab:modelos_abstracao}
+    \begin{tabularx}{\linewidth}{|l|X|l|X|X|}
+    \hline
+    \textbf{Modelo} & \textbf{Nível de Abstração} & \textbf{Dependência do SGBD} & \textbf{Representação} & \textbf{Foco} \\
+    \hline
+    Conceitual & Mais Alto & Não (Puro negócio) & Diagrama Entidade-Relacionamento (MER) & O que é o negócio (Entidades e Regras) \\
+    \hline
+    Lógico & Intermediário & Não (Puro modelo relacional) & Esquema de Tabelas e Chaves (Lógico) & Como os dados serão estruturados (Relações, PK, FK, 3FN) \\
+    \hline
+    Físico & Mais Baixo & Sim (Dependente do SQL/SGBD) & Comandos SQL DDL, Índices, Triggers & Como o SGBD irá armazenar e otimizar (Tipos de dados, Triggers) \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+\section{Modelo Conceitual (MER)}
+
+É a representação de alto nível das entidades e seus relacionamentos, focado na regra de negócio.
+
+\subsection{Entidades Principais}
+\begin{table}[htb]
+    \centering
+    \caption{Entidades Principais do Modelo Conceitual}
+    \label{tab:entidades_mer}
+    \begin{tabularx}{\linewidth}{|l|X|X|}
+    \hline
+    \textbf{Entidade} & \textbf{Descrição} & \textbf{Atributos Principais (Exemplos)} \\
+    \hline
+    PRODUTO & Carnes/itens vendidos. & ID\_Produto (Chave), Nome, Corte, Estoque\_Mínimo. \\
+    \hline
+    CATEGORIA & Agrupa os produtos (ex: Bovino, Suíno). & ID\_Categoria (Chave), Nome\_Categoria. \\
+    \hline
+    FORNECEDOR & Empresas de quem se compra. & ID\_Fornecedor (Chave), Nome\_Fornecedor, CNPJ. \\
+    \hline
+    USUARIO & Pessoas que acessam o sistema (vendedores/administradores). & ID\_Usuario (Chave), Nome, Cargo. \\
+    \hline
+    \end{tabularx}
+\end{table}
+
+\section{Modelo Lógico - Dicionário de Dados}
+
+O Dicionário de Dados detalha a estrutura de cada tabela, tipos de dados, chaves e restrições de integridade referencial.
+
+\subsection{Tabela PRODUTO}
+\begin{longtable}{|p{2.5cm}|p{2.8cm}|p{1.5cm}|p{6cm}|}
+    \caption{Estrutura da Tabela PRODUTO}
+    \label{tab:ddproduto} \\ % Rótulo corrigido
+    \hline
+    \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\
+    \hline
+    \endfirsthead
+    \multicolumn{4}{c}%
+    {{\bfseries Tabela \thetable{} -- continuação}} \\
+    \hline
+    \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\
+    \hline
+    \endhead
+    \hline
+    \multicolumn{4}{|r|}{{\bfseries Continua na próxima página}} \\
+    \hline
+    \endfoot
+    \hline
+    \endlastfoot
+    id\_produto & INT & PK & NOT NULL, AUTO\_INCREMENT \\
+    id\_categoria & INT & FK & NOT NULL (Referencia CATEGORIA) \\
+    nome & VARCHAR(100) & & NOT NULL \\
+    corte & VARCHAR(50) & & NULL \\
+    estoque\_atual & DECIMAL(10, 3) & & NOT NULL \\
+    estoque\_minimo & DECIMAL(10, 3) & & NOT NULL \\
+    data\_cadastro & DATE & & NOT NULL \\
+\end{longtable}
+
+\subsection{Tabela CATEGORIA}
+\begin{longtable}{|p{2.5cm}|p{2.8cm}|p{1.5cm}|p{6cm}|}
+    \caption{Estrutura da Tabela CATEGORIA}
+    \label{tab:ddcategoria} \\ % Rótulo corrigido
+    \hline
+    \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\
+    \hline
+    \endfirsthead
+    \multicolumn{4}{c}%
+    {{\bfseries Tabela \thetable{} -- continuação}} \\
+    \hline
+    \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\
+    \hline
+    \endhead
+    \hline
+    \multicolumn{4}{|r|}{{\bfseries Continua na próxima página}} \\
+    \hline
+    \endfoot
+    \hline
+    \endlastfoot
+    id\_categoria & INT & PK & NOT NULL, AUTO\_INCREMENT \\
+    nome\_categoria & VARCHAR(50) & & NOT NULL \\
+    descricao & VARCHAR(255) & & NULL \\
+\end{longtable}
+
+\subsection{Tabela FORNECEDOR}
+\begin{longtable}{|p{2.5cm}|p{2.8cm}|p{1.5cm}|p{6cm}|}
+    \caption{Estrutura da Tabela FORNECEDOR}
+    \label{tab:ddfornecedor} \\ % Rótulo corrigido
+    \hline
+    \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\
+    \hline
+    \endfirsthead
+    \multicolumn{4}{c}%
+    {{\bfseries Tabela \thetable{} -- continuação}} \\
+    \hline
+    \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\
+    \hline
+    \endhead
+    \hline
+    \multicolumn{4}{|r|}{{\bfseries Continua na próxima página}} \\
+    \hline
+    \endfoot
+    \hline
+    \endlastfoot
+    id\_fornecedor & INT & PK & NOT NULL, AUTO\_INCREMENT \\
+    nome\_fornecedor & VARCHAR(150) & & NOT NULL \\
+    cnpj & VARCHAR(18) & & NOT NULL, UNIQUE \\
+    contato & VARCHAR(100) & & NULL \\
+\end{longtable}
+
+\subsection{Tabela USUARIO}
+\begin{longtable}{|p{2.5cm}|p{2.8cm}|p{1.5cm}|p{6cm}|}
+    \caption{Estrutura da Tabela USUARIO}
+    \label{tab:ddusuario} \\ % Rótulo corrigido
+    \hline
+    \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\
+    \hline
+    \endfirsthead
+    \multicolumn{4}{c}%
+    {{\bfseries Tabela \thetable{} -- continuação}} \\
+    \hline
+    \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\
+    \hline
+    \endhead
+    \hline
+    \multicolumn{4}{|r|}{{\bfseries Continua na próxima página}} \\
+    \hline
+    \endfoot
+    \hline
+    \endlastfoot
+    id\_usuario & INT & PK & NOT NULL, AUTO\_INCREMENT \\
+    nome & VARCHAR(100) & & NOT NULL \\
+    email & VARCHAR(150) & & NOT NULL, UNIQUE \\
+    senha\_hash & VARCHAR(255) & & NOT NULL \\
+    cargo & ENUM ('Administrador', 'Vendedor') & & NOT NULL \\
+\end{longtable}
+
+\subsection{Tabela ESTOQUE}
+\begin{longtable}{|p{2.5cm}|p{2.8cm}|p{1.5cm}|p{6cm}|}
+    \caption{Estrutura da Tabela ESTOQUE}
+    \label{tab:ddestoque} \\ % Rótulo corrigido
+    \hline
+    \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\
+    \hline
+    \endfirsthead
+    \multicolumn{4}{c}%
+    {{\bfseries Tabela \thetable{} -- continuação}} \\
+    \hline
+    \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\
+    \hline
+    \endhead
+    \hline
+    \multicolumn{4}{|r|}{{\bfseries Continua na próxima página}} \\
+    \hline
+    \endfoot
+    \hline
+    \endlastfoot
+    id\_lote & INT & PK & NOT NULL, AUTO\_INCREMENT \\
+    id\_produto & INT & FK & NOT NULL (Referencia PRODUTO) \\
+    quantidade & DECIMAL(10, 3) & & NOT NULL \\
+    custo\_unitario & DECIMAL(10, 2) & & NOT NULL \\
+    data\_validade & DATE & & NOT NULL \\
+    data\_entrada & DATETIME & & NOT NULL \\
+\end{longtable}
+
+\subsection{Tabela COMPRA}
+\begin{longtable}{|p{2.5cm}|p{2.8cm}|p{1.5cm}|p{6cm}|}
+    \caption{Estrutura da Tabela COMPRA}
+    \label{tab:ddcompra} \\ % Rótulo corrigido
+    \hline
+    \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\
+    \hline
+    \endfirsthead
+    \multicolumn{4}{c}%
+    {{\bfseries Tabela \thetable{} -- continuação}} \\
+    \hline
+    \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\
+    \hline
+    \endhead
+    \hline
+    \multicolumn{4}{|r|}{{\bfseries Continua na próxima página}} \\
+    \hline
+    \endfoot
+    \hline
+    \endlastfoot
+    id\_compra & INT & PK & NOT NULL, AUTO\_INCREMENT \\
+    id\_fornecedor & INT & FK & NOT NULL (Referencia FORNECEDOR) \\
+    data\_compra & DATE & & NOT NULL \\
+    valor\_total\_compra & DECIMAL(10, 2) & & NOT NULL \\
+    status\_compra & ENUM ('Concluída', 'Pendente', 'Cancelada') & & NOT NULL \\
+\end{longtable}
+
+\subsection{Tabela ITEM\_COMPRA}
+\begin{longtable}{|p{2.5cm}|p{2.8cm}|p{1.5cm}|p{6cm}|}
+    \caption{Estrutura da Tabela ITEM\_COMPRA}
+    \label{tab:dditemcompra} \\ % Rótulo corrigido
+    \hline
+    \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\
+    \hline
+    \endfirsthead
+    \multicolumn{4}{c}%
+    {{\bfseries Tabela \thetable{} -- continuação}} \\
+    \hline
+    \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\
+    \hline
+    \endhead
+    \hline
+    \multicolumn{4}{|r|}{{\bfseries Continua na próxima página}} \\
+    \hline
+    \endfoot
+    \hline
+    \endlastfoot
+    id\_compra & INT & PK, FK & NOT NULL (Referencia COMPRA) \\
+    id\_produto & INT & PK, FK & NOT NULL (Referencia PRODUTO) \\
+    quantidade & DECIMAL(10, 3) & & NOT NULL \\
+    custo\_unitario & DECIMAL(10, 2) & & NOT NULL \\
+\end{longtable}
+
+\subsection{Tabela VENDA}
+\begin{longtable}{|p{2.5cm}|p{2.8cm}|p{1.5cm}|p{6cm}|}
+    \caption{Estrutura da Tabela VENDA}
+    \label{tab:ddvenda} \\ % Rótulo corrigido
+    \hline
+    \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\
+    \hline
+    \endfirsthead
+    \multicolumn{4}{c}%
+    {{\bfseries Tabela \thetable{} -- continuação}} \\
+    \hline
+    \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\
+    \hline
+    \endhead
+    \hline
+    \multicolumn{4}{|r|}{{\bfseries Continua na próxima página}} \\
+    \hline
+    \endfoot
+    \hline
+    \endlastfoot
+    id\_venda & INT & PK & NOT NULL, AUTO\_INCREMENT \\
+    id\_usuario & INT & FK & NOT NULL (Referencia USUARIO) \\
+    data\_venda & DATETIME & & NOT NULL \\
+    valor\_total\_venda & DECIMAL(10, 2) & & NOT NULL \\
+    status\_venda & ENUM ('Finalizada', 'Cancelada') & & NOT NULL \\
+\end{longtable}
+
+\subsection{Tabela ITEM\_VENDA}
+\begin{longtable}{|p{2.5cm}|p{2.8cm}|p{1.5cm}|p{6cm}|}
+    \caption{Estrutura da Tabela ITEM\_VENDA}
+    \label{tab:dditemvenda} \\ % Rótulo corrigido
+    \hline
+    \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\
+    \hline
+    \endfirsthead
+    \multicolumn{4}{c}%
+    {{\bfseries Tabela \thetable{} -- continuação}} \\
+    \hline
+    \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\
+    \hline
+    \endhead
+    \hline
+    \multicolumn{4}{|r|}{{\bfseries Continua na próxima página}} \\
+    \hline
+    \endfoot
+    \hline
+    \endlastfoot
+    id\_venda & INT & PK, FK & NOT NULL (Referencia VENDA) \\
+    id\_produto & INT & PK, FK & NOT NULL (Referencia PRODUTO) \\
+    quantidade & DECIMAL(10, 3) & & NOT NULL \\
+    preco\_unitario & DECIMAL(10, 2) & & NOT NULL \\
+    custo\_unitario\_registro & DECIMAL(10, 2) & & NOT NULL (Crucial para cálculo de lucro) \\
+\end{longtable}
+
+\end{anexos}
+
 \end{document}
