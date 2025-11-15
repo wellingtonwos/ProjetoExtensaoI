@@ -22,8 +22,9 @@ public class Sale {
     @Column(name = "data")
     private LocalDateTime date;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "metodo_pagamento")
-    private String paymentMethod;
+    private PaymentMethod paymentMethod;
 
     @Column(name = "desconto")
     private Double discount;

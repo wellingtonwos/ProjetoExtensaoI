@@ -25,8 +25,9 @@ public class User {
     @Column(name = "senha")
     private String password;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "nivel_acesso")
-    private String accessLevel;
+    private AccessLevel accessLevel;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Sale> sales;
