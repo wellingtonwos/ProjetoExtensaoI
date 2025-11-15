@@ -14,7 +14,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 
-export default function POS() {
+export default function Sales() {
 	const [barcode, setBarcode] = useState('')
 	const [cart, setCart] = useState([])
 	const [total, setTotal] = useState(0)
