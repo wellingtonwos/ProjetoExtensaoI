@@ -3,7 +3,6 @@ package com.example.SpringBootApp.services;
 import com.example.SpringBootApp.DTOs.BrandCreateDTO;
 import com.example.SpringBootApp.DTOs.CategoryCreateDTO;
 import com.example.SpringBootApp.DTOs.ProductCreateDTO;
-import com.example.SpringBootApp.exceptions.BusinessException;
 import com.example.SpringBootApp.exceptions.ResourceAlreadyExistsException;
 import com.example.SpringBootApp.exceptions.ResourceNotFoundException;
 import com.example.SpringBootApp.models.Brand;
@@ -27,7 +26,7 @@ public class CatalogService {
 
     private final BrandRepository brandRepository;
 
-    public Product createProduct(ProductCreateDTO productDTO) {
+    public Product createProducts(ProductCreateDTO productDTO) {
         Category category = categoryRepository.findById(productDTO.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 

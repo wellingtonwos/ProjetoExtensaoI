@@ -1,6 +1,8 @@
 package com.example.SpringBootApp.services;
 
+import com.example.SpringBootApp.DTOs.ProductWithPurchaseInStockDTO;
 import com.example.SpringBootApp.DTOs.PurchaseCreateDTO;
+import com.example.SpringBootApp.DTOs.PurchaseInStockDTO;
 import com.example.SpringBootApp.DTOs.PurchaseItemDTO;
 import com.example.SpringBootApp.exceptions.ResourceNotFoundException;
 import com.example.SpringBootApp.models.*;
@@ -11,9 +13,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -54,4 +57,71 @@ public class InventoryService {
         savedPurchase.setItems(items);
         return savedPurchase;
     }
+
+    public List<ProductWithPurchaseInStockDTO> getProductsWithPurchaseInStock(){
+        List<Product> products = productRepository.findAllWithItems()
+                .stream()
+                .filter(product -> !product.getItems().isEmpty())
+                .toList();
+        return products.stream()
+                .map(product -> {
+
+                    ProductWithPurchaseInStockDTO dto = new ProductWithPurchaseInStockDTO();
+
+                    dto.setId(product.getId().intValue());
+                    dto.setProduct_name(product.getName());
+                    dto.setBrand_name(product.getBrand() != null ? product.getBrand().getName() : null);
+                    dto.setUnitMeasurement(product.getUnitMeasurement());
+
+                    // aqui agrupamos compras e vendas por purchase_id
+                    List<PurchaseInStockDTO> groupedPurchases = groupItemsByPurchase(product.getItems());
+                    dto.setPurchases(groupedPurchases);
+
+                    return dto;
+                })
+                .toList();
+    }
+
+    private List<PurchaseInStockDTO> groupItemsByPurchase(List<Item> items) {
+
+        return items.stream()
+                // só ignora itens onde não existe uma compra associada
+                .filter(item -> item.getPurchase() != null)
+                .collect(Collectors.groupingBy(
+                        item -> item.getPurchase().getId() // agrupa por ID da compra
+                ))
+                .values()
+                .stream()
+                .map(group -> {
+
+                    Item reference = group.getFirst();
+
+                    // data da compra
+                    LocalDate purchaseDate = reference.getPurchase().getDate();
+
+                    // menor data de validade do grupo
+                    LocalDate expiration =
+                            group.stream()
+                                    .map(Item::getExpirationDate)
+                                    .filter(Objects::nonNull)
+                                    .min(LocalDate::compareTo)
+                                    .orElse(null);
+
+                    // soma as quantidades (compra = positivo, venda = negativo)
+                    BigDecimal totalQuantity =
+                            group.stream()
+                                    .map(Item::getQuantity)
+                                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                    // monta DTO
+                    PurchaseInStockDTO dto = new PurchaseInStockDTO();
+                    dto.setPurchase_date(purchaseDate);
+                    dto.setExpiring_date(expiration);
+                    dto.setQuantity(totalQuantity);
+
+                    return dto;
+                })
+                .toList();
+    }
+
 }

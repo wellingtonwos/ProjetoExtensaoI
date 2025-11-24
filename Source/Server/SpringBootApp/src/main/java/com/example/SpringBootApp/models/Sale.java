@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -27,7 +29,7 @@ public class Sale {
     private PaymentMethod paymentMethod;
 
     @Column(name = "desconto")
-    private Double discount;
+    private BigDecimal discount;
 
     @ManyToOne
     @JoinColumn(name = "fk_usuario_id")

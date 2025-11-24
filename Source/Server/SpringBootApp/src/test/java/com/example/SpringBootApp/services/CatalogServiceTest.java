@@ -21,7 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,7 +44,7 @@ class CatalogServiceTest {
         ProductCreateDTO productDTO = new ProductCreateDTO("Picanha", UnitMeasurement.KG, 1001, 1L, 1L);
         Category category = new Category(1L, "Bovino", null);
         Brand brand = new Brand(1L, "Friboi", null);
-        Product expectedProduct = new Product(1L, "Picanha", UnitMeasurement.KG, 1001, category, brand);
+        Product expectedProduct = new Product(1L, "Picanha", UnitMeasurement.KG, 1001, category, brand, null);
 
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
         when(brandRepository.findById(1L)).thenReturn(Optional.of(brand));
@@ -53,7 +52,7 @@ class CatalogServiceTest {
         when(productRepository.save(any(Product.class))).thenReturn(expectedProduct);
 
         // Act
-        Product result = catalogService.createProduct(productDTO);
+        Product result = catalogService.createProducts(productDTO);
 
         // Assert
         assertNotNull(result);
@@ -78,7 +77,7 @@ class CatalogServiceTest {
 
         // Act & Assert
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
-                () -> catalogService.createProduct(productDTO));
+                () -> catalogService.createProducts(productDTO));
 
         assertEquals("Category not found", exception.getMessage());
         verify(categoryRepository).findById(999L);
@@ -98,7 +97,7 @@ class CatalogServiceTest {
 
         // Act & Assert
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
-                () -> catalogService.createProduct(productDTO));
+                () -> catalogService.createProducts(productDTO));
 
         assertEquals("Brand not found", exception.getMessage());
         verify(categoryRepository).findById(1L);
@@ -120,7 +119,7 @@ class CatalogServiceTest {
 
         // Act & Assert
         ResourceAlreadyExistsException exception = assertThrows(ResourceAlreadyExistsException.class,
-                () -> catalogService.createProduct(productDTO));
+                () -> catalogService.createProducts(productDTO));
 
         assertEquals("Product code already exists", exception.getMessage());
         verify(categoryRepository).findById(1L);

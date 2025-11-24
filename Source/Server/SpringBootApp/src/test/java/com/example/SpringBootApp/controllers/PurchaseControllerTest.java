@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -42,7 +43,7 @@ class PurchaseControllerTest {
     @BeforeEach
     void setup() {
         objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule()); // Para serializar LocalDate
+        objectMapper.registerModule(new JavaTimeModule()); // Para LocalDate
 
         mockMvc = MockMvcBuilders.standaloneSetup(purchaseController)
                 .setControllerAdvice(new GlobalExceptionHandler())
@@ -52,9 +53,24 @@ class PurchaseControllerTest {
     @Test
     void createPurchase_ShouldReturn201_WhenValidInput() throws Exception {
         // Arrange
-        PurchaseItemDTO item1 = new PurchaseItemDTO(1L, 10.5, 45.90, 69.90, LocalDate.of(2024, 2, 15));
-        PurchaseItemDTO item2 = new PurchaseItemDTO(2L, 5.0, 32.50, 49.90, LocalDate.of(2024, 3, 1));
-        PurchaseCreateDTO request = new PurchaseCreateDTO(LocalDate.of(2024, 1, 15), List.of(item1, item2));
+        PurchaseItemDTO item1 = new PurchaseItemDTO(
+                1L,
+                new BigDecimal("10.5"),
+                new BigDecimal("45.90"),
+                new BigDecimal("69.90"),
+                LocalDate.of(2024, 2, 15)
+        );
+
+        PurchaseItemDTO item2 = new PurchaseItemDTO(
+                2L,
+                new BigDecimal("5.0"),
+                new BigDecimal("32.50"),
+                new BigDecimal("49.90"),
+                LocalDate.of(2024, 3, 1)
+        );
+
+        PurchaseCreateDTO request =
+                new PurchaseCreateDTO(LocalDate.of(2024, 1, 15), List.of(item1, item2));
 
         Purchase savedPurchase = new Purchase(1L, LocalDate.of(2024, 1, 15), null);
 
@@ -72,8 +88,16 @@ class PurchaseControllerTest {
     @Test
     void createPurchase_ShouldReturn404_WhenProductNotFound() throws Exception {
         // Arrange
-        PurchaseItemDTO item = new PurchaseItemDTO(999L, 10.5, 45.90, 69.90, null);
-        PurchaseCreateDTO request = new PurchaseCreateDTO(LocalDate.now(), List.of(item));
+        PurchaseItemDTO item = new PurchaseItemDTO(
+                999L,
+                new BigDecimal("10.5"),
+                new BigDecimal("45.90"),
+                new BigDecimal("69.90"),
+                null
+        );
+
+        PurchaseCreateDTO request =
+                new PurchaseCreateDTO(LocalDate.now(), List.of(item));
 
         when(inventoryService.createPurchase(any(PurchaseCreateDTO.class)))
                 .thenThrow(new ResourceNotFoundException("Product not found with id: 999"));

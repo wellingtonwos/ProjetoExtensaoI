@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -18,15 +20,15 @@ public class PurchaseItemDTO {
 
     @NotNull(message = "Quantity is required")
     @Positive(message = "Quantity must be positive")
-    private Double quantity;
+    private BigDecimal quantity;
 
     @NotNull(message = "Unit purchase price is required")
     @Positive(message = "Unit purchase price must be positive")
-    private Double unitPurchasePrice;
+    private BigDecimal unitPurchasePrice;
 
     @NotNull(message = "Unit sale price is required")
     @Positive(message = "Unit sale price must be positive")
-    private Double unitSalePrice;
+    private BigDecimal unitSalePrice;
 
     private LocalDate expiringDate;
 }

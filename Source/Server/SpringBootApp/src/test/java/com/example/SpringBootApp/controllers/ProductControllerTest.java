@@ -47,9 +47,9 @@ class ProductControllerTest {
 
         // Arrange
         ProductCreateDTO request = new ProductCreateDTO("Picanha", UnitMeasurement.KG, 1001, 1L, 1L);
-        Product savedProduct = new Product(1L, "Picanha", UnitMeasurement.KG, 1001, null, null);
+        Product savedProduct = new Product(1L, "Picanha", UnitMeasurement.KG, 1001, null, null, null);
 
-        when(catalogService.createProduct(any(ProductCreateDTO.class))).thenReturn(savedProduct);
+        when(catalogService.createProducts(any(ProductCreateDTO.class))).thenReturn(savedProduct);
 
         // Act & Assert
         mockMvc.perform(post("/products")
@@ -67,7 +67,7 @@ class ProductControllerTest {
         // Arrange
         ProductCreateDTO request = new ProductCreateDTO("Picanha", UnitMeasurement.KG, 1001, 1L, 1L);
 
-        when(catalogService.createProduct(any(ProductCreateDTO.class)))
+        when(catalogService.createProducts(any(ProductCreateDTO.class)))
                 .thenThrow(new ResourceAlreadyExistsException("Product code already exists"));
 
         // Act & Assert
@@ -86,7 +86,7 @@ class ProductControllerTest {
         // Arrange
         ProductCreateDTO request = new ProductCreateDTO("Picanha", UnitMeasurement.KG, 1001, 999L, 1L);
 
-        when(catalogService.createProduct(any(ProductCreateDTO.class)))
+        when(catalogService.createProducts(any(ProductCreateDTO.class)))
                 .thenThrow(new ResourceNotFoundException("Category not found"));
 
         // Act & Assert
@@ -105,7 +105,7 @@ class ProductControllerTest {
         // Arrange
         ProductCreateDTO request = new ProductCreateDTO("Picanha", UnitMeasurement.KG, 1001, 1L, 999L);
 
-        when(catalogService.createProduct(any(ProductCreateDTO.class)))
+        when(catalogService.createProducts(any(ProductCreateDTO.class)))
                 .thenThrow(new ResourceNotFoundException("Brand not found"));
 
         // Act & Assert

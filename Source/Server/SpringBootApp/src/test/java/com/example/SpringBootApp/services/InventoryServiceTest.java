@@ -13,12 +13,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,16 +39,16 @@ class InventoryServiceTest {
     @Test
     void createPurchase_ShouldReturnPurchase_WhenValidInput() {
         // Arrange
-        PurchaseItemDTO item1 = new PurchaseItemDTO(1L, 10.5, 45.90, 69.90, LocalDate.of(2024, 2, 15));
-        PurchaseItemDTO item2 = new PurchaseItemDTO(2L, 5.0, 32.50, 49.90, LocalDate.of(2024, 3, 1));
+        PurchaseItemDTO item1 = new PurchaseItemDTO(1L, new BigDecimal("10.5"), new BigDecimal("45.90"), new BigDecimal("69.90"), LocalDate.of(2024, 2, 15));
+        PurchaseItemDTO item2 = new PurchaseItemDTO(2L, new BigDecimal("5.0"), new BigDecimal("32.50"), new BigDecimal("49.90"), LocalDate.of(2024, 3, 1));
         PurchaseCreateDTO purchaseDTO = new PurchaseCreateDTO(LocalDate.of(2024, 1, 15), List.of(item1, item2));
 
-        Product product1 = new Product(1L, "Picanha", UnitMeasurement.KG, 1001, null, null);
-        Product product2 = new Product(2L, "Alcatra", UnitMeasurement.KG, 1002, null, null);
+        Product product1 = new Product(1L, "Picanha", UnitMeasurement.KG, 1001, null, null, null);
+        Product product2 = new Product(2L, "Alcatra", UnitMeasurement.KG, 1002, null, null, null);
 
         Purchase savedPurchase = new Purchase(1L, LocalDate.of(2024, 1, 15), null);
-        Item savedItem1 = new Item(1L, 10.5, 45.90, 69.90, LocalDate.of(2024, 2, 15), product1, savedPurchase, null);
-        Item savedItem2 = new Item(2L, 5.0, 32.50, 49.90, LocalDate.of(2024, 3, 1), product2, savedPurchase, null);
+        Item savedItem1 = new Item(1L, new BigDecimal("10.5"), new BigDecimal("45.90"), new BigDecimal("69.90"), LocalDate.of(2024, 2, 15), product1, savedPurchase, null);
+        Item savedItem2 = new Item(2L, new BigDecimal("5.0"), new BigDecimal("32.50"), new BigDecimal("49.90"), LocalDate.of(2024, 3, 1), product2, savedPurchase, null);
 
         when(purchaseRepository.save(any(Purchase.class))).thenReturn(savedPurchase);
         when(productRepository.findById(1L)).thenReturn(Optional.of(product1));
@@ -72,12 +72,12 @@ class InventoryServiceTest {
     @Test
     void createPurchase_ShouldUseCurrentDate_WhenDateIsNull() {
         // Arrange
-        PurchaseItemDTO item = new PurchaseItemDTO(1L, 10.5, 45.90, 69.90, null);
+        PurchaseItemDTO item = new PurchaseItemDTO(1L, new BigDecimal("10.5"), new BigDecimal("45.90"), new BigDecimal("69.90"), null);
         PurchaseCreateDTO purchaseDTO = new PurchaseCreateDTO(null, List.of(item));
 
-        Product product = new Product(1L, "Picanha", UnitMeasurement.KG, 1001, null, null);
+        Product product = new Product(1L, "Picanha", UnitMeasurement.KG, 1001, null, null, null);
         Purchase savedPurchase = new Purchase(1L, LocalDate.now(), null);
-        Item savedItem = new Item(1L, 10.5, 45.90, 69.90, null, product, savedPurchase, null);
+        Item savedItem = new Item(1L, new BigDecimal("10.5"), new BigDecimal("45.90"), new BigDecimal("69.90"), null, product, savedPurchase, null);
 
         when(purchaseRepository.save(any(Purchase.class))).thenReturn(savedPurchase);
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
@@ -94,7 +94,7 @@ class InventoryServiceTest {
     @Test
     void createPurchase_ShouldThrowException_WhenProductNotFound() {
         // Arrange
-        PurchaseItemDTO item = new PurchaseItemDTO(999L, 10.5, 45.90, 69.90, null);
+        PurchaseItemDTO item = new PurchaseItemDTO(999L, new BigDecimal("10.5"), new BigDecimal("45.90"), new BigDecimal("69.90"), null);
         PurchaseCreateDTO purchaseDTO = new PurchaseCreateDTO(LocalDate.now(), List.of(item));
 
         when(productRepository.findById(999L)).thenReturn(Optional.empty());
@@ -113,10 +113,10 @@ class InventoryServiceTest {
     void createPurchase_ShouldCreateItemsWithCorrectData() {
         // Arrange
         LocalDate expiringDate = LocalDate.of(2024, 2, 15);
-        PurchaseItemDTO itemDTO = new PurchaseItemDTO(1L, 10.5, 45.90, 69.90, expiringDate);
+        PurchaseItemDTO itemDTO = new PurchaseItemDTO(1L, new BigDecimal("10.5"), new BigDecimal("45.90"), new BigDecimal("69.90"), expiringDate);
         PurchaseCreateDTO purchaseDTO = new PurchaseCreateDTO(LocalDate.now(), List.of(itemDTO));
 
-        Product product = new Product(1L, "Picanha", UnitMeasurement.KG, 1001, null, null);
+        Product product = new Product(1L, "Picanha", UnitMeasurement.KG, 1001, null, null, null);
         Purchase savedPurchase = new Purchase(1L, LocalDate.now(), null);
 
         when(purchaseRepository.save(any(Purchase.class))).thenReturn(savedPurchase);
@@ -125,9 +125,9 @@ class InventoryServiceTest {
         // Mock para capturar o Item salvo
         when(itemRepository.save(any(Item.class))).thenAnswer(invocation -> {
             Item item = invocation.getArgument(0);
-            assertEquals(10.5, item.getQuantity());
-            assertEquals(45.90, item.getPurchaseUnitPrice());
-            assertEquals(69.90, item.getSaleUnitPrice());
+            assertEquals(new BigDecimal("10.5"), item.getQuantity());
+            assertEquals(new BigDecimal("45.90"), item.getPurchaseUnitPrice());
+            assertEquals(new BigDecimal("69.90"), item.getSaleUnitPrice());
             assertEquals(expiringDate, item.getExpirationDate());
             assertEquals(product, item.getProduct());
             assertEquals(savedPurchase, item.getPurchase());

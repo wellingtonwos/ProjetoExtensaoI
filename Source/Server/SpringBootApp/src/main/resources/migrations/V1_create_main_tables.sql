@@ -12,7 +12,7 @@ CREATE TABLE Usuario (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(255),
     senha VARCHAR(60),
-    nivel_acesso VARCHAR(8) CHECK (nivel_acesso IN ('operator', 'admin'))
+    nivel_acesso VARCHAR(8) CHECK (nivel_acesso IN ('OPERATOR', 'ADMIN'))
 );
 
 CREATE TABLE Produto (

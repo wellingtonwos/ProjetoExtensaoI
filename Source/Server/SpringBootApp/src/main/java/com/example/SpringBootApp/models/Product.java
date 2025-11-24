@@ -3,8 +3,9 @@ package com.example.SpringBootApp.models;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -33,4 +34,7 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "fk_marca_id")
     private Brand brand;
+
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    private List<Item> items;
 }

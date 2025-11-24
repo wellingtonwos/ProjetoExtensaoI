@@ -57,6 +57,131 @@ export default function Reports() {
 						Quantity: 1.2,
 						Sale_price: 150.5,
 					},
+					{
+						Name: 'Alcatra',
+						Supplier: 'Frigol',
+						Quantity: 1.0,
+						Sale_price: 85.0,
+						Discounts: 5,
+					},{
+						Name: 'Picanha Bassi',
+						Supplier: 'Bassi',
+						Quantity: 1.2,
+						Sale_price: 150.5,
+					},
+					{
+						Name: 'Alcatra',
+						Supplier: 'Frigol',
+						Quantity: 1.0,
+						Sale_price: 85.0,
+						Discounts: 5,
+					},{
+						Name: 'Picanha Bassi',
+						Supplier: 'Bassi',
+						Quantity: 1.2,
+						Sale_price: 150.5,
+					},
+					{
+						Name: 'Alcatra',
+						Supplier: 'Frigol',
+						Quantity: 1.0,
+						Sale_price: 85.0,
+						Discounts: 5,
+					}
+				],
+			},
+			{
+				Timestamp: '2025-11-09T10:15:00',
+				Salesman_name: 'Gustavo',
+				Payment_method: 'Crédito',
+				Total_price: 80.0,
+				Discounts: 5,
+				Items: [
+					{
+						Name: 'Alcatra',
+						Supplier: 'Frigol',
+						Quantity: 1.0,
+						Sale_price: 85.0,
+						Discounts: 5,
+					},
+				],
+			},
+			{
+				Timestamp: '2025-11-09T10:15:00',
+				Salesman_name: 'Gustavo',
+				Payment_method: 'Crédito',
+				Total_price: 80.0,
+				Discounts: 5,
+				Items: [
+					{
+						Name: 'Alcatra',
+						Supplier: 'Frigol',
+						Quantity: 1.0,
+						Sale_price: 85.0,
+						Discounts: 5,
+					},
+				],
+			},
+			{
+				Timestamp: '2025-11-09T10:15:00',
+				Salesman_name: 'Gustavo',
+				Payment_method: 'Crédito',
+				Total_price: 80.0,
+				Discounts: 5,
+				Items: [
+					{
+						Name: 'Alcatra',
+						Supplier: 'Frigol',
+						Quantity: 1.0,
+						Sale_price: 85.0,
+						Discounts: 5,
+					},
+				],
+			},
+			{
+				Timestamp: '2025-11-09T14:30:00',
+				Salesman_name: 'Junior',
+				Payment_method: 'PIX',
+				Total_price: 150.5,
+				Discounts: 0,
+				Items: [
+					{
+						Name: 'Picanha Bassi',
+						Supplier: 'Bassi',
+						Quantity: 1.2,
+						Sale_price: 150.5,
+					},
+				],
+			},
+			{
+				Timestamp: '2025-11-09T10:15:00',
+				Salesman_name: 'Gustavo',
+				Payment_method: 'Crédito',
+				Total_price: 80.0,
+				Discounts: 5,
+				Items: [
+					{
+						Name: 'Alcatra',
+						Supplier: 'Frigol',
+						Quantity: 1.0,
+						Sale_price: 85.0,
+						Discounts: 5,
+					},
+				],
+			},
+			{
+				Timestamp: '2025-11-09T14:30:00',
+				Salesman_name: 'Junior',
+				Payment_method: 'PIX',
+				Total_price: 150.5,
+				Discounts: 0,
+				Items: [
+					{
+						Name: 'Picanha Bassi',
+						Supplier: 'Bassi',
+						Quantity: 1.2,
+						Sale_price: 150.5,
+					},
 				],
 			},
 			{

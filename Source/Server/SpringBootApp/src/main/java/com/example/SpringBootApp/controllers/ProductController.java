@@ -1,20 +1,20 @@
 package com.example.SpringBootApp.controllers;
 
 import com.example.SpringBootApp.DTOs.ProductCreateDTO;
+import com.example.SpringBootApp.DTOs.ProductWithPurchaseInStockDTO;
 import com.example.SpringBootApp.models.Product;
 import com.example.SpringBootApp.services.CatalogService;
+import com.example.SpringBootApp.services.InventoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/products")
@@ -22,6 +22,7 @@ import java.net.URI;
 public class ProductController {
 
     private final CatalogService catalogService;
+    private final InventoryService inventoryService;
 
     @Operation(summary = "Create a new product")
     @ApiResponses(value = {
@@ -30,9 +31,16 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Category or brand not found"),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
     })
+
     @PostMapping
-    public ResponseEntity<?> createProduct(@Valid @RequestBody ProductCreateDTO productDTO) {
-        Product product = catalogService.createProduct(productDTO);
+    public ResponseEntity<?> createProducts(@Valid @RequestBody ProductCreateDTO productDTO) {
+        Product product = catalogService.createProducts(productDTO);
         return ResponseEntity.created(URI.create("/products/" + product.getId())).build();
+    }
+
+    @GetMapping("/purchases")
+    public ResponseEntity<List<ProductWithPurchaseInStockDTO>> getProductsWithPurchasesInStock() {
+        List<ProductWithPurchaseInStockDTO> products = inventoryService.getProductsWithPurchaseInStock();
+        return ResponseEntity.ok(products);
     }
 }

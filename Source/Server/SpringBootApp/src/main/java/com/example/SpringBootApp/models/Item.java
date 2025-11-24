@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -19,13 +21,13 @@ public class Item {
     private Long id;
 
     @Column(name = "quantidade")
-    private Double quantity;
+    private BigDecimal quantity;
 
     @Column(name = "preco_unitario_compra")
-    private Double purchaseUnitPrice;
+    private BigDecimal purchaseUnitPrice;
 
     @Column(name = "preco_unitario_venda")
-    private Double saleUnitPrice;
+    private BigDecimal saleUnitPrice;
 
     @Column(name = "data_validade")
     private LocalDate expirationDate;
