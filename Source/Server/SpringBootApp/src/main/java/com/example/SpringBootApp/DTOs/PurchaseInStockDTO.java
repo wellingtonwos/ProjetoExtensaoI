@@ -8,6 +8,8 @@ import java.time.LocalDate;
 @Data
 public class PurchaseInStockDTO {
 
+    private Long purchase_id;
+
     private LocalDate purchase_date;
 
     private LocalDate expiring_date;

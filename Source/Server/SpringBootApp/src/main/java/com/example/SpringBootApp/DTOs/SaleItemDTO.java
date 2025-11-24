@@ -17,6 +17,9 @@ public class SaleItemDTO {
     @NotNull(message = "Purchase ID is required")
     private Long purchaseId;
 
+    @NotNull(message = "Product ID is required")
+    private Long productId;
+
     @NotNull(message = "Quantity is required")
     @Positive(message = "Quantity must be positive")
     private BigDecimal quantity;

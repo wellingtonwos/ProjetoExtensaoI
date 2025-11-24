@@ -73,7 +73,6 @@ public class InventoryService {
                     dto.setBrand_name(product.getBrand() != null ? product.getBrand().getName() : null);
                     dto.setUnitMeasurement(product.getUnitMeasurement());
 
-                    // aqui agrupamos compras e vendas por purchase_id
                     List<PurchaseInStockDTO> groupedPurchases = groupItemsByPurchase(product.getItems());
                     dto.setPurchases(groupedPurchases);
 
@@ -85,10 +84,9 @@ public class InventoryService {
     private List<PurchaseInStockDTO> groupItemsByPurchase(List<Item> items) {
 
         return items.stream()
-                // só ignora itens onde não existe uma compra associada
                 .filter(item -> item.getPurchase() != null)
                 .collect(Collectors.groupingBy(
-                        item -> item.getPurchase().getId() // agrupa por ID da compra
+                        item -> item.getPurchase().getId()
                 ))
                 .values()
                 .stream()
@@ -96,10 +94,9 @@ public class InventoryService {
 
                     Item reference = group.getFirst();
 
-                    // data da compra
                     LocalDate purchaseDate = reference.getPurchase().getDate();
+                    Long purchaseId = reference.getPurchase().getId();
 
-                    // menor data de validade do grupo
                     LocalDate expiration =
                             group.stream()
                                     .map(Item::getExpirationDate)
@@ -107,14 +104,13 @@ public class InventoryService {
                                     .min(LocalDate::compareTo)
                                     .orElse(null);
 
-                    // soma as quantidades (compra = positivo, venda = negativo)
                     BigDecimal totalQuantity =
                             group.stream()
                                     .map(Item::getQuantity)
                                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-                    // monta DTO
                     PurchaseInStockDTO dto = new PurchaseInStockDTO();
+                    dto.setPurchase_id(purchaseId);
                     dto.setPurchase_date(purchaseDate);
                     dto.setExpiring_date(expiration);
                     dto.setQuantity(totalQuantity);
