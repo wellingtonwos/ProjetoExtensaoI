@@ -1,6 +1,7 @@
 package com.example.SpringBootApp.controllers;
 
 import com.example.SpringBootApp.DTOs.CategoryCreateDTO;
+import com.example.SpringBootApp.DTOs.CategoryDTO;
 import com.example.SpringBootApp.models.Category;
 import com.example.SpringBootApp.services.CatalogService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/categories")
@@ -30,5 +32,11 @@ public class CategoryController {
     public ResponseEntity<?> createCategory(@Valid @RequestBody CategoryCreateDTO categoryDTO) {
         Category category = catalogService.createCategory(categoryDTO);
         return ResponseEntity.created(URI.create("/categories/" + category.getId())).build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<CategoryDTO>> getAllCategories() {
+        List<CategoryDTO> categories = catalogService.getAllCategories();
+        return ResponseEntity.ok(categories);
     }
 }

@@ -1,8 +1,6 @@
 package com.example.SpringBootApp.services;
 
-import com.example.SpringBootApp.DTOs.BrandCreateDTO;
-import com.example.SpringBootApp.DTOs.CategoryCreateDTO;
-import com.example.SpringBootApp.DTOs.ProductCreateDTO;
+import com.example.SpringBootApp.DTOs.*;
 import com.example.SpringBootApp.exceptions.ResourceAlreadyExistsException;
 import com.example.SpringBootApp.exceptions.ResourceNotFoundException;
 import com.example.SpringBootApp.models.Brand;
@@ -14,6 +12,9 @@ import com.example.SpringBootApp.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Transactional
@@ -67,5 +68,31 @@ public class CatalogService {
         brand.setName(brandDTO.getName());
 
         return brandRepository.save(brand);
+    }
+
+    public List<BrandDTO> getAllBrands() {
+        List<Brand> brands = brandRepository.findAll();
+        List<BrandDTO> brandsDTO = new ArrayList<>();
+
+        for (Brand brand : brands){
+            BrandDTO currentBrand = new BrandDTO();
+            currentBrand.setId(brand.getId());
+            currentBrand.setBrandName(brand.getName());
+            brandsDTO.add(currentBrand);
+        }
+        return brandsDTO;
+    }
+
+    public List<CategoryDTO> getAllCategories() {
+        List<Category> categories = categoryRepository.findAll();
+        List<CategoryDTO> categoriesDTO = new ArrayList<>();
+
+        for (Category category : categories){
+            CategoryDTO currentCategory = new CategoryDTO();
+            currentCategory.setId(category.getId());
+            currentCategory.setCategoryName(category.getName());
+            categoriesDTO.add(currentCategory);
+        }
+        return categoriesDTO;
     }
 }

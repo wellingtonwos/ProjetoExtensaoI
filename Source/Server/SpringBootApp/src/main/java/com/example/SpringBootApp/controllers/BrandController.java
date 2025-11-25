@@ -1,6 +1,7 @@
 package com.example.SpringBootApp.controllers;
 
 import com.example.SpringBootApp.DTOs.BrandCreateDTO;
+import com.example.SpringBootApp.DTOs.BrandDTO;
 import com.example.SpringBootApp.models.Brand;
 import com.example.SpringBootApp.services.CatalogService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/brands")
@@ -30,5 +32,11 @@ public class BrandController {
     public ResponseEntity<?> createBrand(@Valid @RequestBody BrandCreateDTO brandDTO) {
         Brand brand = catalogService.createBrand(brandDTO);
         return ResponseEntity.created(URI.create("/brands/" + brand.getId())).build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<BrandDTO>> getAllBrands() {
+        List<BrandDTO> brands = catalogService.getAllBrands();
+        return ResponseEntity.ok(brands);
     }
 }
