@@ -27,7 +27,7 @@ public class SalesService {
         User user = userRepository.findById(saleDTO.getUserId()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Sale sale = new Sale();
-        sale.setDate(saleDTO.getTimestamp());
+        sale.setTimestamp(saleDTO.getTimestamp());
         sale.setPaymentMethod(saleDTO.getPaymentMethod());
         sale.setDiscount(saleDTO.getDiscount());
         sale.setUser(user);
@@ -53,5 +53,4 @@ public class SalesService {
         savedSale.setItems(items);
         return savedSale;
     }
-
 }

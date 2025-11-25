@@ -1,7 +1,9 @@
 package com.example.SpringBootApp.controllers;
 
 import com.example.SpringBootApp.DTOs.SaleCreateDTO;
+import com.example.SpringBootApp.DTOs.SaleReportDTO;
 import com.example.SpringBootApp.models.Sale;
+import com.example.SpringBootApp.services.ReportService;
 import com.example.SpringBootApp.services.SalesService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -12,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequestMapping("/sales")
@@ -19,6 +23,7 @@ import java.net.URI;
 public class SaleController {
 
     private final SalesService salesService;
+    private final ReportService reportService;
 
     @Operation(summary = "Create a new sale")
     @ApiResponses(value = {
@@ -32,4 +37,12 @@ public class SaleController {
         Sale sale = salesService.createSale(saleDTO);
         return ResponseEntity.created(URI.create("/sales/" + sale.getId())).build();
     }
+
+    @GetMapping
+    public ResponseEntity<List<SaleReportDTO>> getSalesReport(@RequestParam LocalDateTime startDate,
+                                                              @RequestParam LocalDateTime endDate) {
+        List<SaleReportDTO> sales = reportService.getSalesReport(startDate, endDate);
+        return ResponseEntity.ok(sales);
+    }
+
 }

@@ -22,7 +22,7 @@ public class Sale {
     private Long id;
 
     @Column(name = "data")
-    private LocalDateTime date;
+    private LocalDateTime timestamp         ;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "metodo_pagamento")
