@@ -1,44 +1,50 @@
 import React, { useState } from 'react'
 import { Container, Card, Form, Button, Alert } from 'react-bootstrap'
-// import { api } from '../services/api'
+import api from '../services/api'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
 
 export default function Login() {
 	const [form, setForm] = useState({ username: '', password: '' })
+	const [errorMsg, setErrorMsg] = useState('')
+	const [loading, setLoading] = useState(false)
+
 	const navigate = useNavigate()
 
-	// async function handleSubmit(e) {
-	// 	e.preventDefault()
-	// 	try {
-	// 		const res = await api.post('/login', form)
-	// 		const token =
-	// 			res.data.token || res.headers.authorization || res.headers.Authorization
-	// 		if (token) {
-	// 			// token might come as 'Bearer xxx'
-	// 			const extract = token.startsWith('Bearer ')
-	// 				? token.split(' ')[1]
-	// 				: token
-	// 			localStorage.setItem('token', extract)
-	// 			toast.success('Login successful')
-	// 			navigate('/')
-	// 		} else {
-	// 			toast.error('Nnehum token recebido do servidor.')
-	// 		}
-	// 	} catch (err) {
-	// 		console.error(err)
-	// 		toast.error('Falha no login. Verifique seus acessos.')
-	// 	}
-	// }
 	async function handleSubmit(e) {
 		e.preventDefault()
+		setErrorMsg('')
+		setLoading(true)
 
-		if (form.username.trim() && form.password.trim()) {
-			localStorage.setItem('token', 'mock-token-123')
-			toast.success('Login bem sucedido')
-			navigate('/')
-		} else {
-			toast.error('Por favor, preencha todos os campos.')
+		try {
+			const payload = {
+				username: form.username,
+				password: form.password,
+			}
+
+			const res = await api.post('/sessions', payload)
+
+			console.log('Resposta Completa:', res.data)
+
+			const token = res.data.token
+
+			if (token) {
+				localStorage.setItem('authToken', token)
+				localStorage.setItem('userId', res.data.userId)
+
+				api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+
+				toast.success('Login realizado com sucesso!')
+
+				navigate('/')
+			} else {
+				setErrorMsg('Erro: O campo "token" veio vazio do servidor.')
+			}
+		} catch (err) {
+			console.error(err)
+			setErrorMsg('Falha no login. Verifique usuário e senha.')
+		} finally {
+			setLoading(false)
 		}
 	}
 
@@ -49,13 +55,23 @@ export default function Login() {
 		>
 			<Card style={{ width: '28rem' }}>
 				<Card.Body>
-					<Card.Title className='mb-3'>Login</Card.Title>
+					<Card.Title className='mb-3 text-center'>CarneUp</Card.Title>
+
+					{errorMsg && (
+						<Alert variant='danger' onClose={() => setErrorMsg('')} dismissible>
+							{errorMsg}
+						</Alert>
+					)}
+
 					<Form onSubmit={handleSubmit}>
 						<Form.Group className='mb-3'>
 							<Form.Label>Usuário</Form.Label>
 							<Form.Control
 								value={form.username}
 								onChange={(e) => setForm({ ...form, username: e.target.value })}
+								placeholder='Ex: admin'
+								required
+								autoFocus
 							/>
 						</Form.Group>
 						<Form.Group className='mb-3'>
@@ -64,10 +80,14 @@ export default function Login() {
 								type='password'
 								value={form.password}
 								onChange={(e) => setForm({ ...form, password: e.target.value })}
+								placeholder='Sua senha'
+								required
 							/>
 						</Form.Group>
 						<div className='d-grid'>
-							<Button type='submit'>Entrar</Button>
+							<Button type='submit' variant='primary' disabled={loading}>
+								{loading ? 'Entrando...' : 'Entrar'}
+							</Button>
 						</div>
 					</Form>
 				</Card.Body>

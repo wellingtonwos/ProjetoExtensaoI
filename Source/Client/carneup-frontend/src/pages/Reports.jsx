@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-// import { api } from '../services/api';
 import {
 	Container,
 	Card,
@@ -10,11 +9,12 @@ import {
 	Col,
 	Alert,
 } from 'react-bootstrap'
+import api from '../services/api'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
 
 const style = document.createElement('style')
-style.innerHTML = `.valor-blur { filter: blur(8px); }`
+style.innerHTML = `.valor-blur { filter: blur(8px); transition: filter 0.3s; }`
 document.head.appendChild(style)
 
 export default function Reports() {
@@ -27,235 +27,126 @@ export default function Reports() {
 
 	const navigate = useNavigate()
 
-	useEffect(() => {
-		// const loadSales = async () => {
-		//   try {
-		//     const res = await api.get('/sales');
-		//     setSales(res.data);
-		//   } catch (err) {
-		//     if (err.response && err.response.status === 401) {
-		//       toast.error('Sessão expirada. Faça o login novamente.');
-		//       navigate('/login');
-		//     } else {
-		//       setError('Falha ao carregar relatórios.');
-		//     }
-		//   }
-		// };
-		// loadSales();
+	const formatMoney = (value) => {
+		return new Intl.NumberFormat('pt-BR', {
+			style: 'currency',
+			currency: 'BRL',
+		}).format(value || 0)
+	}
 
-		setSales([
-			{
-				Timestamp: '2025-11-09T14:30:00',
-				Salesman_name: 'Junior',
-				Payment_method: 'PIX',
-				Total_price: 150.5,
-				Discounts: 0,
-				Items: [
-					{
-						Name: 'Picanha Bassi',
-						Supplier: 'Bassi',
-						Quantity: 1.2,
-						Sale_price: 150.5,
-					},
-					{
-						Name: 'Alcatra',
-						Supplier: 'Frigol',
-						Quantity: 1.0,
-						Sale_price: 85.0,
-						Discounts: 5,
-					},{
-						Name: 'Picanha Bassi',
-						Supplier: 'Bassi',
-						Quantity: 1.2,
-						Sale_price: 150.5,
-					},
-					{
-						Name: 'Alcatra',
-						Supplier: 'Frigol',
-						Quantity: 1.0,
-						Sale_price: 85.0,
-						Discounts: 5,
-					},{
-						Name: 'Picanha Bassi',
-						Supplier: 'Bassi',
-						Quantity: 1.2,
-						Sale_price: 150.5,
-					},
-					{
-						Name: 'Alcatra',
-						Supplier: 'Frigol',
-						Quantity: 1.0,
-						Sale_price: 85.0,
-						Discounts: 5,
-					}
-				],
-			},
-			{
-				Timestamp: '2025-11-09T10:15:00',
-				Salesman_name: 'Gustavo',
-				Payment_method: 'Crédito',
-				Total_price: 80.0,
-				Discounts: 5,
-				Items: [
-					{
-						Name: 'Alcatra',
-						Supplier: 'Frigol',
-						Quantity: 1.0,
-						Sale_price: 85.0,
-						Discounts: 5,
-					},
-				],
-			},
-			{
-				Timestamp: '2025-11-09T10:15:00',
-				Salesman_name: 'Gustavo',
-				Payment_method: 'Crédito',
-				Total_price: 80.0,
-				Discounts: 5,
-				Items: [
-					{
-						Name: 'Alcatra',
-						Supplier: 'Frigol',
-						Quantity: 1.0,
-						Sale_price: 85.0,
-						Discounts: 5,
-					},
-				],
-			},
-			{
-				Timestamp: '2025-11-09T10:15:00',
-				Salesman_name: 'Gustavo',
-				Payment_method: 'Crédito',
-				Total_price: 80.0,
-				Discounts: 5,
-				Items: [
-					{
-						Name: 'Alcatra',
-						Supplier: 'Frigol',
-						Quantity: 1.0,
-						Sale_price: 85.0,
-						Discounts: 5,
-					},
-				],
-			},
-			{
-				Timestamp: '2025-11-09T14:30:00',
-				Salesman_name: 'Junior',
-				Payment_method: 'PIX',
-				Total_price: 150.5,
-				Discounts: 0,
-				Items: [
-					{
-						Name: 'Picanha Bassi',
-						Supplier: 'Bassi',
-						Quantity: 1.2,
-						Sale_price: 150.5,
-					},
-				],
-			},
-			{
-				Timestamp: '2025-11-09T10:15:00',
-				Salesman_name: 'Gustavo',
-				Payment_method: 'Crédito',
-				Total_price: 80.0,
-				Discounts: 5,
-				Items: [
-					{
-						Name: 'Alcatra',
-						Supplier: 'Frigol',
-						Quantity: 1.0,
-						Sale_price: 85.0,
-						Discounts: 5,
-					},
-				],
-			},
-			{
-				Timestamp: '2025-11-09T14:30:00',
-				Salesman_name: 'Junior',
-				Payment_method: 'PIX',
-				Total_price: 150.5,
-				Discounts: 0,
-				Items: [
-					{
-						Name: 'Picanha Bassi',
-						Supplier: 'Bassi',
-						Quantity: 1.2,
-						Sale_price: 150.5,
-					},
-				],
-			},
-			{
-				Timestamp: '2025-11-09T10:15:00',
-				Salesman_name: 'Gustavo',
-				Payment_method: 'Crédito',
-				Total_price: 80.0,
-				Discounts: 5,
-				Items: [
-					{
-						Name: 'Alcatra',
-						Supplier: 'Frigol',
-						Quantity: 1.0,
-						Sale_price: 85.0,
-						Discounts: 5,
-					},
-				],
-			},
-		])
-	}, [navigate])
+	useEffect(() => {
+		fetchSales()
+	}, [])
+
+	async function fetchSales() {
+		try {
+			const res = await api.get('/sales')
+			setSales(res.data || [])
+			setError(null)
+		} catch (err) {
+			console.error(err)
+			if (err.response && err.response.status === 401) {
+				toast.error('Sessão expirada. Faça login novamente.')
+				navigate('/login')
+			} else {
+				setError('Falha ao carregar o histórico de vendas.')
+			}
+		}
+	}
 
 	const handleShowModal = (items) => {
-		setSelectedSaleItems(items)
+		setSelectedSaleItems(items || [])
 		setShowModal(true)
 	}
+
 	const handleCloseModal = () => setShowModal(false)
 
-	const faturamento = sales.reduce((sum, sale) => sum + sale.Total_price, 0)
+	const faturamento = sales.reduce((sum, sale) => {
+		const valor = sale.total_price || sale.Total_price || 0
+		return sum + valor
+	}, 0)
+
 	const lucro = faturamento * 0.15
 
 	return (
 		<Container className='mt-4'>
 			{error && <Alert variant='danger'>{error}</Alert>}
+
+			<div className='mb-3'>
+				<h3>Histórico de Vendas</h3>
+			</div>
+
 			<Card>
-				<Card.Header as='h4'>Histórico de vendas</Card.Header>
-				<Card.Body>
-					<ListGroup>
-						{sales.map((sale, index) => (
-							<ListGroup.Item
-								key={index}
-								action
-								onClick={() => handleShowModal(sale.Items)}
-								className='d-flex justify-content-between align-items-center'
-							>
-								<div>
-									<strong>Data:</strong>{' '}
-									{new Date(sale.Timestamp).toLocaleString('pt-BR')}
-									<br />
-									<small className='text-muted'>
-										Vendedor: {sale.Salesman_name} |
-										Método: {sale.Payment_method} |
-										Desconto: R$ {sale.Discounts.toFixed(2)} |
-										Total: R$ {sale.Total_price.toFixed(2)}
-									</small>
-								</div>
-								<Button variant='outline-secondary' size='sm'>
-									Visualizar itens
-								</Button>
-							</ListGroup.Item>
-						))}
-					</ListGroup>
+				<Card.Header as='h5' className='d-flex justify-content-between'>
+					<span>Transações</span>
+					<span className='fs-6 text-muted'>{sales.length} registros</span>
+				</Card.Header>
+
+				<Card.Body style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+					{sales.length === 0 ? (
+						<p className='text-center text-muted mt-3'>
+							Nenhuma venda registrada.
+						</p>
+					) : (
+						<ListGroup variant='flush'>
+							{sales.map((sale, index) => {
+								const dataVenda = sale.timestamp || sale.Timestamp
+								const vendedor =
+									sale.salesman_name || sale.Salesman_name || 'Sistema'
+								const metodo = sale.payment_method || sale.Payment_method || '-'
+								const total = sale.total_price || sale.Total_price || 0
+								const itens = sale.items || sale.Items || []
+
+								return (
+									<ListGroup.Item
+										key={index}
+										className='d-flex justify-content-between align-items-center'
+									>
+										<div>
+											<strong>Data:</strong>{' '}
+											{dataVenda
+												? new Date(dataVenda).toLocaleString('pt-BR')
+												: '--/--/--'}
+											<br />
+											<small className='text-muted'>
+												Vend: {vendedor} | Pgto: {metodo}
+											</small>
+											<br />
+											<strong>Total: {formatMoney(total)}</strong>
+										</div>
+
+										<Button
+											variant='outline-secondary'
+											size='sm'
+											onClick={() => handleShowModal(itens)}
+										>
+											Ver Itens
+										</Button>
+									</ListGroup.Item>
+								)
+							})}
+						</ListGroup>
+					)}
 				</Card.Body>
+
 				<Card.Footer>
 					<Row>
 						<Col>
-							<h5>Faturamento total:</h5>
-							<h4 className={!showValues ? 'valor-blur' : ''}>
-								R$ {faturamento.toFixed(2)}
+							<h5>Faturamento Total:</h5>
+							<h4
+								className={!showValues ? 'valor-blur' : ''}
+								style={{ color: 'green' }}
+							>
+								{formatMoney(faturamento)}
 							</h4>
 						</Col>
 						<Col>
-							<h5>Lucro estimado:</h5>
-							<h4 className={!showValues ? 'valor-blur' : ''}>
-								R$ {lucro.toFixed(2)}
+							<h5>Lucro Estimado (15%):</h5>
+							<h4
+								className={!showValues ? 'valor-blur' : ''}
+								style={{ color: 'blue' }}
+							>
+								{formatMoney(lucro)}
 							</h4>
 						</Col>
 						<Col xs='auto' className='d-flex align-items-center'>
@@ -263,7 +154,7 @@ export default function Reports() {
 								variant='light'
 								onClick={() => setShowValues(!showValues)}
 							>
-								{showValues ? '🙈 Hide' : '👁️ Show'}
+								{showValues ? '🙈 Ocultar' : '👁️ Mostrar'}
 							</Button>
 						</Col>
 					</Row>
@@ -276,17 +167,32 @@ export default function Reports() {
 				</Modal.Header>
 				<Modal.Body>
 					<ListGroup variant='flush'>
-						{selectedSaleItems.map((item, index) => (
-							<ListGroup.Item key={index}>
-								<strong>Produto: {item.Name}</strong>
-								<br />
-								Fornecedor: {item.Supplier} <br />
-								Quantidade: {item.Quantity} <br />
-								Preço: R$ {item.Sale_price.toFixed(2)}
-							</ListGroup.Item>
-						))}
+						{selectedSaleItems.map((item, index) => {
+							const nome = item.name || item.Name || item.product?.name
+							const fornecedor = item.supplier || item.Supplier
+							const qtd = item.quantity || item.Quantity
+							const preco =
+								item.sale_price || item.Sale_price || item.unit_price
+
+							return (
+								<ListGroup.Item key={index}>
+									<strong>{nome}</strong>
+									<br />
+									<small className='text-muted'>
+										Fornecedor: {fornecedor}
+									</small>{' '}
+									<br />
+									{qtd} x {formatMoney(preco)}
+								</ListGroup.Item>
+							)
+						})}
 					</ListGroup>
 				</Modal.Body>
+				<Modal.Footer>
+					<Button variant='secondary' onClick={handleCloseModal}>
+						Fechar
+					</Button>
+				</Modal.Footer>
 			</Modal>
 		</Container>
 	)

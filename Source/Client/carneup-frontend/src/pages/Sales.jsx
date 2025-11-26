@@ -1,5 +1,4 @@
-import React, { useState } from 'react'
-// import { api } from '../services/api'
+import React, { useState, useEffect } from 'react'
 import {
 	Container,
 	Row,
@@ -8,75 +7,88 @@ import {
 	Button,
 	Card,
 	ListGroup,
-	Badge,
-	Alert,
 } from 'react-bootstrap'
-import { useNavigate } from 'react-router-dom'
+import api from '../services/api'
 import { toast } from 'react-toastify'
 
 export default function Sales() {
-	const [barcode, setBarcode] = useState('')
+	const [availableStock, setAvailableStock] = useState([])
+	const [selectedStockId, setSelectedStockId] = useState('')
+	const [quantity, setQuantity] = useState('')
+
 	const [cart, setCart] = useState([])
 	const [total, setTotal] = useState(0)
-	const [error, setError] = useState(null)
-	const navigate = useNavigate()
 
-	const handleAddItem = async (e) => {
-		e.preventDefault()
-		setError(null)
+	const [paymentMethod, setPaymentMethod] = useState('CASH')
 
-		let itemData
+	useEffect(() => {
+		loadStock()
+	}, [])
+
+	async function loadStock() {
 		try {
-			// const res = await api.get(`/purchases/${barcode}`))
-			if (barcode) {
-				itemData = {
-					purchase_id: parseInt(barcode),
-					name: `Item Simulado (ID: ${barcode})`,
-					price: 50.0,
-				}
-			} else {
-				throw new Error('Código inválido')
-			}
-
-			const newCart = [...cart, itemData]
-			setCart(newCart)
-
-			const newTotal = newCart.reduce((sum, item) => sum + item.price, 0)
-			setTotal(newTotal)
+			const res = await api.get('/products/purchases')
+			setAvailableStock(res.data || [])
 		} catch (err) {
-			setError('Item não encontrado ou inválido.')
-		} finally {
-			setBarcode('')
+			console.error(err)
+			toast.error('Erro ao carregar estoque.')
 		}
 	}
 
-	const handleFinalizeSale = async () => {
-		setError(null)
+	const handleAddItem = (e) => {
+		e.preventDefault()
+		const item = availableStock.find((i) => i.id === Number(selectedStockId))
+
+		if (!item) {
+			toast.error('Selecione um produto.')
+			return
+		}
+		if (!quantity || Number(quantity) <= 0) {
+			toast.error('Quantidade inválida.')
+			return
+		}
+
+		const newItem = {
+			stock_id: item.id,
+			name: item.product?.name || item.name || `Item #${item.id}`,
+			unit_price: Number(item.unit_sale_price),
+			quantity: Number(quantity),
+			total: Number(item.unit_sale_price) * Number(quantity),
+		}
+
+		const newCart = [...cart, newItem]
+		setCart(newCart)
+		setTotal(newCart.reduce((acc, i) => acc + i.total, 0))
+		setSelectedStockId('')
+		setQuantity('')
+	}
+
+	const handleFinalize = async () => {
 		try {
-			const saleBody = {
-				Timestamp: new Date().toISOString(),
-				Payment_method: 'PIX',
-				Discount: 0.0,
-				User_id: 1,
-				Items: cart.map((item) => ({
-					Quantity: 1,
-					Purchase_id: item.purchase_id,
+			const storedUserId = localStorage.getItem('userId')
+			const userId = storedUserId ? Number(storedUserId) : 1
+
+			const payload = {
+				timestamp: new Date().toISOString(),
+				payment_method: paymentMethod,
+				discount: 0,
+				user_id: userId,
+				items: cart.map((i) => ({
+					purchase_id: i.stock_id,
+					quantity: i.quantity,
 				})),
 			}
 
-			// await api.post('/sales', saleBody);
+			await api.post('/sales', payload)
 
-			toast.success('Venda registrada com sucesso')
+			toast.success('Venda realizada com sucesso!')
 			setCart([])
 			setTotal(0)
+			setPaymentMethod('CASH')
+			loadStock()
 		} catch (err) {
-			if (err.response && err.response.status === 401) {
-				toast.error('Sessão expirada. Faça o login novamente.')
-				navigate('/login')
-			} else {
-				setError('Falha ao registrar venda.')
-				console.error(err)
-			}
+			console.error(err)
+			toast.error('Erro ao finalizar venda.')
 		}
 	}
 
@@ -85,62 +97,92 @@ export default function Sales() {
 			<Row>
 				<Col md={7}>
 					<Card>
-						<Card.Header as='h4'>🥩 Vendas</Card.Header>
+						<Card.Header as='h4'>Nova Venda</Card.Header>
 						<Card.Body>
-							{error && <Alert variant='danger'>{error}</Alert>}
-
 							<Form onSubmit={handleAddItem}>
-								<Form.Group>
-									<Form.Label>Código de barras</Form.Label>
-									<Form.Control
-										type='text'
-										placeholder='Scan item barcode...'
-										value={barcode}
-										onChange={(e) => setBarcode(e.target.value)}
-										autoFocus
-									/>
-								</Form.Group>
-								<Button type='submit' style={{ display: 'none' }}>
+								<Row>
+									<Col md={8}>
+										<Form.Group className='mb-3'>
+											<Form.Label>Produto (Em Estoque)</Form.Label>
+											<Form.Select
+												value={selectedStockId}
+												onChange={(e) => setSelectedStockId(e.target.value)}
+												autoFocus
+											>
+												<option value=''>Selecione...</option>
+												{availableStock.map((item) => (
+													<option key={item.id} value={item.id}>
+														{item.product?.name || item.name} - R${' '}
+														{item.unit_sale_price} (Disp: {item.quantity})
+													</option>
+												))}
+											</Form.Select>
+										</Form.Group>
+									</Col>
+									<Col md={4}>
+										<Form.Group className='mb-3'>
+											<Form.Label>Qtd / Peso</Form.Label>
+											<Form.Control
+												type='number'
+												step='0.01'
+												value={quantity}
+												onChange={(e) => setQuantity(e.target.value)}
+											/>
+										</Form.Group>
+									</Col>
+								</Row>
+								<Button type='submit' className='w-100'>
 									Adicionar
 								</Button>
 							</Form>
-
-							<hr />
-							<h5>Venda atual</h5>
-							<ListGroup>
-								{cart.map((item, index) => (
-									<ListGroup.Item
-										key={index}
-										className='d-flex justify-content-between'
-									>
-										{item.name}
-										<Badge bg='primary' pill>
-											R$ {item.price.toFixed(2)}
-										</Badge>
-									</ListGroup.Item>
-								))}
-							</ListGroup>
 						</Card.Body>
 					</Card>
+					<div className='mt-3'>
+						<ListGroup>
+							{cart.map((item, index) => (
+								<ListGroup.Item
+									key={index}
+									className='d-flex justify-content-between'
+								>
+									<span>
+										{item.name} ({item.quantity} x R$ {item.unit_price})
+									</span>
+									<strong>R$ {item.total.toFixed(2)}</strong>
+								</ListGroup.Item>
+							))}
+						</ListGroup>
+					</div>
 				</Col>
 
 				<Col md={5}>
-					<Card className='text-center'>
-						<Card.Header as='h5'>Total</Card.Header>
+					<Card className='text-center bg-light'>
 						<Card.Body>
-							<h1 className='display-4'>R$ {total.toFixed(2)}</h1>
-						</Card.Body>
-						<div className='d-grid gap-2 p-3'>
+							<h3>Total: R$ {total.toFixed(2)}</h3>
+
+							<Form.Group className='mb-3 mt-3 text-start'>
+								<Form.Label>Forma de Pagamento</Form.Label>
+								<Form.Select
+									value={paymentMethod}
+									onChange={(e) => setPaymentMethod(e.target.value)}
+									size='lg'
+								>
+									<option value='CASH'>Dinheiro</option>
+									<option value='PIX'>Pix</option>
+									<option value='CREDIT'>Crédito</option>
+									<option value='DEBIT'>Débito</option>
+								</Form.Select>
+							</Form.Group>
+
 							<Button
 								variant='success'
 								size='lg'
-								className='p-3'
-								onClick={handleFinalizeSale}
+								className='w-100'
+								onClick={handleFinalize}
 								disabled={cart.length === 0}
 							>
-								Finalizar compra
+								Finalizar Venda
 							</Button>
-						</div>
+						</Card.Body>
 					</Card>
 				</Col>
 			</Row>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 import { Container, Row, Col, Card, Button } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
 
@@ -7,7 +7,7 @@ export default function Dashboard() {
 
 	return (
 		<Container className='mt-4'>
-			<h3>Bem vindo ao Junior Prime Beef</h3>
+			<h3>Bem vindo ao CarneUp</h3>
 			<p>Selecione uma das opções abaixo:</p>
 			<Row className='g-3 mt-2'>
 				<Col md={3}>
@@ -25,9 +25,7 @@ export default function Dashboard() {
 					<Card className='h-100'>
 						<Card.Body className='d-flex flex-column'>
 							<Card.Title>Vendas</Card.Title>
-							<Card.Text>
-								Abra o sistema de vendas
-							</Card.Text>
+							<Card.Text>Abra o sistema de vendas</Card.Text>
 							<div className='mt-auto'>
 								<Button onClick={() => navigate('/sales')}>Abrir</Button>
 							</div>
@@ -38,7 +36,9 @@ export default function Dashboard() {
 					<Card className='h-100'>
 						<Card.Body className='d-flex flex-column'>
 							<Card.Title>Relatórios</Card.Title>
-							<Card.Text>Veja os relatórios/histórico das vendas realizadas</Card.Text>
+							<Card.Text>
+								Veja os relatórios/histórico das vendas realizadas
+							</Card.Text>
 							<div className='mt-auto'>
 								<Button onClick={() => navigate('/reports')}>Abrir</Button>
 							</div>

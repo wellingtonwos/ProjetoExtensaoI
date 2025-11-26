@@ -4,7 +4,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/JuniorPrimeBeef
     username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD}
+    password: admin
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -13,5 +13,5 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 jwt:
-  secret: ${JWT_SECRET_KEY}
+  secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
   expiration: 86400000
