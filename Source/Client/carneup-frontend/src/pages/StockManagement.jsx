@@ -1,4 +1,3 @@
-// src/pages/StockManagement.jsx
 import React, { useState, useEffect } from 'react'
 import {
 	Container,
@@ -16,28 +15,24 @@ import api from '../services/api'
 import { toast } from 'react-toastify'
 
 export default function StockManagement() {
-	const [key, setKey] = useState('products') // Controla as abas (Produtos vs Entrada Estoque)
+	const [key, setKey] = useState('products')
 
-	// Listas para os Dropdowns
 	const [products, setProducts] = useState([])
-	const [brands, setBrands] = useState([]) // Antes era suppliers, agora brands
+	const [brands, setBrands] = useState([])
 	const [categories, setCategories] = useState([])
 
-	// Modais de Cadastro Rápido
 	const [showBrandModal, setShowBrandModal] = useState(false)
 	const [showCategoryModal, setShowCategoryModal] = useState(false)
 	const [quickName, setQuickName] = useState('')
 
-	// Formulário de Produto (Cadastro do "Catálogo")
 	const [formProduct, setFormProduct] = useState({
 		name: '',
-		measuring_unit: 'kg',
+		measuring_unit: 'KG',
 		code: '',
 		id_category: '',
 		id_brand: '',
 	})
 
-	// Formulário de Compra (Entrada no Estoque)
 	const [formPurchase, setFormPurchase] = useState({
 		product_id: '',
 		quantity: '',
@@ -46,35 +41,27 @@ export default function StockManagement() {
 		expiring_date: '',
 	})
 
-	// 1. Carregar listas ao abrir a tela
 	useEffect(() => {
 		fetchLists()
 	}, [])
 
 	async function fetchLists() {
 		try {
-			// Busca tudo que é necessário para os formulários
-			// const [prodRes, brandRes, catRes] = await Promise.all([
-			// 	api.get('/products'),
-			// 	api.get('/brands'),
-			// 	api.get('/categories'),
-			// ])
-
-			const [brandRes, catRes] = await Promise.all([
+			const [prodRes, brandRes, catRes] = await Promise.all([
+				api.get('/products'),
 				api.get('/brands'),
 				api.get('/categories'),
 			])
 
-			setProducts([])
+			setProducts(prodRes.data || [])
 			setBrands(brandRes.data || [])
 			setCategories(catRes.data || [])
 		} catch (err) {
 			console.error(err)
-			// toast.error('Erro ao carregar listas (Verifique login)');
+			toast.error('Erro ao carregar listas')
 		}
 	}
 
-	// --- LÓGICA DE CADASTRO RÁPIDO (MARCA/CATEGORIA) ---
 	async function handleQuickSave() {
 		try {
 			if (showBrandModal) {
@@ -87,30 +74,28 @@ export default function StockManagement() {
 			setQuickName('')
 			setShowBrandModal(false)
 			setShowCategoryModal(false)
-			fetchLists() // Atualiza os dropdowns
+			fetchLists()
 		} catch (err) {
 			toast.error('Erro ao criar item.')
 		}
 	}
 
-	// --- 2. CRIAR PRODUTO (POST /products) ---
 	async function handleCreateProduct(e) {
 		e.preventDefault()
 		try {
 			const payload = {
 				name: formProduct.name,
-				measuring_unit: formProduct.measuring_unit,
 				code: formProduct.code,
-				id_category: Number(formProduct.id_category),
-				id_brand: Number(formProduct.id_brand), // Ajustado para brand
+				unitMeasurement: formProduct.measuring_unit,
+				categoryId: Number(formProduct.id_category),
+				brandId: Number(formProduct.id_brand),
 			}
 			await api.post('/products', payload)
 			toast.success('Produto cadastrado!')
 
-			// Limpa form e recarrega lista para aparecer na aba de "Entrada"
 			setFormProduct({
 				name: '',
-				measuring_unit: 'kg',
+				measuring_unit: 'KG',
 				code: '',
 				id_category: '',
 				id_brand: '',
@@ -121,19 +106,18 @@ export default function StockManagement() {
 		}
 	}
 
-	// --- 3. CRIAR COMPRA/ENTRADA (POST /purchases) ---
 	async function handleCreatePurchase(e) {
 		e.preventDefault()
 		try {
 			const payload = {
-				date: new Date().toISOString().split('T')[0], // Data de hoje
+				date: new Date().toISOString().split('T')[0],
 				items: [
 					{
 						quantity: Number(formPurchase.quantity),
-						unit_purchase_price: Number(formPurchase.unit_purchase_price),
-						unit_sale_price: Number(formPurchase.unit_sale_price),
-						expiring_date: formPurchase.expiring_date,
-						product_id: Number(formPurchase.product_id),
+						unitPurchasePrice: Number(formPurchase.unit_purchase_price),
+						unitSalePrice: Number(formPurchase.unit_sale_price),
+						expiringDate: formPurchase.expiring_date,
+						productId: Number(formPurchase.product_id),
 					},
 				],
 			}
@@ -156,7 +140,6 @@ export default function StockManagement() {
 			<h2>Gerenciamento de Estoque</h2>
 
 			<Tabs activeKey={key} onSelect={(k) => setKey(k)} className='mb-3'>
-				{/* ABA 1: CADASTRO DE PRODUTO (CATÁLOGO) */}
 				<Tab eventKey='products' title='1. Cadastrar Novo Produto'>
 					<Card>
 						<Card.Body>
@@ -211,7 +194,7 @@ export default function StockManagement() {
 													<option value=''>Selecione...</option>
 													{brands.map((b) => (
 														<option key={b.id} value={b.id}>
-															{b.name}
+															{b.brandName}
 														</option>
 													))}
 												</Form.Select>
@@ -241,7 +224,7 @@ export default function StockManagement() {
 													<option value=''>Selecione...</option>
 													{categories.map((c) => (
 														<option key={c.id} value={c.id}>
-															{c.name}
+															{c.categoryName}
 														</option>
 													))}
 												</Form.Select>
@@ -266,8 +249,8 @@ export default function StockManagement() {
 													})
 												}
 											>
-												<option value='kg'>Quilo (kg)</option>
-												<option value='un'>Unidade (un)</option>
+												<option value='KG'>Quilo (kg)</option>
+												<option value='UN'>Unidade (un)</option>
 											</Form.Select>
 										</Form.Group>
 									</Col>
@@ -278,7 +261,6 @@ export default function StockManagement() {
 					</Card>
 				</Tab>
 
-				{/* ABA 2: ENTRADA DE ESTOQUE (COMPRAS) */}
 				<Tab eventKey='purchases' title='2. Entrada de Estoque (Compra)'>
 					<Card>
 						<Card.Body>
@@ -384,7 +366,6 @@ export default function StockManagement() {
 				</Tab>
 			</Tabs>
 
-			{/* MODAL GENÉRICO PARA CRIAR MARCA/CATEGORIA */}
 			<Modal
 				show={showBrandModal || showCategoryModal}
 				onHide={() => {

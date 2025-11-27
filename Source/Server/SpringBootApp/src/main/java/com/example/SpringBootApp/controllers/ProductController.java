@@ -5,6 +5,7 @@ import com.example.SpringBootApp.DTOs.ProductWithPurchaseInStockDTO;
 import com.example.SpringBootApp.models.Product;
 import com.example.SpringBootApp.services.CatalogService;
 import com.example.SpringBootApp.services.InventoryService;
+import com.example.SpringBootApp.DTOs.ProductResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -43,4 +44,10 @@ public class ProductController {
         List<ProductWithPurchaseInStockDTO> products = inventoryService.getProductsWithPurchaseInStock();
         return ResponseEntity.ok(products);
     }
+
+		@GetMapping
+		public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
+			List<ProductResponseDTO> products = catalogService.getAllProducts();
+			return ResponseEntity.ok(products);
+		}
 }

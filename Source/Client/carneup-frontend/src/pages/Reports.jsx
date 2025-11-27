@@ -8,6 +8,8 @@ import {
 	Row,
 	Col,
 	Alert,
+	Form,
+	InputGroup,
 } from 'react-bootstrap'
 import api from '../services/api'
 import { toast } from 'react-toastify'
@@ -22,6 +24,19 @@ export default function Reports() {
 	const [error, setError] = useState(null)
 	const [showValues, setShowValues] = useState(false)
 
+	const getFirstDayOfMonth = () => {
+		const date = new Date()
+		return new Date(date.getFullYear(), date.getMonth(), 1)
+			.toISOString()
+			.split('T')[0]
+	}
+	const getToday = () => {
+		return new Date().toISOString().split('T')[0]
+	}
+
+	const [startDate, setStartDate] = useState(getFirstDayOfMonth())
+	const [endDate, setEndDate] = useState(getToday())
+
 	const [showModal, setShowModal] = useState(false)
 	const [selectedSaleItems, setSelectedSaleItems] = useState([])
 
@@ -35,21 +50,40 @@ export default function Reports() {
 	}
 
 	useEffect(() => {
-		fetchSales()
-	}, [])
+		handleFilter()
+	})
 
-	async function fetchSales() {
+	async function handleFilter(e) {
+		if (e) e.preventDefault()
+
 		try {
-			const res = await api.get('/sales')
+			if (!startDate || !endDate) {
+				toast.warning('Selecione as datas de início e fim.')
+				return
+			}
+
+			const params = {
+				startDate: `${startDate}T00:00:00`,
+				endDate: `${endDate}T23:59:59`,
+			}
+
+			const res = await api.get('/sales', { params })
+
 			setSales(res.data || [])
 			setError(null)
+
+			if (res.data.length === 0) {
+				toast.info('Nenhuma venda encontrada neste período.')
+			}
 		} catch (err) {
 			console.error(err)
 			if (err.response && err.response.status === 401) {
 				toast.error('Sessão expirada. Faça login novamente.')
 				navigate('/login')
 			} else {
-				setError('Falha ao carregar o histórico de vendas.')
+				const msg =
+					err.response?.data?.message || 'Falha ao carregar histórico.'
+				setError(`Erro: ${msg}`)
 			}
 		}
 	}
@@ -70,23 +104,65 @@ export default function Reports() {
 
 	return (
 		<Container className='mt-4'>
-			{error && <Alert variant='danger'>{error}</Alert>}
-
-			<div className='mb-3'>
+			<div className='mb-4'>
 				<h3>Histórico de Vendas</h3>
+
+				<Card className='mt-3 bg-light'>
+					<Card.Body className='py-3'>
+						<Form onSubmit={handleFilter}>
+							<Row className='align-items-end'>
+								<Col md={4}>
+									<Form.Group>
+										<Form.Label>Data Início</Form.Label>
+										<Form.Control
+											type='date'
+											value={startDate}
+											onChange={(e) => setStartDate(e.target.value)}
+											required
+										/>
+									</Form.Group>
+								</Col>
+								<Col md={4}>
+									<Form.Group>
+										<Form.Label>Data Fim</Form.Label>
+										<Form.Control
+											type='date'
+											value={endDate}
+											onChange={(e) => setEndDate(e.target.value)}
+											required
+										/>
+									</Form.Group>
+								</Col>
+								<Col md={4}>
+									<div className='d-grid'>
+										<Button type='submit' variant='primary'>
+											🔍 Filtrar Período
+										</Button>
+									</div>
+								</Col>
+							</Row>
+						</Form>
+					</Card.Body>
+				</Card>
 			</div>
 
+			{error && <Alert variant='danger'>{error}</Alert>}
+
 			<Card>
-				<Card.Header as='h5' className='d-flex justify-content-between'>
-					<span>Transações</span>
-					<span className='fs-6 text-muted'>{sales.length} registros</span>
+				<Card.Header
+					as='h5'
+					className='d-flex justify-content-between align-items-center'
+				>
+					<span>Resultados</span>
+					<span className='badge bg-secondary'>{sales.length} Vendas</span>
 				</Card.Header>
 
-				<Card.Body style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+				<Card.Body style={{ maxHeight: '55vh', overflowY: 'auto' }}>
 					{sales.length === 0 ? (
-						<p className='text-center text-muted mt-3'>
-							Nenhuma venda registrada.
-						</p>
+						<div className='text-center py-5 text-muted'>
+							<h5>Nenhum registro encontrado</h5>
+							<p>Tente alterar o filtro de datas acima.</p>
+						</div>
 					) : (
 						<ListGroup variant='flush'>
 							{sales.map((sale, index) => {
@@ -103,16 +179,19 @@ export default function Reports() {
 										className='d-flex justify-content-between align-items-center'
 									>
 										<div>
-											<strong>Data:</strong>{' '}
-											{dataVenda
-												? new Date(dataVenda).toLocaleString('pt-BR')
-												: '--/--/--'}
+											<strong>
+												{dataVenda
+													? new Date(dataVenda).toLocaleString('pt-BR')
+													: '--/--/--'}
+											</strong>
 											<br />
 											<small className='text-muted'>
 												Vend: {vendedor} | Pgto: {metodo}
 											</small>
 											<br />
-											<strong>Total: {formatMoney(total)}</strong>
+											<span className='text-success fw-bold'>
+												{formatMoney(total)}
+											</span>
 										</div>
 
 										<Button
@@ -132,7 +211,7 @@ export default function Reports() {
 				<Card.Footer>
 					<Row>
 						<Col>
-							<h5>Faturamento Total:</h5>
+							<h5>Faturamento:</h5>
 							<h4
 								className={!showValues ? 'valor-blur' : ''}
 								style={{ color: 'green' }}
@@ -141,7 +220,7 @@ export default function Reports() {
 							</h4>
 						</Col>
 						<Col>
-							<h5>Lucro Estimado (15%):</h5>
+							<h5>Lucro (15%):</h5>
 							<h4
 								className={!showValues ? 'valor-blur' : ''}
 								style={{ color: 'blue' }}
@@ -152,9 +231,10 @@ export default function Reports() {
 						<Col xs='auto' className='d-flex align-items-center'>
 							<Button
 								variant='light'
+								size='sm'
 								onClick={() => setShowValues(!showValues)}
 							>
-								{showValues ? '🙈 Ocultar' : '👁️ Mostrar'}
+								{showValues ? '🙈' : '👁️'}
 							</Button>
 						</Col>
 					</Row>
@@ -168,19 +248,18 @@ export default function Reports() {
 				<Modal.Body>
 					<ListGroup variant='flush'>
 						{selectedSaleItems.map((item, index) => {
-							const nome = item.name || item.Name || item.product?.name
-							const fornecedor = item.supplier || item.Supplier
+							const nome =
+								item.name || item.Name || item.product?.name || 'Produto'
+							const fornecedor = item.supplier || item.Supplier || '-'
 							const qtd = item.quantity || item.Quantity
 							const preco =
-								item.sale_price || item.Sale_price || item.unit_price
+								item.sale_price || item.Sale_price || item.unit_price || 0
 
 							return (
 								<ListGroup.Item key={index}>
 									<strong>{nome}</strong>
 									<br />
-									<small className='text-muted'>
-										Fornecedor: {fornecedor}
-									</small>{' '}
+									<small className='text-muted'>Marca: {fornecedor}</small>{' '}
 									<br />
 									{qtd} x {formatMoney(preco)}
 								</ListGroup.Item>

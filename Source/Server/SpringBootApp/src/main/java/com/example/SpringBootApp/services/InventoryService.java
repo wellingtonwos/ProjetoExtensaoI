@@ -114,6 +114,7 @@ public class InventoryService {
                     dto.setPurchase_date(purchaseDate);
                     dto.setExpiring_date(expiration);
                     dto.setQuantity(totalQuantity);
+										dto.setUnitSalePrice(reference.getSaleUnitPrice());
 
                     return dto;
                 })

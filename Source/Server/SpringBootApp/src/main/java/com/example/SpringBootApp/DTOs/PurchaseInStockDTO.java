@@ -15,4 +15,6 @@ public class PurchaseInStockDTO {
     private LocalDate expiring_date;
 
     private BigDecimal quantity;
+
+		private BigDecimal unitSalePrice;
 }

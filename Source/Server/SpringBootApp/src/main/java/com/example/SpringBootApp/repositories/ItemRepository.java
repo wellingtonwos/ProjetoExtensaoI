@@ -15,4 +15,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     BigDecimal sumQuantityByPurchaseId(@Param("purchaseId") Long purchaseId);
 
     List<Item> findByPurchaseIdAndProductId(Long purchaseId, Long productId);
+
+		Item findFirstByPurchaseIdAndSaleIsNull(Long purchaseId);
 }

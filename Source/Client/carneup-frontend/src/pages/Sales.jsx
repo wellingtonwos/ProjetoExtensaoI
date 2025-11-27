@@ -13,13 +13,12 @@ import { toast } from 'react-toastify'
 
 export default function Sales() {
 	const [availableStock, setAvailableStock] = useState([])
-	const [selectedStockId, setSelectedStockId] = useState('')
+	const [selectedOptionId, setSelectedOptionId] = useState('')
 	const [quantity, setQuantity] = useState('')
 
 	const [cart, setCart] = useState([])
 	const [total, setTotal] = useState(0)
-
-	const [paymentMethod, setPaymentMethod] = useState('CASH')
+	const [paymentMethod, setPaymentMethod] = useState('PIX')
 
 	useEffect(() => {
 		loadStock()
@@ -28,16 +27,57 @@ export default function Sales() {
 	async function loadStock() {
 		try {
 			const res = await api.get('/products/purchases')
-			setAvailableStock(res.data || [])
+
+			const flatOptions = res.data.flatMap((product) => {
+				if (!product.purchases || product.purchases.length === 0) return []
+
+				const lotsWithStock = product.purchases.filter(
+					(p) => Number(p.quantity) > 0
+				)
+
+				return lotsWithStock.map((purchase) => {
+					const priceFound = purchase.unitSalePrice || 0
+
+					return {
+						value: purchase.purchase_id,
+						productId: product.id,
+						purchaseId: purchase.purchase_id,
+						name: product.product_name,
+						unit: product.unitMeasurement,
+						quantityAvailable: Number(purchase.quantity),
+						price: Number(priceFound),
+					}
+				})
+			})
+
+			setAvailableStock(flatOptions)
 		} catch (err) {
 			console.error(err)
 			toast.error('Erro ao carregar estoque.')
 		}
 	}
 
+	const selectedItemData = availableStock.find(
+		(i) => i.value === Number(selectedOptionId)
+	)
+	let labelTexto = 'Qtd / Peso'
+	let placeholderTexto = '0.00'
+
+	if (selectedItemData) {
+		if (selectedItemData.unit === 'KG') {
+			labelTexto = 'Peso (KG)'
+			placeholderTexto = 'Ex: 1.250'
+		} else {
+			labelTexto = 'Quantidade (UN)'
+			placeholderTexto = 'Ex: 2'
+		}
+	}
+
 	const handleAddItem = (e) => {
 		e.preventDefault()
-		const item = availableStock.find((i) => i.id === Number(selectedStockId))
+		const item = availableStock.find(
+			(i) => i.value === Number(selectedOptionId)
+		)
 
 		if (!item) {
 			toast.error('Selecione um produto.')
@@ -48,18 +88,32 @@ export default function Sales() {
 			return
 		}
 
+		if (Number(quantity) > item.quantityAvailable) {
+			toast.error(`Estoque insuficiente! Disp: ${item.quantityAvailable}`)
+			return
+		}
+
+		let finalPrice = item.price
+		if (finalPrice === 0) {
+			toast.warning('Item sem preço cadastrado. R$ 0,00.')
+		}
+
 		const newItem = {
-			stock_id: item.id,
-			name: item.product?.name || item.name || `Item #${item.id}`,
-			unit_price: Number(item.unit_sale_price),
+			uniqueId: Date.now(),
+			productId: item.productId,
+			purchaseId: item.purchaseId,
+			name: item.name,
+			unit: item.unit,
+			unitSalePrice: finalPrice,
 			quantity: Number(quantity),
-			total: Number(item.unit_sale_price) * Number(quantity),
+			total: finalPrice * Number(quantity),
 		}
 
 		const newCart = [...cart, newItem]
 		setCart(newCart)
 		setTotal(newCart.reduce((acc, i) => acc + i.total, 0))
-		setSelectedStockId('')
+
+		setSelectedOptionId('')
 		setQuantity('')
 	}
 
@@ -70,25 +124,26 @@ export default function Sales() {
 
 			const payload = {
 				timestamp: new Date().toISOString(),
-				payment_method: paymentMethod,
+				paymentMethod: paymentMethod,
 				discount: 0,
-				user_id: userId,
+				userId: userId,
 				items: cart.map((i) => ({
-					purchase_id: i.stock_id,
+					productId: i.productId,
+					purchaseId: i.purchaseId,
 					quantity: i.quantity,
 				})),
 			}
 
 			await api.post('/sales', payload)
 
-			toast.success('Venda realizada com sucesso!')
+			toast.success('Venda realizada!')
 			setCart([])
 			setTotal(0)
-			setPaymentMethod('CASH')
 			loadStock()
 		} catch (err) {
 			console.error(err)
-			toast.error('Erro ao finalizar venda.')
+			const msg = err.response?.data?.message || 'Erro ao finalizar venda.'
+			toast.error(msg)
 		}
 	}
 
@@ -105,15 +160,15 @@ export default function Sales() {
 										<Form.Group className='mb-3'>
 											<Form.Label>Produto (Em Estoque)</Form.Label>
 											<Form.Select
-												value={selectedStockId}
-												onChange={(e) => setSelectedStockId(e.target.value)}
+												value={selectedOptionId}
+												onChange={(e) => setSelectedOptionId(e.target.value)}
 												autoFocus
 											>
 												<option value=''>Selecione...</option>
-												{availableStock.map((item) => (
-													<option key={item.id} value={item.id}>
-														{item.product?.name || item.name} - R${' '}
-														{item.unit_sale_price} (Disp: {item.quantity})
+												{availableStock.map((opt) => (
+													<option key={opt.value} value={opt.value}>
+														{opt.name} ({opt.quantityAvailable} {opt.unit}) - R${' '}
+														{opt.price.toFixed(2)}
 													</option>
 												))}
 											</Form.Select>
@@ -121,12 +176,15 @@ export default function Sales() {
 									</Col>
 									<Col md={4}>
 										<Form.Group className='mb-3'>
-											<Form.Label>Qtd / Peso</Form.Label>
+											<Form.Label className='fw-bold text-primary'>
+												{labelTexto}
+											</Form.Label>
 											<Form.Control
 												type='number'
 												step='0.01'
 												value={quantity}
 												onChange={(e) => setQuantity(e.target.value)}
+												placeholder={placeholderTexto}
 											/>
 										</Form.Group>
 									</Col>
@@ -139,13 +197,14 @@ export default function Sales() {
 					</Card>
 					<div className='mt-3'>
 						<ListGroup>
-							{cart.map((item, index) => (
+							{cart.map((item) => (
 								<ListGroup.Item
-									key={index}
+									key={item.uniqueId}
 									className='d-flex justify-content-between'
 								>
 									<span>
-										{item.name} ({item.quantity} x R$ {item.unit_price})
+										{item.name} ({item.quantity} {item.unit} x R${' '}
+										{item.unitSalePrice.toFixed(2)})
 									</span>
 									<strong>R$ {item.total.toFixed(2)}</strong>
 								</ListGroup.Item>
@@ -166,8 +225,8 @@ export default function Sales() {
 									onChange={(e) => setPaymentMethod(e.target.value)}
 									size='lg'
 								>
-									<option value='CASH'>Dinheiro</option>
 									<option value='PIX'>Pix</option>
+									<option value='CASH'>Dinheiro</option>
 									<option value='CREDIT'>Crédito</option>
 									<option value='DEBIT'>Débito</option>
 								</Form.Select>

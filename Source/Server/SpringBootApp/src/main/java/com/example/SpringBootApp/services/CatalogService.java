@@ -15,84 +15,98 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class CatalogService {
 
-    private final ProductRepository productRepository;
+	private final ProductRepository productRepository;
 
-    private final CategoryRepository categoryRepository;
+	private final CategoryRepository categoryRepository;
 
-    private final BrandRepository brandRepository;
+	private final BrandRepository brandRepository;
 
-    public Product createProducts(ProductCreateDTO productDTO) {
-        Category category = categoryRepository.findById(productDTO.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+	public Product createProducts(ProductCreateDTO productDTO) {
+		Category category = categoryRepository.findById(productDTO.getCategoryId())
+				.orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
-        Brand brand = brandRepository.findById(productDTO.getBrandId())
-                .orElseThrow(() -> new ResourceNotFoundException("Brand not found"));
+		Brand brand = brandRepository.findById(productDTO.getBrandId())
+				.orElseThrow(() -> new ResourceNotFoundException("Brand not found"));
 
-        if (productRepository.existsByCode(productDTO.getCode())) {
-            throw new ResourceAlreadyExistsException("Product code already exists");
-        }
+		if (productRepository.existsByCode(productDTO.getCode())) {
+			throw new ResourceAlreadyExistsException("Product code already exists");
+		}
 
-        Product product = new Product();
-        product.setName(productDTO.getName());
-        product.setUnitMeasurement(productDTO.getUnitMeasurement());
-        product.setCode(productDTO.getCode());
-        product.setCategory(category);
-        product.setBrand(brand);
+		Product product = new Product();
+		product.setName(productDTO.getName());
+		product.setUnitMeasurement(productDTO.getUnitMeasurement());
+		product.setCode(productDTO.getCode());
+		product.setCategory(category);
+		product.setBrand(brand);
 
-        return productRepository.save(product);
-    }
+		return productRepository.save(product);
+	}
 
-    public Category createCategory(CategoryCreateDTO categoryDTO) {
-        if (categoryRepository.existsByName(categoryDTO.getName())) {
-            throw new ResourceAlreadyExistsException("Category name already exists");
-        }
+	public Category createCategory(CategoryCreateDTO categoryDTO) {
+		if (categoryRepository.existsByName(categoryDTO.getName())) {
+			throw new ResourceAlreadyExistsException("Category name already exists");
+		}
 
-        Category category = new Category();
-        category.setName(categoryDTO.getName());
+		Category category = new Category();
+		category.setName(categoryDTO.getName());
 
-        return categoryRepository.save(category);
-    }
+		return categoryRepository.save(category);
+	}
 
-    public Brand createBrand(BrandCreateDTO brandDTO) {
-        if (brandRepository.existsByName(brandDTO.getName())) {
-            throw new ResourceAlreadyExistsException("Brand name already exists");
-        }
+	public Brand createBrand(BrandCreateDTO brandDTO) {
+		if (brandRepository.existsByName(brandDTO.getName())) {
+			throw new ResourceAlreadyExistsException("Brand name already exists");
+		}
 
-        Brand brand = new Brand();
-        brand.setName(brandDTO.getName());
+		Brand brand = new Brand();
+		brand.setName(brandDTO.getName());
 
-        return brandRepository.save(brand);
-    }
+		return brandRepository.save(brand);
+	}
 
-    public List<BrandDTO> getAllBrands() {
-        List<Brand> brands = brandRepository.findAll();
-        List<BrandDTO> brandsDTO = new ArrayList<>();
+	public List<BrandDTO> getAllBrands() {
+		List<Brand> brands = brandRepository.findAll();
+		List<BrandDTO> brandsDTO = new ArrayList<>();
 
-        for (Brand brand : brands){
-            BrandDTO currentBrand = new BrandDTO();
-            currentBrand.setId(brand.getId());
-            currentBrand.setBrandName(brand.getName());
-            brandsDTO.add(currentBrand);
-        }
-        return brandsDTO;
-    }
+		for (Brand brand : brands) {
+			BrandDTO currentBrand = new BrandDTO();
+			currentBrand.setId(brand.getId());
+			currentBrand.setBrandName(brand.getName());
+			brandsDTO.add(currentBrand);
+		}
+		return brandsDTO;
+	}
 
-    public List<CategoryDTO> getAllCategories() {
-        List<Category> categories = categoryRepository.findAll();
-        List<CategoryDTO> categoriesDTO = new ArrayList<>();
+	public List<CategoryDTO> getAllCategories() {
+		List<Category> categories = categoryRepository.findAll();
+		List<CategoryDTO> categoriesDTO = new ArrayList<>();
 
-        for (Category category : categories){
-            CategoryDTO currentCategory = new CategoryDTO();
-            currentCategory.setId(category.getId());
-            currentCategory.setCategoryName(category.getName());
-            categoriesDTO.add(currentCategory);
-        }
-        return categoriesDTO;
-    }
+		for (Category category : categories) {
+			CategoryDTO currentCategory = new CategoryDTO();
+			currentCategory.setId(category.getId());
+			currentCategory.setCategoryName(category.getName());
+			categoriesDTO.add(currentCategory);
+		}
+		return categoriesDTO;
+	}
+
+	public List<ProductResponseDTO> getAllProducts() {
+		List<Product> products = productRepository.findAll();
+
+		return products.stream().map(product -> {
+			ProductResponseDTO dto = new ProductResponseDTO();
+			dto.setId(product.getId());
+			dto.setName(product.getName());
+			dto.setCode(product.getCode());
+			dto.setUnitMeasurement(product.getUnitMeasurement() != null ? product.getUnitMeasurement().name() : null); // Se
+			return dto;
+		}).collect(Collectors.toList());
+	}
 }

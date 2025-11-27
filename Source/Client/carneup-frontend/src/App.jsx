@@ -14,16 +14,17 @@ import {
 	Button,
 } from 'react-bootstrap'
 
-// Imports das Páginas
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+
 import Login from './pages/Login'
-import Dashboard from './pages/Dashboard' // <--- 1. IMPORTE AQUI
+import Dashboard from './pages/Dashboard'
 import StockManagement from './pages/StockManagement'
 import Sales from './pages/Sales'
 import Reports from './pages/Reports'
 import Brands from './pages/Brands'
 import Categories from './pages/Categories'
 
-// Componente Navbar
 function AppNavbar() {
 	const location = useLocation()
 	const isLoginPage = location.pathname === '/login'
@@ -38,9 +39,8 @@ function AppNavbar() {
 	return (
 		<BootstrapNavbar bg='dark' variant='dark' expand='lg'>
 			<Container>
-				{/* Link da marca agora leva para o Dashboard */}
 				<BootstrapNavbar.Brand as={Link} to='/'>
-					Junior Prime Beef
+					CarneUp
 				</BootstrapNavbar.Brand>
 				<BootstrapNavbar.Toggle aria-controls='basic-navbar-nav' />
 				<BootstrapNavbar.Collapse id='basic-navbar-nav'>
@@ -48,7 +48,6 @@ function AppNavbar() {
 						<Nav.Link as={Link} to='/'>
 							Dashboard
 						</Nav.Link>{' '}
-						{/* Link no menu */}
 						<Nav.Link as={Link} to='/stock'>
 							Estoque
 						</Nav.Link>
@@ -84,12 +83,12 @@ function PrivateRoute({ children }) {
 function App() {
 	return (
 		<BrowserRouter>
+			<ToastContainer autoClose={3000} />
 			<AppNavbar />
 			<Container className='mt-3'>
 				<Routes>
 					<Route path='/login' element={<Login />} />
 
-					{/* 2. DEFINA O DASHBOARD COMO A ROTA RAIZ "/" */}
 					<Route
 						path='/'
 						element={
@@ -140,7 +139,6 @@ function App() {
 						}
 					/>
 
-					{/* Redireciona qualquer rota desconhecida para o Dashboard */}
 					<Route path='*' element={<Navigate to='/' />} />
 				</Routes>
 			</Container>
