@@ -15,6 +15,7 @@
 	spanish,			% idioma adicional para hifenização
 	brazil				% o último idioma é o principal do documento
 	]{abntex2}
+
 % ---
 % Pacotes básicos 
 % ---
@@ -43,13 +44,13 @@
 \usepackage{booktabs}
 \usepackage{ragged2e} % Para alinhar texto justificado/à esquerda em colunas p{}
 \usepackage{longtable} % Essencial para tabelas longas
-% \usepackage{hyperref}  % NOTA: Removido. abntex2 já carrega o hyperref. Carregá-lo novamente pode causar conflitos.
 
 % --- 
 % CONFIGURAÇÕES DE PACOTES
 % --- 
 
 \newcommand{\source}[1]{\caption*{Fonte: #1}}
+
 % ---
 % Configurações do pacote backref
 % Usado sem a opção hyperpageref de backref
@@ -71,7 +72,6 @@
 % Informações de dados para CAPA e FOLHA DE ROSTO
 % ---
 \titulo{CarneUp: Sistema de Gestão de Açougue de Pequeno e Média Porte}
-
 
 \autor{BRENO DIAS OLIVEIRA SP3015645\\FELIPE DALBOSCO PALUDO SP3123766\\GUSTAVO GOUVEA ANDRADE SP3076725\\PEDRO AUGUSTO SILVA SANTOS SP3098559\\RAQUEL CORREIA DA SILVA 
 SP3098567\\WELLINGTON OLIVEIRA DE SOUSA SP3161307}
@@ -144,7 +144,6 @@ SP3098567\\WELLINGTON OLIVEIRA DE SOUSA SP3161307}
 % ----------------------------------------------------------
 % ELEMENTOS PRÉ-TEXTUAIS
 % ----------------------------------------------------------
-% \pretextual % Em abntex2, \pretextual é automático.
 
 % ---
 % Capa
@@ -157,14 +156,6 @@ SP3098567\\WELLINGTON OLIVEIRA DE SOUSA SP3161307}
 % (o * indica que haverá a ficha bibliográfica)
 % ---
 \imprimirfolhaderosto*
-% ---
-
-% ---
-% Inserir a ficha bibliografica
-% ---
-% \begin{fichacatalografica}
-% 	\includepdf{fig_ficha_catalografica.pdf}
-% \end{fichacatalografica}
 % ---
 
 % ---
@@ -258,7 +249,6 @@ Diante desse cenário, a relevância do CarneUp reside na necessidade urgente de
 
 % ----------------------------------------------------------
 % CAPÍTULO 1: ESCOPO E OBJETIVOS
-% (Promovido de \section para \chapter para iniciar a numeração)
 % ----------------------------------------------------------
 \chapter{Escopo e Objetivos}
 \label{cap:escopo}
@@ -291,7 +281,7 @@ Os objetivos específicos do projeto incluem:
 \end{itemize}
 
 % ---
-% As seções abaixo agora serão subseções do Capítulo 1 (1.1, 1.2...)
+% Seção 1.1 Requisitos
 % ---
 
 \section{Requisitos do Sistema}
@@ -365,7 +355,7 @@ A Tabela \ref{tab:requisitos_rn} apresenta as regras de negócio obrigatórias, 
     \endfoot
     \hline
     \endlastfoot
-    
+     
     RN01 & A venda só pode ser registrada se o código de barras lido for reconhecido e o item tiver estoque disponível. & RF01, RF02 \\ 
     \hline
     RN02 & O valor de custo por peça deve ser registrado no momento da entrada no estoque para cálculo de margem de lucro. & RF03, RF05 \\ 
@@ -448,7 +438,7 @@ O CarneUp se posiciona contra sistemas de gestão (PDV) mais genéricos, que nã
 
 \subsection{Concorrente 1: ConnectPlug}
 
-O ConnectPlug é um sistema de PDV (Ponto de Venda) e gestão comercial mais abrangente, atendendo diversos segmentos, incluindo açougues. Ele oferece funcionalidades como frente de caixa, gestão de estoque e emissão de notas fiscais \cite{ConnectPlug}.
+O ConnectPlug é um sistema de PDV (Ponto de Venda) e gestão comercial mais abrangente, atendendo diversos segmentos, incluindo açougues. Ele oferece funcionalidades como frente de caixa, gestão de estoque e emissão de notas fiscais \cite{connectplug}.
 
 \begin{itemize}
     \item Foco: Solução completa de gestão comercial.
@@ -457,7 +447,7 @@ O ConnectPlug é um sistema de PDV (Ponto de Venda) e gestão comercial mais abr
 
 \subsection{Concorrente 2: Aliar Sistemas}
 
-A Aliar Sistemas oferece soluções específicas para o varejo de carnes, com foco em açougues e frigoríficos. Seu sistema inclui gestão de produção, rastreabilidade e controle de estoque \cite{Aliar}.
+A Aliar Sistemas oferece soluções específicas para o varejo de carnes, com foco em açougues e frigoríficos. Seu sistema inclui gestão de produção, rastreabilidade e controle de estoque \cite{aliar}.
 
 \begin{itemize}
     \item Foco: Soluções específicas para o setor de carnes.
@@ -466,7 +456,7 @@ A Aliar Sistemas oferece soluções específicas para o varejo de carnes, com fo
 
 \subsection{Concorrente 3: SOFTClass}
 
-A SOFTClass oferece software de gestão para diversos segmentos do varejo, incluindo açougues. Possui módulos de frente de caixa, estoque e financeiro \cite{SoftClass}.
+A SOFTClass oferece software de gestão para diversos segmentos do varejo, incluindo açougues. Possui módulos de frente de caixa, estoque e financeiro \cite{softclass}.
 
 \begin{itemize}
     \item Foco: Solução de gestão empresarial para varejo.
@@ -528,17 +518,17 @@ O projeto será desenvolvido por uma equipe de cinco membros, com papéis defini
     \hline
     \endlastfoot
 
-    Product Owner & Raquel Correia da Silva & Definição e priorização do Product Backlog, contato com o cliente, validação das entregas. \\
+    Product Owner & Raquel Correia da Silva & Definição e priorização do Product Backlog, validação das entregas, documentação.\\
     \hline
-    Scrum Master & Felipe Dalbosco Paludo & Visar a aplicação correta da metodologia Scrum, remover impedimentos, facilitar as reuniões. \\
+    Desenvolvedor Full Stack & Felipe Dalbosco Paludo &Elaboração da documentação, desenvolvimento Latex, desenvolvimento Front-end e Back-end. \\
     \hline
-    Desenvolvedor Full Stack & Gustavo Gouvea Andrade & Implementação das funcionalidades no front-end e back-end, integração com banco de dados. \\
+    Desenvolvedor Full Stack & Gustavo Gouvea Andrade & Implementação das funcionalidades no front-end e back-end, desenvolvimento do Back-end, elaboração da arquitetura do sistema, elaboração de diagramas. \\
     \hline
-    Desenvolvedor Front-end & Breno Dias Oliveira & Desenvolvimento da interface do usuário, usabilidade e responsividade. \\
+    Desenvolvedor Front-end & Breno Dias Oliveira & Desenvolvimento da documentação, desenvolvimento do Front-end, elaboração de diagramas, desenvolvimento Latex. \\
     \hline
-    DBA / Desenvolvedor Back-end & Pedro Augusto Silva Santos & Modelagem e Administração do Banco de Dados, desenvolvimento de APIs e lógica de negócios. \\
+    Desenvolvedor Front-end & Pedro Augusto Silva Santos & Desenvolvimento Front-end, documentação, aplicação React, organização visual. \\
     \hline
-    DBA / Desenvolvedor Back-end & Wellington Oliveira de Sousa & Modelagem e Administração do Banco de Dados, desenvolvimento da documentação LaTeX. \\
+    Desenvolvedor Back-end & Wellington Oliveira de Sousa & Documentação, desenvolvimento Latex, elaboração de diagramas, Back-end, controle do Github, organização do Kanban. \\
     \hline
 \end{longtable}
 
@@ -546,7 +536,7 @@ O projeto será desenvolvido por uma equipe de cinco membros, com papéis defini
 \section{Metodologias de gestão e desenvolvimento}
 % ---
 
-O projeto foi planejado para ter uma duração total de aproximadamente 2,5 meses, iniciando em 6 de Setembro de 2025 e com previsão de conclusão em 31 de Outubro de 2025. Essa duração é ditada pelos Marcos Fixos de Entrega.
+O projeto foi planejado para ter uma duração total de aproximadamente 3 meses, iniciando em 1 de Setembro de 2025 e com previsão de conclusão em 28 de Novembro de 2025. Essa duração é ditada pelos Marcos Fixos de Entrega.
 
 O desenvolvimento do CarneUp adota a metodologia ágil Scrum, organizada em ciclos de trabalho curtos chamados Sprints. Dada a restrição temporal imposta pelos marcos de entrega acadêmica (Projeto Integrado - PI), o projeto foi dividido em 4 Sprints principais com duração variável (aproximadamente 10 a 14 dias úteis) para focar na entrega dos marcos fixos. O foco não é no número de Sprints, mas sim no cumprimento dos marcos de entrega, apresentado na Tabela \ref{tab:marcos}, que guiam o ritmo do projeto.
 
@@ -577,7 +567,7 @@ O desenvolvimento do CarneUp adota a metodologia ágil Scrum, organizada em cicl
     \hline
     10/10/2025 & Apresentação da Prova de Conceito (POC). \\
     \hline
-    31/10/2025 & Entrega do Projeto Final (MVP) e sua Documentação. \\
+    28/11/2025 & Entrega do Projeto Final (MVP) e sua Documentação. \\
     \hline
 \end{longtable}
 
@@ -590,6 +580,22 @@ O projeto utilizará o GitHub como plataforma de versionamento de código e cola
 \noindent\textbf{Link:} \url{https://github.com/wellingtonwos/ProjetoExtensaoI}
 
 \noindent\textbf{Acesso:} O repositório será privado durante o desenvolvimento e pode ser tornado público (ou manter-se privado com acesso via convite) após a Entrega Final. Para fins de avaliação, os colaboradores deverão ser convidados a ter acesso "Read" ou "Collaborator".
+
+% ---
+\subsection{Gerenciamento de Tarefas e Fluxo de Trabalho (Kanban)}
+% ---
+
+Para a organização das atividades e acompanhamento do progresso das Sprints, o projeto utiliza a ferramenta \textit{GitHub Projects}, integrada nativamente ao repositório. A metodologia de gestão visual adotada foi o Kanban, que permite à equipe monitorar o ciclo de vida de cada tarefa (\textit{Issue}) desde a sua concepção até a entrega final.
+
+A estrutura do fluxo de trabalho foi definida para refletir o processo de desenvolvimento ágil, dividida nas seguintes etapas de controle:
+
+\begin{itemize}
+    \item \textbf{Backlog (Pendências):} Repositório central de todas as funcionalidades, correções de bugs e melhorias mapeadas para o projeto, aguardando priorização.
+    \item \textbf{Ready (Preparar):} Tarefas que foram detalhadas, priorizadas e possuem todas as informações necessárias para serem iniciadas pela equipe de desenvolvimento.
+    \item \textbf{In Progress (Em Andamento):} Atividades que estão sendo trabalhadas ativamente pelos desenvolvedores no momento.
+    \item \textbf{In Review (Revisão):} Tarefas concluídas que aguardam revisão de código (\textit{Pull Request Review}) ou validação de qualidade antes de serem integradas à ramificação principal.
+    \item \textbf{Done (Concluído):} Funcionalidades finalizadas, testadas e integradas com sucesso.
+\end{itemize}
 
 % ----------------------------------------------------------
 % CAPÍTULO 3: DESENVOLVIMENTO DO PROJETO
@@ -611,11 +617,11 @@ O Back-end é o \textit{core} transacional do sistema e está logicamente dividi
 
 \begin{itemize}
     \item \textbf{Módulo de Gestão de Vendas (PDV):} Focado na eficiência do caixa (RNF01), gerencia o registro rápido de vendas. Sua principal característica é a integração com a leitura de código de barras da balança (ou inserção manual do item), permitindo a captura automática do item, peso e valor, e garantindo a baixa de estoque em tempo real (RF01, RF02).
-    
+     
     \item \textbf{Módulo de Estoque e Rastreabilidade:} Permite o registro da entrada de estoque com informações cruciais para a análise de custo e rastreabilidade: valor de custo, marca e data de validade (RF03). O módulo é responsável pela emissão de alertas visuais quando a validade das peças está próxima (RF05).
-    
+     
     \item \textbf{Módulo de Gestão de Marcas e Compras:} Gerencia o cadastro completo das marcas (RF08) e mantém o histórico de compra de cada lote, permitindo o cálculo da margem de lucro por peça (RF04).
-    
+     
     \item \textbf{Módulo de Autenticação e Usuários:} Controla o acesso ao sistema via login/senha e implementa o gerenciamento dos perfis Administrador e Operador, garantindo que apenas usuários autorizados tenham acesso às funcionalidades específicas (RF10, RF11).
 \end{itemize}
 
@@ -627,9 +633,9 @@ A seleção da pilha tecnológica foi baseada na busca por performance, seguran�
 
 \begin{itemize}
     \item \textbf{Front-end (Apresentação):} Foi escolhido o \textbf{React} para a construção da interface. Esta biblioteca permite a criação de uma experiência de usuário reativa, modular e otimizada para telas de toque e leitores de código de barras, o que atende ao requisito de usabilidade no PDV (RNF03).
-    
+     
     \item \textbf{Back-end (Aplicação):} A lógica de negócios é implementada em \textbf{Java} com o framework \textbf{Spring Boot}. Esta combinação é ideal para sistemas transacionais de missão crítica, oferecendo alta segurança e performance na execução das regras de negócio (RNF01).
-    
+     
     \item \textbf{Banco de Dados (Dados):} O \textbf{PostgreSQL} foi definido como o Sistema Gerenciador de Banco de Dados (SGBD) principal. Sua reputação de robustez, integridade transacional e confiabilidade é fundamental para armazenar dados financeiros e de estoque de forma segura e duradoura (RNF04).
 \end{itemize}
 
@@ -641,9 +647,9 @@ O projeto será implantado na Amazon Web Services (AWS), que oferece o modelo de
 
 \begin{itemize}
     \item \textbf{Hospedagem e Escalabilidade:} A plataforma AWS garante que o sistema possa suportar picos de até 10 usuários simultâneos (RNF02) sem degradação de performance, por meio de serviços de computação elástica.
-    
+     
     \item \textbf{Segurança de Dados em Trânsito:} A comunicação entre o Front-end e o Back-end será totalmente blindada pelo protocolo HTTPS, com terminação SSL/TLS configurada no Load Balancer da AWS. Isso é mandatório para proteger credenciais de acesso e dados financeiros (RNF04).
-    
+     
     \item \textbf{Manutenibilidade:} A utilização de serviços de \textit{logging} nativos do Spring Boot (SLF4J/Logback) será implementada para rastrear transações e facilitar a identificação e correção de erros, conforme o requisito de manutenibilidade (RNF05).
 \end{itemize}
 
@@ -693,28 +699,22 @@ As Histórias de Usuário a seguir detalham o escopo do Mínimo Produto Viável 
 
 A segurança e a privacidade dos dados representam um pilar não funcional crítico para o sucesso e a longevidade do sistema CarneUp.
 
-\subsection{Critérios de Segurança e Privacidade}
-
 A estratégia de segurança do CarneUp está fundamentada em dois pilares essenciais: proteção dos dados em repouso (armazenados) e proteção dos dados em trânsito (durante a comunicação). O Requisito Não Funcional RNF04 exige o uso de técnicas de segurança para todos os dados sensíveis.
 
-\subsubsection{Proteção de Dados em Repouso: Hashing de Senhas}
 Para garantir a confidencialidade das credenciais de acesso, o sistema adotará a seguinte medida para dados armazenados:
 
 \begin{itemize}
     \item \textbf{Hashing de Senhas:} Utilização do algoritmo de hash \textit{bcrypt} para armazenar as senhas dos usuários (Administradores e Operadores) no banco de dados. Esta técnica de hashing "salgado" impede a recuperação da senha original mesmo em caso de comprometimento da base de dados (RNF04).
 \end{itemize}
 
-\subsubsection{Criptografia em Trânsito: SSL/TLS (HTTPS)}
 O protocolo HTTPS (\textit{HyperText Transfer Protocol Secure}) é essencial para o projeto CarneUp, pois garante a segurança das comunicações entre o navegador do usuário e o servidor de aplicação. O HTTPS é o protocolo HTTP combinado com a camada de segurança SSL/TLS, criando um link criptografado.
 
-\paragraph{Critérios de Segurança e Conformidade}
 A implementação do SSL/TLS no CarneUp atende a critérios cruciais para um sistema de gestão:
 \begin{itemize}
     \item \textbf{Proteção de Credenciais:} As senhas são protegidas durante o trânsito da máquina do cliente até o servidor.
     \item \textbf{Integridade dos Dados de Venda:} Garante que os dados financeiros críticos (valor final da venda, custo do produto ou atualização de estoque) não possam ser modificados por terceiros maliciosos durante a transmissão.
 \end{itemize}
 
-\paragraph{Implantação na Infraestrutura AWS}
 Na arquitetura do CarneUp, a proteção HTTPS será implementada utilizando os serviços nativos da Amazon Web Services (AWS):
 \begin{itemize}
     \item \textbf{Certificado SSL/TLS:} Será utilizado um certificado SSL/TLS para autenticar a identidade do domínio.
@@ -771,19 +771,18 @@ O modelo é composto pelas seguintes entidades principais:
 \end{itemize}
 
 \begin{figure}[htb]
-    \caption{Modelo Conceitual (MER) do CarneUp}
+    \caption{Estrutura do Banco de Dados (MER)}
     \label{fig:mer_conceitual}
     \centering
-    % BD2.jpg é o diagrama com losangos (Conceitual)
-    \includegraphics[width=0.9\textwidth]{Documentacao/Imagens/BD2.jpg}
-    \source{Autoria própria (2025)}
+    \includegraphics[width=0.9\textwidth]{Imagens/BD2.jpg}
+    %\source{Autoria própria (2025)}
 \end{figure}
 
 % ---
 \subsection{Modelo Lógico (Esquema Relacional)}
 % ---
 
-O Modelo Lógico (Figura \ref{fig:modelo_logico}) representa a etapa de transição entre o entendimento do negócio e a implementação técnica. Diferente do modelo conceitual, este diagrama detalha como os dados serão efetivamente estruturados no Sistema Gerenciador de Banco de Dados (SGBD) PostgreSQL \cite{postgre24}. Ele define as tabelas, a tipagem estrita dos dados e as regras de integridade.
+O Modelo Lógico representa a etapa de transição entre o entendimento do negócio e a implementação técnica. Diferente do modelo conceitual, este diagrama detalha como os dados serão efetivamente estruturados no Sistema Gerenciador de Banco de Dados (SGBD) PostgreSQL \cite{postgre24}. Ele define as tabelas, a tipagem estrita dos dados e as regras de integridade.
 
 \noindent\textbf{Elementos Estruturais e Visuais:}
 \begin{itemize}
@@ -804,12 +803,18 @@ O Modelo Lógico (Figura \ref{fig:modelo_logico}) representa a etapa de transiç
 
 \begin{figure}[htb]
     \caption{Modelo Lógico Relacional do CarneUp}
-    \label{fig:modelo_logico}
+    \label{fig:modelo_logico}    
     \centering
-    % BD.jpg é o diagrama com tabelas e chaves (Lógico)
-    \includegraphics[width=0.9\textwidth]{Documentacao/Imagens/BD.jpg}
-    \source{Autoria própria (2025)}
+    % Atenção: Caminho corrigido para 'Imagens/' (raiz)
+    \includegraphics[width=0.9\textwidth]{Imagens/BD.jpg}
+    %\source{Autoria própria (2025)}
 \end{figure}
+
+% ---
+\section{Arquitetura do Sistema}
+% ---
+
+Esta seção detalha a arquitetura técnica da solução, ilustrando como os componentes de software são organizados e como a infraestrutura física é disposta para suportar a aplicação CarneUp.
 
 % ---
 \subsection{Diagrama de Implantação}
@@ -829,8 +834,8 @@ O modelo de implantação utiliza um \textit{Load Balancer} (AWS ALB) como ponto
     \caption{Diagrama de Implantação do Sistema CarneUp}
     \label{fig:implantacao}
     \centering
-    \includegraphics[width=0.8\textwidth]{Documentacao/Imagens/DiagramaImplantação.jpg}
-    \source{Autoria própria (2025)}
+    \includegraphics[width=0.8\textwidth]{Imagens/DiagramaImplantacao.jpg}
+    %\source{Autoria própria (2025)}
 \end{figure}
 
 % ---
@@ -856,8 +861,8 @@ Os componentes são segregados em três camadas principais:
     \caption{Diagrama de Componentes do Sistema CarneUp}
     \label{fig:componentes}
     \centering
-    \includegraphics[width=0.8\textwidth]{Documentacao/Imagens/DiagramaComponentes.jpg}
-    \source{Autoria própria (2025)}
+    \includegraphics[width=0.8\textwidth]{Imagens/DiagramaComponentes.jpg}
+    %\source{Autoria própria (2025)}
 \end{figure}
 
 % ----------------------------------------------------------
@@ -912,7 +917,7 @@ O investimento total necessário para a conclusão e entrega do MVP é consolida
         \textbf{INVESTIMENTO INICIAL TOTAL} & \textbf{50.250,00} & \textbf{100,00\%} \\
         \hline
     \end{tabular}
-    \source{Elaborado pelo autor (2025).}
+    %\source{Elaborado pelo autor (2025).}
 \end{table}
 
 Conforme apresentado na Tabela \ref{tab:custos_iniciais}, o Investimento Inicial Total do projeto é de R\$ 50.250,00.
@@ -943,7 +948,7 @@ O desenvolvimento foi marcado por desafios que exigiram adaptação metodológic
 
 \begin{itemize}
     \item \textbf{Restrição Temporal e Escopo:} A principal dificuldade foi a condensação do cronograma para apenas 2,5 meses, imposta pelos Marcos Fixos de Entrega Acadêmica. Essa restrição exigiu uma priorização agressiva e um controle rigoroso do escopo.
-    
+     
     \item \textbf{Modelagem de Dados Complexa:} A rastreabilidade por lote e validade demandou um esforço significativo na fase de modelagem, com refinamentos repetidos nos diagramas (MER/DER). Isso evidenciou a complexidade inerente à representação de processos de estoque perecível.
 \end{itemize}
 
@@ -957,7 +962,7 @@ As limitações impostas pelo prazo rigoroso resultaram em funcionalidades que f
 
 \begin{itemize}
     \item \textbf{Módulo de Contabilidade Completa:} O foco foi mantido no \textit{core business} (Venda, Estoque e Custo da Peça). Módulos avançados de geração de balancetes ou integração contábil foram adiados.
-    
+     
     \item \textbf{Suporte a Múltiplas Filiais:} O sistema foi dimensionado inicialmente para um único açougue. A expansão para uma arquitetura multi-filial será o foco principal para a otimização da escalabilidade do produto no futuro.
 \end{itemize}
 
