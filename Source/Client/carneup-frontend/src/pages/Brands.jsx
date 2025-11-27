@@ -76,7 +76,7 @@ export default function Brands() {
 							{brands.map((b) => (
 								<tr key={b.id}>
 									<td>{b.id}</td>
-									<td>{b.name}</td>
+									<td>{b.brandName}</td>
 								</tr>
 							))}
 						</tbody>

@@ -105,7 +105,8 @@ public class CatalogService {
 			dto.setId(product.getId());
 			dto.setName(product.getName());
 			dto.setCode(product.getCode());
-			dto.setUnitMeasurement(product.getUnitMeasurement() != null ? product.getUnitMeasurement().name() : null); // Se
+			dto.setBrandName(product.getBrand().getName());
+			dto.setUnitMeasurement(product.getUnitMeasurement() != null ? product.getUnitMeasurement().name() : null);
 			return dto;
 		}).collect(Collectors.toList());
 	}

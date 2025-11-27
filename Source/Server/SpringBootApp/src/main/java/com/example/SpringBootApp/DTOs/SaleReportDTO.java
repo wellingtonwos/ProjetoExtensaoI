@@ -12,6 +12,7 @@ public class SaleReportDTO {
     private LocalDateTime timestamp;
     private String paymentMethod;
     private String salesmanName;
+    private BigDecimal totalCost;
     private BigDecimal totalPrice;
     private BigDecimal discounts;
     private List<SaleItemReportDTO> items;

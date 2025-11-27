@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 public class SaleItemReportDTO {
     private String productName;
     private String brand;
+    private String category;
     private BigDecimal quantity;
     private BigDecimal purchasePrice;
     private BigDecimal salePrice;

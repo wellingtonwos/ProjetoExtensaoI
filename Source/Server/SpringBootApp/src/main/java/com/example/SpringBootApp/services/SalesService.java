@@ -51,7 +51,7 @@ public class SalesService {
             Purchase purchase = purchaseRepository.findById(itemDTO.getPurchaseId())
                     .orElseThrow(() -> new ResourceNotFoundException("Purchase not found with id: " + itemDTO.getPurchaseId()));
 
-						Item stockItem = itemRepository.findFirstByPurchaseIdAndSaleIsNull(purchase.getId());
+            Item stockItem = itemRepository.findFirstByPurchaseIdAndProductIdAndSaleIsNull(purchase.getId(), product.getId());
             
             if (stockItem == null) {
                 throw new ResourceNotFoundException("Lote de estoque não encontrado para a compra ID: " + purchase.getId());
@@ -63,8 +63,8 @@ public class SalesService {
             item.setSale(savedSale);
             item.setQuantity(itemDTO.getQuantity().multiply(BigDecimal.valueOf(-1)));
 
-						item.setSaleUnitPrice(stockItem.getSaleUnitPrice());
-						item.setPurchaseUnitPrice(stockItem.getPurchaseUnitPrice());
+            item.setSaleUnitPrice(stockItem.getSaleUnitPrice());
+            item.setPurchaseUnitPrice(stockItem.getPurchaseUnitPrice());
 
             items.add(itemRepository.save(item));
         }

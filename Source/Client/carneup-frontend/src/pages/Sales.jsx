@@ -39,9 +39,9 @@ export default function Sales() {
 					const priceFound = purchase.unitSalePrice || 0
 
 					return {
-						value: purchase.purchase_id,
-						productId: product.id,
-						purchaseId: purchase.purchase_id,
+						value: product.id, 
+						productId: product.id, 
+						purchaseId: purchase.purchase_id, 
 						name: product.product_name,
 						unit: product.unitMeasurement,
 						quantityAvailable: Number(purchase.quantity),
@@ -117,13 +117,19 @@ export default function Sales() {
 		setQuantity('')
 	}
 
+	const getLocalTimestamp = () => {
+	const now = new Date();
+	// Formata para o formato ISO mas usando horário local
+	return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString();
+}
+
 	const handleFinalize = async () => {
 		try {
 			const storedUserId = localStorage.getItem('userId')
 			const userId = storedUserId ? Number(storedUserId) : 1
 
 			const payload = {
-				timestamp: new Date().toISOString(),
+				timestamp: getLocalTimestamp(),
 				paymentMethod: paymentMethod,
 				discount: 0,
 				userId: userId,

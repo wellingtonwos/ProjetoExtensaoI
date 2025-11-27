@@ -7,5 +7,6 @@ public class ProductResponseDTO {
     private Long id;
     private String name;
     private Integer code;
-		private String unitMeasurement;
+    private String brandName;
+    private String unitMeasurement;
 }

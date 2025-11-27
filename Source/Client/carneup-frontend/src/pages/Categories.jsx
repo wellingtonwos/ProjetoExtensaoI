@@ -59,7 +59,7 @@ export default function Categories() {
 							{categories.map((c) => (
 								<tr key={c.id}>
 									<td>{c.id}</td>
-									<td>{c.name}</td>
+									<td>{c.categoryName}</td>
 								</tr>
 							))}
 						</tbody>

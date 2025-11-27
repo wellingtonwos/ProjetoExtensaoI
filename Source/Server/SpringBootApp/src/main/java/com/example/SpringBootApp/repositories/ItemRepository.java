@@ -16,5 +16,5 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     List<Item> findByPurchaseIdAndProductId(Long purchaseId, Long productId);
 
-		Item findFirstByPurchaseIdAndSaleIsNull(Long purchaseId);
+		Item findFirstByPurchaseIdAndProductIdAndSaleIsNull(Long purchaseId, Long productId);
 }

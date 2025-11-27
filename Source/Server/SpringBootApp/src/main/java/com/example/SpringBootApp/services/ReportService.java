@@ -50,6 +50,11 @@ public class ReportService {
                 .map(item -> item.getSalePrice().multiply(item.getQuantity().abs()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add).subtract(sale.getDiscount());
 
+        BigDecimal totalCost = itemDTOs.stream()
+                .map(item -> item.getPurchasePrice().multiply(item.getQuantity().abs()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        reportDTO.setTotalCost(totalCost);
         reportDTO.setTotalPrice(totalPrice);
 
         return reportDTO;
@@ -60,9 +65,10 @@ public class ReportService {
 
         itemDTO.setProductName(item.getProduct().getName());
         itemDTO.setBrand(item.getProduct().getBrand().getName());
+        itemDTO.setCategory(item.getProduct().getCategory().getName());
         itemDTO.setQuantity(item.getQuantity().abs());
-        itemDTO.setPurchasePrice(item.getPurchase().getItems().getFirst().getPurchaseUnitPrice());
-        itemDTO.setSalePrice(item.getPurchase().getItems().getFirst().getSaleUnitPrice());
+        itemDTO.setPurchasePrice(item.getPurchaseUnitPrice());
+        itemDTO.setSalePrice(item.getSaleUnitPrice());
         itemDTO.setTotal(itemDTO.getSalePrice().multiply(itemDTO.getQuantity()));
 
         return itemDTO;
