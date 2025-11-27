@@ -2,7 +2,7 @@ spring:
   application:
     name: JuniorPrimeBeef
   datasource:
-    url: jdbc:postgresql://localhost:5432/JuniorPrimeBeef
+    url: ${DB_PATH}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver

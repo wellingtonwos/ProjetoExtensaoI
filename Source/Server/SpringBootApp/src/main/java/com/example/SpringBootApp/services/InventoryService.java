@@ -69,6 +69,7 @@ public class InventoryService {
                     ProductWithPurchaseInStockDTO dto = new ProductWithPurchaseInStockDTO();
 
                     dto.setId(product.getId().intValue());
+                    dto.setCode(product.getCode());
                     dto.setProduct_name(product.getName());
                     dto.setBrand_name(product.getBrand() != null ? product.getBrand().getName() : null);
                     dto.setUnitMeasurement(product.getUnitMeasurement());

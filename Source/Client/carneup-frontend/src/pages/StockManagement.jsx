@@ -6,10 +6,11 @@ import {
 	Card,
 	Form,
 	Button,
-	Table,
 	Modal,
 	Tab,
 	Tabs,
+	Badge,
+	InputGroup,
 } from 'react-bootstrap'
 import api from '../services/api'
 import { toast } from 'react-toastify'
@@ -46,20 +47,20 @@ export default function StockManagement() {
 	})
 
 	const handleAddItem = () => {
-	setFormPurchase(prev => ({
-		...prev,
-		items: [
-			...prev.items,
-			{
-				product_id: '',
-				quantity: '',
-				unit_purchase_price: '',
-				unit_sale_price: '',
-				expiring_date: '',
-			}
-		]
-	}))
-}
+		setFormPurchase(prev => ({
+			...prev,
+			items: [
+				...prev.items,
+				{
+					product_id: '',
+					quantity: '',
+					unit_purchase_price: '',
+					unit_sale_price: '',
+					expiring_date: '',
+				}
+			]
+		}))
+	}
 
 	const handleRemoveItem = (index) => {
 		setFormPurchase(prev => ({
@@ -143,63 +144,82 @@ export default function StockManagement() {
 	}
 
 	async function handleCreatePurchase(e) {
-	e.preventDefault()
-	try {
-		// Verifica se todos os itens estão preenchidos
-		const hasEmptyFields = formPurchase.items.some(item => 
-			!item.product_id || !item.quantity || !item.unit_purchase_price || 
-			!item.unit_sale_price || !item.expiring_date
-		)
-		
-		if (hasEmptyFields) {
-			toast.error('Preencha todos os campos de todos os produtos')
-			return
-		}
+		e.preventDefault()
+		try {
+			// Verifica se todos os itens estão preenchidos
+			const hasEmptyFields = formPurchase.items.some(item => 
+				!item.product_id || !item.quantity || !item.unit_purchase_price || 
+				!item.unit_sale_price || !item.expiring_date
+			)
+			
+			if (hasEmptyFields) {
+				toast.error('Preencha todos os campos de todos os produtos')
+				return
+			}
 
-		const payload = {
-			date: new Date().toISOString().split('T')[0],
-			items: formPurchase.items.map(item => ({
-				productId: Number(item.product_id),
-				quantity: Number(item.quantity),
-				unitPurchasePrice: Number(item.unit_purchase_price),
-				unitSalePrice: Number(item.unit_sale_price),
-				expiringDate: item.expiring_date,
-			})),
+			const payload = {
+				date: new Date().toISOString().split('T')[0],
+				items: formPurchase.items.map(item => ({
+					productId: Number(item.product_id),
+					quantity: Number(item.quantity),
+					unitPurchasePrice: Number(item.unit_purchase_price),
+					unitSalePrice: Number(item.unit_sale_price),
+					expiringDate: item.expiring_date,
+				})),
+			}
+			
+			await api.post('/purchases', payload)
+			toast.success('Entrada de estoque realizada!')
+			
+			// Limpa o formulário
+			setFormPurchase({
+				items: [
+					{
+						product_id: '',
+						quantity: '',
+						unit_purchase_price: '',
+						unit_sale_price: '',
+						expiring_date: '',
+					}
+				]
+			})
+		} catch (err) {
+			toast.error('Erro ao registrar entrada.')
 		}
-		
-		await api.post('/purchases', payload)
-		toast.success('Entrada de estoque realizada!')
-		
-		// Limpa o formulário
-		setFormPurchase({
-			items: [
-				{
-					product_id: '',
-					quantity: '',
-					unit_purchase_price: '',
-					unit_sale_price: '',
-					expiring_date: '',
-				}
-			]
-		})
-	} catch (err) {
-		toast.error('Erro ao registrar entrada.')
 	}
-}
 
 	return (
 		<Container className='mt-4'>
-			<h2>Gerenciamento de Estoque</h2>
+			<div className='text-center mb-4'>
+				<h2 className='fw-bold text-dark'>Gerenciamento de Estoque</h2>
+				<p className='text-muted'>Cadastre produtos e registre entradas de estoque</p>
+			</div>
 
-			<Tabs activeKey={key} onSelect={(k) => setKey(k)} className='mb-3'>
-				<Tab eventKey='products' title='1. Cadastrar Novo Produto'>
-					<Card>
-						<Card.Body>
+			<Tabs 
+				activeKey={key} 
+				onSelect={(k) => setKey(k)} 
+				className='mb-4'
+				fill
+			>
+				<Tab 
+					eventKey='products' 
+					title={
+						<div className='text-center'>
+							<div>Cadastrar Produto</div>
+							<small className='text-muted'>Novos produtos</small>
+						</div>
+					}
+				>
+					<Card className='shadow-sm border-0'>
+						<Card.Header className='bg-light'>
+							<h5 className='mb-0'>Cadastrar Novo Produto</h5>
+						</Card.Header>
+						<Card.Body className='p-4'>
 							<Form onSubmit={handleCreateProduct}>
 								<Row>
 									<Col md={6}>
 										<Form.Group className='mb-3'>
-											<Form.Label>Nome do Produto</Form.Label>
+											<Form.Label className='fw-bold'>Nome do Produto</Form.Label>
 											<Form.Control
 												value={formProduct.name}
 												onChange={(e) =>
@@ -209,12 +229,13 @@ export default function StockManagement() {
 													})
 												}
 												required
+												placeholder='Ex: Picanha Premium'
 											/>
 										</Form.Group>
 									</Col>
 									<Col md={6}>
 										<Form.Group className='mb-3'>
-											<Form.Label>Código do Produto</Form.Label>
+											<Form.Label className='fw-bold'>Código do Produto</Form.Label>
 											<Form.Control
 												value={formProduct.code}
 												onChange={(e) =>
@@ -223,6 +244,7 @@ export default function StockManagement() {
 														code: e.target.value,
 													})
 												}
+												placeholder='Ex: 1'
 											/>
 										</Form.Group>
 									</Col>
@@ -231,8 +253,8 @@ export default function StockManagement() {
 								<Row>
 									<Col md={4}>
 										<Form.Group className='mb-3'>
-											<Form.Label>Marca</Form.Label>
-											<div className='d-flex'>
+											<Form.Label className='fw-bold'>Marca</Form.Label>
+											<InputGroup>
 												<Form.Select
 													value={formProduct.id_brand}
 													onChange={(e) =>
@@ -243,7 +265,7 @@ export default function StockManagement() {
 													}
 													required
 												>
-													<option value=''>Selecione...</option>
+													<option value=''>Selecione a marca...</option>
 													{brands.map((b) => (
 														<option key={b.id} value={b.id}>
 															{b.brandName}
@@ -256,13 +278,13 @@ export default function StockManagement() {
 												>
 													+
 												</Button>
-											</div>
+											</InputGroup>
 										</Form.Group>
 									</Col>
 									<Col md={4}>
 										<Form.Group className='mb-3'>
-											<Form.Label>Categoria</Form.Label>
-											<div className='d-flex'>
+											<Form.Label className='fw-bold'>Categoria</Form.Label>
+											<InputGroup>
 												<Form.Select
 													value={formProduct.id_category}
 													onChange={(e) =>
@@ -273,7 +295,7 @@ export default function StockManagement() {
 													}
 													required
 												>
-													<option value=''>Selecione...</option>
+													<option value=''>Selecione a categoria...</option>
 													{categories.map((c) => (
 														<option key={c.id} value={c.id}>
 															{c.categoryName}
@@ -286,12 +308,12 @@ export default function StockManagement() {
 												>
 													+
 												</Button>
-											</div>
+											</InputGroup>
 										</Form.Group>
 									</Col>
 									<Col md={4}>
 										<Form.Group className='mb-3'>
-											<Form.Label>Unidade</Form.Label>
+											<Form.Label className='fw-bold'>Unidade de Medida</Form.Label>
 											<Form.Select
 												value={formProduct.measuring_unit}
 												onChange={(e) =>
@@ -307,112 +329,155 @@ export default function StockManagement() {
 										</Form.Group>
 									</Col>
 								</Row>
-								<Button type='submit'>Cadastrar Produto</Button>
+								<div className='text-center mt-4'>
+									<Button 
+										type='submit' 
+										size='lg' 
+										className='px-5'
+										variant='primary'
+									>
+										Cadastrar Produto
+									</Button>
+								</div>
 							</Form>
 						</Card.Body>
 					</Card>
 				</Tab>
 
-				<Tab eventKey='purchases' title='2. Entrada de Estoque (Compra)'>
-					<Card>
-						<Card.Body>
+				<Tab 
+					eventKey='purchases' 
+					title={
+						<div className='text-center'>
+							<div>Entrada de Estoque</div>
+							<small className='text-muted'>Registrar compras</small>
+						</div>
+					}
+				>
+					<Card className='shadow-sm border-0'>
+						<Card.Header className='bg-light d-flex justify-content-between align-items-center'>
+							<h5 className='mb-0'>Entrada de Estoque</h5>
+							<Badge bg='secondary'>
+								{formPurchase.items.length} produto{formPurchase.items.length !== 1 ? 's' : ''}
+							</Badge>
+						</Card.Header>
+						<Card.Body className='p-4'>
 							<Form onSubmit={handleCreatePurchase}>
 								{formPurchase.items.map((item, index) => (
-									<div key={index} className='mb-4 p-3 border rounded'>
-										{formPurchase.items.length > 1 && (
-											<div className='d-flex justify-content-between align-items-center mb-3'>
-												<h6 className='mb-0'>Produto {index + 1}</h6>
+									<Card key={index} className='mb-4 border'>
+										<Card.Header className='bg-light d-flex justify-content-between align-items-center'>
+											<h6 className='mb-0'>
+												Produto {index + 1}
+											</h6>
+											{formPurchase.items.length > 1 && (
 												<Button
 													variant='outline-danger'
 													size='sm'
 													onClick={() => handleRemoveItem(index)}
-													disabled={formPurchase.items.length === 1}
 												>
 													Remover
 												</Button>
-											</div>
-										)}
-										
-										<Form.Group className='mb-3'>
-											<Form.Label>Selecione o Produto</Form.Label>
-											<Form.Select
-												value={item.product_id}
-												onChange={(e) => handleItemChange(index, 'product_id', e.target.value)}
-												required
-											>
-												<option value=''>Selecione...</option>
-												{products.map((p) => (
-													<option key={p.id} value={p.id}>
-														{p.code} - {p.name} - {p.brandName}
-													</option>
-												))}
-											</Form.Select>
-										</Form.Group>
+											)}
+										</Card.Header>
+										<Card.Body>
+											<Form.Group className='mb-3'>
+												<Form.Label className='fw-bold'>Selecione o Produto</Form.Label>
+												<Form.Select
+													value={item.product_id}
+													onChange={(e) => handleItemChange(index, 'product_id', e.target.value)}
+													required
+												>
+													<option value=''>Selecione um produto...</option>
+													{products.map((p) => (
+														<option key={p.id} value={p.id}>
+															{p.code} - {p.name} - {p.brandName}
+														</option>
+													))}
+												</Form.Select>
+											</Form.Group>
 
-										<Row>
-											<Col md={6}>
-												<Form.Group className='mb-3'>
-													<Form.Label>Quantidade / Peso</Form.Label>
-													<Form.Control
-														type='number'
-														step='0.01'
-														value={item.quantity}
-														onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
-														required
-													/>
-												</Form.Group>
-											</Col>
-											<Col md={6}>
-												<Form.Group className='mb-3'>
-													<Form.Label>Validade</Form.Label>
-													<Form.Control
-														type='date'
-														value={item.expiring_date}
-														onChange={(e) => handleItemChange(index, 'expiring_date', e.target.value)}
-														required
-													/>
-												</Form.Group>
-											</Col>
-										</Row>
-										<Row>
-											<Col md={6}>
-												<Form.Group className='mb-3'>
-													<Form.Label>Preço de Custo (Unitário)</Form.Label>
-													<Form.Control
-														type='number'
-														step='0.01'
-														value={item.unit_purchase_price}
-														onChange={(e) => handleItemChange(index, 'unit_purchase_price', e.target.value)}
-														required
-													/>
-												</Form.Group>
-											</Col>
-											<Col md={6}>
-												<Form.Group className='mb-3'>
-													<Form.Label>Preço de Venda (Unitário)</Form.Label>
-													<Form.Control
-														type='number'
-														step='0.01'
-														value={item.unit_sale_price}
-														onChange={(e) => handleItemChange(index, 'unit_sale_price', e.target.value)}
-														required
-													/>
-												</Form.Group>
-											</Col>
-										</Row>
-									</div>
+											<Row>
+												<Col md={6}>
+													<Form.Group className='mb-3'>
+														<Form.Label className='fw-bold'>Quantidade / Peso</Form.Label>
+														<Form.Control
+															type='number'
+															step='0.01'
+															value={item.quantity}
+															onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
+															required
+															placeholder='0.00'
+														/>
+													</Form.Group>
+												</Col>
+												<Col md={6}>
+													<Form.Group className='mb-3'>
+														<Form.Label className='fw-bold'>Data de Validade</Form.Label>
+														<Form.Control
+															type='date'
+															value={item.expiring_date}
+															onChange={(e) => handleItemChange(index, 'expiring_date', e.target.value)}
+															required
+														/>
+													</Form.Group>
+												</Col>
+											</Row>
+											<Row>
+												<Col md={6}>
+													<Form.Group className='mb-3'>
+														<Form.Label className='fw-bold'>Preço de Custo (Unitário)</Form.Label>
+														<InputGroup>
+															<InputGroup.Text>R$</InputGroup.Text>
+															<Form.Control
+																type='number'
+																step='0.01'
+																value={item.unit_purchase_price}
+																onChange={(e) => handleItemChange(index, 'unit_purchase_price', e.target.value)}
+																required
+																placeholder='0.00'
+															/>
+														</InputGroup>
+													</Form.Group>
+												</Col>
+												<Col md={6}>
+													<Form.Group className='mb-3'>
+														<Form.Label className='fw-bold'>Preço de Venda (Unitário)</Form.Label>
+														<InputGroup>
+															<InputGroup.Text>R$</InputGroup.Text>
+															<Form.Control
+																type='number'
+																step='0.01'
+																value={item.unit_sale_price}
+																onChange={(e) => handleItemChange(index, 'unit_sale_price', e.target.value)}
+																required
+																placeholder='0.00'
+															/>
+														</InputGroup>
+													</Form.Group>
+												</Col>
+											</Row>
+										</Card.Body>
+									</Card>
 								))}
 
-								<div className='d-flex gap-2'>
+								<div className='d-flex gap-3 flex-wrap'>
 									<Button 
 										variant='outline-primary' 
 										onClick={handleAddItem}
 										type='button'
+										className='flex-fill'
 									>
-										+ Adicionar Outro Produto
+										Adicionar Outro Produto
 									</Button>
 									
-									<Button variant='success' type='submit'>
+									<Button 
+										variant='success' 
+										type='submit' 
+										className='flex-fill'
+										disabled={formPurchase.items.some(item => 
+											!item.product_id || !item.quantity || !item.unit_purchase_price || 
+											!item.unit_sale_price || !item.expiring_date
+										)}
+									>
 										Registrar Entrada de Estoque
 									</Button>
 								</div>
@@ -428,24 +493,59 @@ export default function StockManagement() {
 					setShowBrandModal(false)
 					setShowCategoryModal(false)
 				}}
+				centered
 			>
 				<Modal.Header closeButton>
 					<Modal.Title>
-						Nova {showBrandModal ? 'Marca' : 'Categoria'}
+						{showBrandModal ? 'Nova Marca' : 'Nova Categoria'}
 					</Modal.Title>
 				</Modal.Header>
-				<Modal.Body>
-					<Form.Control
-						placeholder='Nome...'
-						value={quickName}
-						onChange={(e) => setQuickName(e.target.value)}
-						autoFocus
-					/>
+				<Modal.Body className='p-4'>
+					<Form.Group>
+						<Form.Label className='fw-bold'>
+							Nome da {showBrandModal ? 'Marca' : 'Categoria'}
+						</Form.Label>
+						<Form.Control
+							placeholder={`Digite o nome da ${showBrandModal ? 'marca' : 'categoria'}...`}
+							value={quickName}
+							onChange={(e) => setQuickName(e.target.value)}
+							autoFocus
+						/>
+					</Form.Group>
 				</Modal.Body>
 				<Modal.Footer>
-					<Button onClick={handleQuickSave}>Salvar</Button>
+					<Button 
+						variant='secondary' 
+						onClick={() => {
+							setShowBrandModal(false)
+							setShowCategoryModal(false)
+							setQuickName('')
+						}}
+					>
+						Cancelar
+					</Button>
+					<Button 
+						variant='primary' 
+						onClick={handleQuickSave}
+						disabled={!quickName.trim()}
+					>
+						Salvar
+					</Button>
 				</Modal.Footer>
 			</Modal>
+
+			{/* Estilos customizados */}
+			<style>
+				{`
+					.card {
+						transition: transform 0.2s ease, box-shadow 0.2s ease;
+					}
+					.card:hover {
+						transform: translateY(-1px);
+						box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+					}
+				`}
+			</style>
 		</Container>
 	)
 }

@@ -10,6 +10,8 @@ public class ProductWithPurchaseInStockDTO {
 
     private Integer id;
 
+    private Integer code;
+
     private String product_name;
 
     private String brand_name;

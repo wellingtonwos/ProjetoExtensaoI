@@ -9,6 +9,7 @@ import {
 	Col,
 	Alert,
 	Form,
+	Badge,
 } from 'react-bootstrap'
 import api from '../services/api'
 import { toast } from 'react-toastify'
@@ -40,27 +41,29 @@ export default function Reports() {
 	})
 
 	const getPaymentMethodLabel = (method) => {
-	const mapping = {
-		'PIX': 'PIX',
-		'CASH': 'Dinheiro',
-		'DEBIT': 'Débito',
-		'CREDIT': 'Crédito'
+		const mapping = {
+			'PIX': 'PIX',
+			'CASH': 'Dinheiro',
+			'DEBIT': 'Débito',
+			'CREDIT': 'Crédito'
+		}
+		return mapping[method] || method
 	}
-	return mapping[method] || method
-}
 
 	const formatDateTimeLocal = (date) => {
-    return date.toISOString().slice(0, 16);
-};
+		return date.toISOString().slice(0, 16);
+	};
 
 	const getFirstDayOfMonth = () => {
 		const d = new Date();
-		return formatDateTimeLocal(new Date(d.getFullYear(), d.getMonth(), 1, 0, 0));
+		const brasiliaDate = new Date(d.getTime() - (3 * 60 * 60 * 1000));
+		return formatDateTimeLocal(new Date(brasiliaDate.getFullYear(), brasiliaDate.getMonth(), 1, 0, 0));
 	};
 
 	const getToday = () => {
 		const now = new Date();
-		return formatDateTimeLocal(now);
+		const brasiliaNow = new Date(now.getTime() - (3 * 60 * 60 * 1000));
+		return formatDateTimeLocal(brasiliaNow);
 	};
 
 	const [startDate, setStartDate] = useState(getFirstDayOfMonth())
@@ -85,12 +88,10 @@ export default function Reports() {
 		const categories = new Set()
 
 		salesData.forEach(sale => {
-			// Método de pagamento
 			if (sale.paymentMethod) {
 				paymentMethods.add(sale.paymentMethod)
 			}
 
-			// Marca e categoria dos itens
 			sale.items?.forEach(item => {
 				if (item.brand) brands.add(item.brand)
 				if (item.category) categories.add(item.category)
@@ -112,12 +113,10 @@ export default function Reports() {
 		}
 
 		const filtered = sales.filter(sale => {
-			// Filtro por método de pagamento
 			if (filters.paymentMethod && sale.paymentMethod !== filters.paymentMethod) {
 				return false
 			}
 
-			// Filtro por marca e categoria (verifica se algum item atende)
 			if (filters.brand || filters.category) {
 				const hasMatchingItem = sale.items?.some(item => {
 					const brandMatch = !filters.brand || item.brand === filters.brand
@@ -134,10 +133,13 @@ export default function Reports() {
 		setFilteredSales(filtered)
 	}
 
-	// Aplica filtros quando sales ou filters mudam
 	useEffect(() => {
 		applyFilters()
 	}, [sales, filters])
+
+	useEffect(() => {
+		handleFilter()
+	}, [])
 
 	async function handleFilter(e) {
 		if (e) e.preventDefault()
@@ -205,222 +207,246 @@ export default function Reports() {
 
 	return (
 		<Container className='mt-4'>
-			<div className='mb-4'>
-				<h3>Histórico de Vendas</h3>
-
-				<Card className='mt-3 bg-light'>
-					<Card.Body className='py-3'>
-						<Form onSubmit={handleFilter}>
-							{/* Filtro por Data */}
-							<Row className='align-items-end mb-3'>
-								<Col md={4}>
-									<Form.Group>
-										<Form.Label>Data Início</Form.Label>
-										<Form.Control
-											type='datetime-local'
-											value={startDate}
-											onChange={(e) => setStartDate(e.target.value)}
-											required
-										/>
-									</Form.Group>
-								</Col>
-								<Col md={4}>
-									<Form.Group>
-										<Form.Label>Data Fim</Form.Label>
-										<Form.Control
-											type='datetime-local'
-											value={endDate}
-											onChange={(e) => setEndDate(e.target.value)}
-											required
-										/>
-									</Form.Group>
-								</Col>
-								<Col md={4}>
-									<div className='d-grid'>
-										<Button 
-											type='submit' 
-											variant='primary'
-											disabled={isLoading}
-										>
-											{isLoading ? '⏳ Carregando...' : '🔍 Buscar Vendas'}
-										</Button>
-									</div>
-								</Col>
-							</Row>
-
-							{/* Filtros Adicionais */}
-							<Row className='align-items-end'>
-								<Col md={3}>
-									<Form.Group>
-										<Form.Label>Método de Pagamento</Form.Label>
-										<Form.Select
-											value={filters.paymentMethod}
-											onChange={(e) => handleFilterChange('paymentMethod', e.target.value)}
-										>
-											<option value="">Todos</option>
-											<option value="PIX">PIX</option>
-											<option value="CASH">Dinheiro</option>
-											<option value="DEBIT">Débito</option>
-											<option value="CREDIT">Crédito</option>
-										</Form.Select>
-									</Form.Group>
-								</Col>
-								<Col md={3}>
-									<Form.Group>
-										<Form.Label>Marca</Form.Label>
-										<Form.Select
-											value={filters.brand}
-											onChange={(e) => handleFilterChange('brand', e.target.value)}
-										>
-											<option value="">Todas</option>
-											{filterOptions.brands.map(brand => (
-												<option key={brand} value={brand}>
-													{brand}
-												</option>
-											))}
-										</Form.Select>
-									</Form.Group>
-								</Col>
-								<Col md={3}>
-									<Form.Group>
-										<Form.Label>Categoria</Form.Label>
-										<Form.Select
-											value={filters.category}
-											onChange={(e) => handleFilterChange('category', e.target.value)}
-										>
-											<option value="">Todas</option>
-											{filterOptions.categories.map(category => (
-												<option key={category} value={category}>
-													{category}
-												</option>
-											))}
-										</Form.Select>
-									</Form.Group>
-								</Col>
-								<Col md={3}>
-									<div className='d-grid gap-2'>
-										<Button 
-											variant='outline-secondary' 
-											onClick={clearFilters}
-											disabled={!filters.paymentMethod && !filters.brand && !filters.category}
-										>
-											🗑️ Limpar Filtros
-										</Button>
-									</div>
-								</Col>
-							</Row>
-						</Form>
-					</Card.Body>
-				</Card>
+			<div className='text-center mb-4'>
+				<h2 className='fw-bold text-dark'>Relatórios de Vendas</h2>
+				<p className='text-muted'>Histórico e análise de vendas</p>
 			</div>
 
-			{error && <Alert variant='danger'>{error}</Alert>}
+			{/* Card de Filtros */}
+			<Card className='shadow-sm border-0 mb-4'>
+				<Card.Header className='bg-dark text-white'>
+					<h5 className='mb-0'>Filtros de Pesquisa</h5>
+				</Card.Header>
+				<Card.Body className='p-4'>
+					<Form onSubmit={handleFilter}>
+						<Row className='align-items-end mb-4'>
+							<Col md={5}>
+								<Form.Group>
+									<Form.Label className='fw-bold'>Data Início</Form.Label>
+									<Form.Control
+										type='datetime-local'
+										value={startDate}
+										onChange={(e) => setStartDate(e.target.value)}
+										required
+									/>
+								</Form.Group>
+							</Col>
+							<Col md={5}>
+								<Form.Group>
+									<Form.Label className='fw-bold'>Data Fim</Form.Label>
+									<Form.Control
+										type='datetime-local'
+										value={endDate}
+										onChange={(e) => setEndDate(e.target.value)}
+										required
+									/>
+								</Form.Group>
+							</Col>
+							<Col md={2}>
+								<div className='d-grid'>
+									<Button 
+										type='submit' 
+										variant='dark'
+										disabled={isLoading}
+									>
+										{isLoading ? 'Buscando...' : 'Buscar'}
+									</Button>
+								</div>
+							</Col>
+						</Row>
 
-			<Card>
-				<Card.Header
-					as='h5'
-					className='d-flex justify-content-between align-items-center'
-				>
-					<span>Resultados</span>
-					<div>
-						<span className='badge bg-secondary me-2'>{filteredSales.length} Vendas</span>
+						<Row className='g-3'>
+							<Col md={4}>
+								<Form.Group>
+									<Form.Label className='fw-bold'>Método de Pagamento</Form.Label>
+									<Form.Select
+										value={filters.paymentMethod}
+										onChange={(e) => handleFilterChange('paymentMethod', e.target.value)}
+									>
+										<option value="">Todos os métodos</option>
+										<option value="PIX">PIX</option>
+										<option value="CASH">Dinheiro</option>
+										<option value="DEBIT">Débito</option>
+										<option value="CREDIT">Crédito</option>
+									</Form.Select>
+								</Form.Group>
+							</Col>
+							<Col md={4}>
+								<Form.Group>
+									<Form.Label className='fw-bold'>Marca</Form.Label>
+									<Form.Select
+										value={filters.brand}
+										onChange={(e) => handleFilterChange('brand', e.target.value)}
+									>
+										<option value="">Todas as marcas</option>
+										{filterOptions.brands.map(brand => (
+											<option key={brand} value={brand}>
+												{brand}
+											</option>
+										))}
+									</Form.Select>
+								</Form.Group>
+							</Col>
+							<Col md={4}>
+								<Form.Group>
+									<Form.Label className='fw-bold'>Categoria</Form.Label>
+									<Form.Select
+										value={filters.category}
+										onChange={(e) => handleFilterChange('category', e.target.value)}
+									>
+										<option value="">Todas as categorias</option>
+										{filterOptions.categories.map(category => (
+											<option key={category} value={category}>
+												{category}
+											</option>
+										))}
+									</Form.Select>
+								</Form.Group>
+							</Col>
+						</Row>
+						<div className='text-center mt-3'>
+							<Button 
+								variant='outline-secondary' 
+								onClick={clearFilters}
+								disabled={!filters.paymentMethod && !filters.brand && !filters.category}
+							>
+								Limpar Filtros
+							</Button>
+						</div>
+					</Form>
+				</Card.Body>
+			</Card>
+
+			{error && <Alert variant='danger' className='text-center'>{error}</Alert>}
+
+			{/* Card de Resultados */}
+			<Card className='shadow-sm border-0'>
+				<Card.Header className='bg-light d-flex justify-content-between align-items-center'>
+					<h5 className='mb-0'>Resultados das Vendas</h5>
+					<div className='d-flex gap-2'>
+						<Badge bg='secondary'>
+							{filteredSales.length} venda{filteredSales.length !== 1 ? 's' : ''}
+						</Badge>
 						{(filters.paymentMethod || filters.brand || filters.category) && (
-							<span className='badge bg-warning'>Filtrado</span>
+							<Badge bg='warning' text='dark'>
+								Filtrado
+							</Badge>
 						)}
 					</div>
 				</Card.Header>
 
-				<Card.Body style={{ maxHeight: '55vh', overflowY: 'auto' }}>
+				<Card.Body style={{ maxHeight: '60vh', overflowY: 'auto' }} className='p-0'>
 					{filteredSales.length === 0 ? (
 						<div className='text-center py-5 text-muted'>
-							<h5>Nenhum registro encontrado</h5>
-							<p>Tente alterar os filtros acima.</p>
+							<h5>Nenhuma venda encontrada</h5>
+							<p>Tente ajustar os filtros ou o período de datas</p>
 						</div>
 					) : (
 						<ListGroup variant='flush'>
 							{filteredSales.map((sale, index) => (
 								<ListGroup.Item
 									key={sale.id || index}
-									className='d-flex justify-content-between align-items-center'
+									className='d-flex justify-content-between align-items-center py-3'
 								>
-									<div>
-										<strong>
-											{sale.timestamp
-												? new Date(sale.timestamp).toLocaleString('pt-BR')
-												: '--/--/--'}
-										</strong>
-										<br />
-										<small className='text-muted'>
-											Vend: {sale.salesmanName} | Pgto: {getPaymentMethodLabel(sale.paymentMethod)}
-										</small>
-										<br />
-										<span className='text-success fw-bold'>
-											Total: {formatMoney(sale.totalPrice)}
-										</span>
-										&nbsp; Descontos: {formatMoney(sale.discounts)}
+									<div className='flex-grow-1'>
+										<h6 className='mb-1 fw-bold'>
+											{new Date(sale.timestamp).toLocaleDateString('pt-BR')} -{' '}
+											{new Date(sale.timestamp).toLocaleTimeString('pt-BR')}
+										</h6>
+										<div className='d-flex flex-wrap gap-3 text-muted'>
+											<small>
+												<strong>Vendedor:</strong> {sale.salesmanName}
+											</small>
+											<small>
+												<strong>Pagamento:</strong> {getPaymentMethodLabel(sale.paymentMethod)}
+											</small>
+										</div>
 									</div>
-
-									<Button
-										variant='outline-secondary'
-										size='sm'
-										onClick={() => handleShowModal(sale.items)}
-									>
-										Ver Itens
-									</Button>
+									<div className='d-flex align-items-center gap-3'>
+										<div className='text-end'>
+											<h6 className='text-success mb-0 fw-bold'>
+												{formatMoney(sale.totalPrice)}
+											</h6>
+										</div>
+										<Button
+											variant='outline-primary'
+											size='sm'
+											onClick={() => handleShowModal(sale.items)}
+										>
+											Ver Itens
+										</Button>
+									</div>
 								</ListGroup.Item>
 							))}
 						</ListGroup>
 					)}
 				</Card.Body>
 
-				<Card.Footer>
-					<Row>
-						<Col>
-							<h5>Faturamento:</h5>
-							<h4
-								className={!showValues ? 'valor-blur' : ''}
-								style={{ color: 'green' }}
-							>
-								{formatMoney(faturamento)}
-							</h4>
+				<Card.Footer className='bg-white'>
+					<Row className='g-4 text-center'>
+						<Col md={4}>
+							<div className='p-3 border rounded'>
+								<small className='text-muted d-block'>Faturamento</small>
+								<h4
+									className={!showValues ? 'valor-blur' : ''}
+									style={{ color: 'green', margin: 0 }}
+								>
+									{formatMoney(faturamento)}
+								</h4>
+							</div>
 						</Col>
-						<Col>
-							<h5>Lucro:</h5>
-							<h4
-								className={!showValues ? 'valor-blur' : ''}
-								style={{ color: 'blue' }}
-							>
-								{formatMoney(lucro)}
-							</h4>
+						<Col md={4}>
+							<div className='p-3 border rounded'>
+								<small className='text-muted d-block'>Lucro</small>
+								<h4
+									className={!showValues ? 'valor-blur' : ''}
+									style={{ color: 'blue', margin: 0 }}
+								>
+									{formatMoney(lucro)}
+								</h4>
+							</div>
 						</Col>
-						<Col xs='auto' className='d-flex align-items-center'>
-							<Button
-								variant='light'
-								size='sm'
-								onClick={() => setShowValues(!showValues)}
-							>
-								{showValues ? 'Ocultar' : 'Exibir'}
-							</Button>
+						<Col md={4}>
+							<div className='p-3 border rounded'>
+								<small className='text-muted d-block'>Visibilidade</small>
+								<Button
+									variant={showValues ? 'outline-secondary' : 'outline-primary'}
+									onClick={() => setShowValues(!showValues)}
+									className='w-100'
+								>
+									{showValues ? 'Ocultar Valores' : 'Exibir Valores'}
+								</Button>
+							</div>
 						</Col>
 					</Row>
 				</Card.Footer>
 			</Card>
 
-			<Modal show={showModal} onHide={handleCloseModal}>
+			{/* Modal de Itens */}
+			<Modal show={showModal} onHide={handleCloseModal} size='lg' centered>
 				<Modal.Header closeButton>
 					<Modal.Title>Itens da Venda</Modal.Title>
 				</Modal.Header>
-				<Modal.Body>
+				<Modal.Body className='p-0'>
 					<ListGroup variant='flush'>
 						{selectedSaleItems.map((item, index) => (
-							<ListGroup.Item key={index}>
-								<strong>{item.productName}</strong>
-								<br />
-								<small className='text-muted'>
-									Marca: {item.brand} | Categoria: {item.category}
-								</small>
-								<br />
-								{item.quantity} x {formatMoney(item.salePrice)} = {formatMoney(item.total)}
+							<ListGroup.Item key={index} className='py-3'>
+								<div className='d-flex justify-content-between align-items-start mb-2'>
+									<h6 className='mb-0 fw-bold'>{item.productName}</h6>
+									<Badge bg='success'>
+										{formatMoney(item.total)}
+									</Badge>
+								</div>
+								<div className='d-flex flex-wrap gap-3 text-muted'>
+									<small><strong>Marca:</strong> {item.brand}</small>
+									<small><strong>Categoria:</strong> {item.category}</small>
+									<small><strong>Quantidade:</strong> {item.quantity}</small>
+								</div>
+								<div className='mt-2'>
+									<small className='text-muted'>
+										{item.quantity} × {formatMoney(item.salePrice)} = {formatMoney(item.total)}
+									</small>
+								</div>
 							</ListGroup.Item>
 						))}
 					</ListGroup>
@@ -431,6 +457,27 @@ export default function Reports() {
 					</Button>
 				</Modal.Footer>
 			</Modal>
+
+			{/* Estilos customizados */}
+			<style>
+				{`
+					.card {
+						transition: transform 0.2s ease, box-shadow 0.2s ease;
+					}
+					.card:hover {
+						transform: translateY(-1px);
+						box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+					}
+					.list-group-item {
+						transition: background-color 0.2s ease;
+						border-left: none;
+						border-right: none;
+					}
+					.list-group-item:hover {
+						background-color: #f8f9fa;
+					}
+				`}
+			</style>
 		</Container>
 	)
 }
