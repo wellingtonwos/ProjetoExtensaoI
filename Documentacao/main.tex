@@ -27,6 +27,7 @@
 \usepackage{color}				% Controle das cores
 \usepackage{graphicx}			% Inclusão de gráficos
 \usepackage{microtype} 			% para melhorias de justificação
+\usepackage{float}
 % ---
 		
 
@@ -739,7 +740,6 @@ O projeto materializa a conformidade com a LGPD nos seguintes pontos de design:
 % ---
 \section{Modelo de Banco de Dados}
 % ---
-
 O modelo de banco de dados é a espinha dorsal do CarneUp. A escolha por um modelo relacional e a tecnologia PostgreSQL é mandatória para suportar as transações de alta frequência no Ponto de Venda (PDV) e permitir cálculos financeiros complexos, como a margem de lucro por peça.
 
 \subsection{Modelo Entidade Relacionamento (MER) - Conceitual}
@@ -770,45 +770,34 @@ O modelo é composto pelas seguintes entidades principais:
     \item \textbf{Entidade Usuário:} Dados de login e perfil de acesso.
 \end{itemize}
 
-\begin{figure}[htb]
+% AQUI ESTÁ A MUDANÇA: [H] em vez de [htb]
+\begin{figure}[H] 
     \caption{Estrutura do Banco de Dados (MER)}
     \label{fig:mer_conceitual}
     \centering
     \includegraphics[width=0.9\textwidth]{Imagens/BD2.jpg}
-    %\source{Autoria própria (2025)}
+    \fonte{Autoria própria (2025).}
 \end{figure}
 
 % ---
-\subsection{Modelo Lógico (Esquema Relacional)}
+\subsection{Modelo Lógico de Dados (DER)}
 % ---
 
-O Modelo Lógico representa a etapa de transição entre o entendimento do negócio e a implementação técnica. Diferente do modelo conceitual, este diagrama detalha como os dados serão efetivamente estruturados no Sistema Gerenciador de Banco de Dados (SGBD) PostgreSQL \cite{postgre24}. Ele define as tabelas, a tipagem estrita dos dados e as regras de integridade.
+Após a definição das entidades e relacionamentos no nível conceitual, foi elaborado o Modelo Lógico de Dados. Nesta etapa, a estrutura do banco de dados é refinada, detalhando os atributos com seus respectivos tipos de dados (como \texttt{INTEGER}, \texttt{VARCHAR}, \texttt{NUMERIC}, \texttt{DATE}, \texttt{TIMESTAMP}) e estabelecendo as regras de integridade referencial através de Chaves Primárias (PK) e Chaves Estrangeiras (FK).
 
-\noindent\textbf{Elementos Estruturais e Visuais:}
-\begin{itemize}
-    \item \textbf{Tabelas:} As entidades conceituais são convertidas em tabelas relacionais.
-    \item \textbf{Colunas e Tipagem:} Os atributos recebem nomenclaturas técnicas (ex: \texttt{VARCHAR(255)}, \texttt{NUMERIC(10,4)}, \texttt{TIMESTAMP}).
-    \item \textbf{Chaves e Identificadores:}
-    \begin{itemize}
-        \item \textit{Chave Preta/Amarela:} Indica a \textbf{Chave Primária} (\textit{Primary Key} - PK).
-        \item \textit{Chave Verde:} Indica a \textbf{Chave Estrangeira} (\textit{Foreign Key} - FK).
-    \end{itemize}
-\end{itemize}
+A Figura \ref{fig:der_logico} apresenta o Diagrama Entidade-Relacionamento (DER) lógico do sistema CarneUp.
 
-\noindent\textbf{Características Técnicas:}
-\begin{itemize}
-    \item \textbf{Implementação de Relacionamentos:} Os losangos do modelo conceitual são materializados através de colunas de Chave Estrangeira (ex: tabela \texttt{Produto} possui a coluna \texttt{fk\_Categoria\_id}).
-    \item \textbf{Restrições de Domínio:} Define limites de caracteres e precisão decimal.
-\end{itemize}
-
-\begin{figure}[htb]
-    \caption{Modelo Lógico Relacional do CarneUp}
-    \label{fig:modelo_logico}    
+\begin{figure}[H]
+    \caption{Diagrama Lógico de Dados (DER)}
+    \label{fig:der_logico}
     \centering
-    % Atenção: Caminho corrigido para 'Imagens/' (raiz)
-    \includegraphics[width=0.9\textwidth]{Imagens/BD.jpg}
-    %\source{Autoria própria (2025)}
+    \includegraphics[width=0.9\textwidth]{Documentacao/Imagens/BD.jpg} % Certifique-se que o nome do arquivo é BD.jpg
+    \fonte{Autoria própria (2025).}
 \end{figure}
+
+A estrutura foi projetada para garantir a rastreabilidade completa do fluxo de mercadorias. A tabela \textbf{Item} atua como a entidade centralizadora da lógica de negócio, conectando os \textbf{Produtos} às transações de \textbf{Compra} e \textbf{Venda}.
+
+Diferente de modelos convencionais, a tabela \texttt{Item} armazena dados históricos críticos, como \texttt{preco\_unitario\_compra} e \texttt{preco\_unitario\_venda} no momento da transação, além da \texttt{data\_validade}. Essa modelagem permite o cálculo exato da margem de lucro e o gerenciamento de vencimento de lotes, atendendo aos requisitos de redução de desperdício.
 
 % ---
 \section{Arquitetura do Sistema}
@@ -830,12 +819,13 @@ O modelo de implantação utiliza um \textit{Load Balancer} (AWS ALB) como ponto
     \item \textbf{Escalabilidade (RNF02):} A aplicação \textit{Back-end} é hospedada em instâncias elásticas (AWS EC2).
 \end{itemize}
 
-\begin{figure}[htb]
+% AQUI ESTÁ A MUDANÇA: [H] em vez de [htb]
+\begin{figure}[H]
     \caption{Diagrama de Implantação do Sistema CarneUp}
     \label{fig:implantacao}
     \centering
     \includegraphics[width=0.8\textwidth]{Imagens/DiagramaImplantacao.jpg}
-    %\source{Autoria própria (2025)}
+    \fonte{Autoria própria (2025).}
 \end{figure}
 
 % ---
@@ -857,14 +847,14 @@ Os componentes são segregados em três camadas principais:
     \item \textbf{Camada de Dados (PostgreSQL):} Responsável pela persistência (CRUD).
 \end{itemize}
 
-\begin{figure}[htb]
+% AQUI ESTÁ A MUDANÇA: [H] em vez de [htb]
+\begin{figure}[H]
     \caption{Diagrama de Componentes do Sistema CarneUp}
     \label{fig:componentes}
     \centering
     \includegraphics[width=0.8\textwidth]{Imagens/DiagramaComponentes.jpg}
-    %\source{Autoria própria (2025)}
+    \fonte{Autoria própria (2025).}
 \end{figure}
-
 % ----------------------------------------------------------
 % CAPÍTULO 4: VIABILIDADE FINANCEIRA
 % ----------------------------------------------------------
@@ -937,8 +927,6 @@ Com a entrega do Produto Mínimo Viável (MVP), o projeto demonstrou a viabilida
 % ---
 
 Esta seção sintetiza os principais resultados alcançados, as decisões estratégicas tomadas e o alinhamento do projeto com sua proposta de valor.
-
-\subsection{Alinhamento com a Proposta de Valor e Viabilidade}
 
 O CarneUp cumpriu seus requisitos técnicos, concentrando o foco em um sistema robusto e confiável. A decisão de utilizar o PostgreSQL foi fundamental para oferecer a robustez e a integridade transacional exigidas para dados financeiros e de estoque. O Investimento Inicial total estimado para o desenvolvimento do MVP foi de R\$ 50.250,00.
 
