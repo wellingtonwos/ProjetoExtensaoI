@@ -259,7 +259,7 @@ O Escopo do projeto abrange a criação de um sistema web focado nas operações
 \noindent\textbf{O projeto abrange:}
 \begin{itemize}
     \item Gestão de Vendas (PDV) com integração de código de barras.
-    \item Controle de Estoque (Entrada/Saída), incluindo fornecedor, valor de custo e validade.
+    \item Controle de Estoque (Entrada/Saída), incluindo marca, valor de custo e validade.
     \item Emissão de alertas de validade.
     \item Geração de relatórios básicos de vendas.
     \item Aplicação de padrões de acessibilidade (WCAG) na interface web.
@@ -313,23 +313,19 @@ A Tabela \ref{tab:requisitos_funcionais} lista os requisitos funcionais que defi
     \hline
     \endlastfoot
 
-    RF01 & O sistema deve permitir o registro de vendas através da leitura do código de barras gerado pela balança. \\ 
+    RF01 & O sistema deve permitir a inserção manual de itens na venda (peso e valor), bem como calcular automaticamente via leitura de código de barras. \\ 
     \hline
-    RF02 & O sistema deve calcular automaticamente o valor total da venda ao capturar o peso e o valor unitário do item lido via código de barras. \\ 
+    RF02 & O sistema deve permitir o registro de novas entradas de estoque (compras), incluindo valor de custo, marca e validade. \\ 
     \hline
-    RF03 & O sistema deve permitir o registro de novas entradas de estoque (compras), incluindo valor de custo, fornecedor e validade. \\ 
+    RF03 & O sistema deve permitir a busca e visualização de peças de estoque por fornecedor. \\ 
     \hline
-    RF04 & O sistema deve permitir a busca e visualização de peças de estoque por fornecedor. \\ 
+    RF04 & O sistema deve calcular a margem de lucro de cada peça de carne vendida (Valor de Venda - Valor de Custo). \\ 
     \hline
-    RF05 & O sistema deve calcular a margem de lucro de cada peça de carne vendida (Valor de Venda - Valor de Custo). \\ 
+    RF05 & O sistema deve emitir um alerta visual para o usuário quando a validade de uma peça de estoque estiver a 7 dias ou menos do vencimento. \\ 
     \hline
-    RF06 & O sistema deve emitir um alerta visual e via e-mail para o administrador quando a validade de uma peça de estoque estiver a 7 dias ou menos do vencimento. \\ 
+    RF06 & O sistema deve permitir o descarte de peças de estoque (baixa) e registrar o motivo do descarte (ex: vencimento, perda de qualidade). \\ 
     \hline
-    RF07 & O sistema deve permitir o descarte de peças de estoque (baixa) e registrar o motivo do descarte (ex: vencimento, perda de qualidade). \\ 
-    \hline
-    RF08 & O sistema deve gerar relatórios diários de vendas, detalhando a quantidade e o valor total vendido. \\ 
-    \hline
-    RF09 & O sistema deve gerenciar o cadastro completo de fornecedores e seus respectivos contatos. \\ 
+    RF07 & O sistema deve permitir a geração de relatórios de vendas, detalhando a quantidade e o valor total vendido. \\ 
     \hline
 \end{longtable}
 
@@ -357,15 +353,13 @@ A Tabela \ref{tab:requisitos_rn} apresenta as regras de negócio obrigatórias, 
     \hline
     \endlastfoot
      
-    RN01 & A venda só pode ser registrada se o código de barras lido for reconhecido e o item tiver estoque disponível. & RF01, RF02 \\ 
+    RN01 & A venda só pode ser registrada se o código de barras lido, ou inserido manualmente, for reconhecido e o item tiver estoque disponível. & RF01, RF02 \\ 
     \hline
-    RN02 & O valor de custo por peça deve ser registrado no momento da entrada no estoque para cálculo de margem de lucro. & RF03, RF05 \\ 
+    RN02 & O valor de compra por peça deve ser registrado no momento da entrada no estoque para cálculo de margem de lucro. & RF03, RF05 \\ 
     \hline
-    RN03 & Peças com validade expirada devem ser automaticamente bloqueadas para venda e movidas para a lista de descarte. & RF07, RNF01 \\ 
+    RN03 & O sistema deve manter o histórico de vendas para cada produto no estoque para fins de rastreabilidade. & RF04 \\ 
     \hline
-    RN04 & O sistema deve manter o histórico de fornecedores para cada peça de carne no estoque para fins de rastreabilidade. & RF04 \\ 
-    \hline
-    RN05 & A peça de carne vendida deve ter seu estoque subtraído em tempo real no momento do registro da venda. & RF02, RNF01 \\ 
+    RN04 & A peça de carne vendida deve ter seu estoque subtraído em tempo real no momento do registro da venda. & RF02, RNF01 \\ 
     \hline
 \end{longtable}
 
@@ -772,26 +766,26 @@ O modelo é composto pelas seguintes entidades principais:
 
 % AQUI ESTÁ A MUDANÇA: [H] em vez de [htb]
 \begin{figure}[H] 
-    \caption{Estrutura do Banco de Dados (MER)}
+    \caption{Diagrama Entidade - Relacionamento (DER)}
     \label{fig:mer_conceitual}
     \centering
-    \includegraphics[width=0.9\textwidth]{Imagens/BD2.jpg}
+    \includegraphics[width=0.9\textwidth]{Documentacao/Imagens/DER.jpg}
     \fonte{Autoria própria (2025).}
 \end{figure}
 
 % ---
-\subsection{Modelo Lógico de Dados (DER)}
+\subsection{Modelo Lógico de Dados }
 % ---
 
 Após a definição das entidades e relacionamentos no nível conceitual, foi elaborado o Modelo Lógico de Dados. Nesta etapa, a estrutura do banco de dados é refinada, detalhando os atributos com seus respectivos tipos de dados (como \texttt{INTEGER}, \texttt{VARCHAR}, \texttt{NUMERIC}, \texttt{DATE}, \texttt{TIMESTAMP}) e estabelecendo as regras de integridade referencial através de Chaves Primárias (PK) e Chaves Estrangeiras (FK).
 
-A Figura \ref{fig:der_logico} apresenta o Diagrama Entidade-Relacionamento (DER) lógico do sistema CarneUp.
+A Figura \ref{fig:der_logico} apresenta o modelo lógico do sistema CarneUp.
 
 \begin{figure}[H]
-    \caption{Diagrama Lógico de Dados (DER)}
+    \caption{Modelo Lógico }
     \label{fig:der_logico}
     \centering
-    \includegraphics[width=0.9\textwidth]{Documentacao/Imagens/BD.jpg} % Certifique-se que o nome do arquivo é BD.jpg
+    \includegraphics[width=0.9\textwidth]{Documentacao/Imagens/DiagramaLogico.jpg} 
     \fonte{Autoria própria (2025).}
 \end{figure}
 
@@ -856,62 +850,75 @@ Os componentes são segregados em três camadas principais:
     \fonte{Autoria própria (2025).}
 \end{figure}
 % ----------------------------------------------------------
-% CAPÍTULO 4: VIABILIDADE FINANCEIRA
+% CAPÍTULO 4: VIABILIDADE DO PROJETO
 % ----------------------------------------------------------
-\chapter{Viabilidade Financeira}
+\chapter{Viabilidade e Sustentabilidade do Projeto}
 \label{cap:viabilidade}
 
-O presente capítulo tem como objetivo delinear a viabilidade econômico-financeira do projeto CarneUp, focando no Investimento Inicial requerido para o desenvolvimento e entrega do Projeto Integrado (PI). Esta análise é baseada no modelo de custo de projeto único para o cliente-alvo (o açougue de pequeno porte).
+O presente capítulo tem como objetivo demonstrar a viabilidade de execução do projeto CarneUp. Diferente de uma abordagem puramente contábil, esta análise foca na alocação eficiente de recursos, no uso estratégico de tecnologias acessíveis e na valorização do capital intelectual aplicado ao desenvolvimento do Produto Mínimo Viável (MVP).
+
+A premissa central é desenvolver uma solução robusta para açougues de pequeno porte, minimizando barreiras de entrada financeiras e maximizando o uso de ferramentas de código aberto e infraestrutura escalável.
 
 % ---
-\section{Custos}
+\section{Investimento em Capital Intelectual}
 % ---
 
-A estimativa de custos representa o Investimento Inicial (Capital de Giro) necessário para a fase de desenvolvimento e entrega do Produto Mínimo Viável (MVP) do CarneUp. Estes custos foram categorizados em duas vertentes principais: Mão de Obra (MO) e Infraestrutura, conforme detalhado nas subseções a seguir.
+O principal ativo investido no desenvolvimento do CarneUp é o capital intelectual. A viabilidade do projeto sustenta-se na capacidade técnica da equipe em transformar requisitos de negócio em software funcional.
 
-\subsection{Detalhamento dos Custos de Desenvolvimento (Mão de Obra)}
-
-O custo de Mão de Obra (MO) é a componente de maior peso no investimento inicial. O cálculo baseou-se na estimativa de horas de trabalho necessárias para o período de 2,5 meses, aplicando-se uma taxa horária média ponderada.
+Nesta ótica, o custo não é monetário imediato, mas sim mensurado em \textbf{Horas de Desenvolvimento e Pesquisa}. O esforço concentra-se nas seguintes atividades:
 
 \begin{itemize}
-    \item \textbf{Esforço Total Estimado:} 1.000 horas (5 desenvolvedores $\times$ 80 horas/mês $\times$ 2,5 meses).
-    \item \textbf{Custo Horário Médio (Loaded Rate):} R\$ 50,00.
-    \item \textbf{Custo Total de MO:} R\$ 50.000,00.
+    \item Levantamento e análise de requisitos junto ao cliente-alvo;
+    \item Modelagem de dados e arquitetura de software;
+    \item Codificação (Frontend e Backend) e testes integrados;
+    \item Documentação acadêmica e técnica.
 \end{itemize}
 
-\subsection{Custos de Infraestrutura e Operacionais}
+Esta abordagem permite que o projeto seja executado sem a necessidade de aportes financeiros externos para contratação de terceiros, validando a autonomia técnica do grupo.
 
-Os custos de infraestrutura consideram a utilização de serviços em nuvem (AWS) e domínios essenciais para o ambiente de desenvolvimento e testes.
+% ---
+\section{Estratégia de Infraestrutura e Ferramentas}
+% ---
 
+Para garantir a viabilidade econômica e a sustentabilidade operacional, o projeto adotou uma pilha tecnológica baseada em soluções de baixo custo e alta disponibilidade.
+
+\subsection{Licenciamento e Software}
+A escolha por linguagens e frameworks Open Source (como PHP, PostgreSQL e bibliotecas JavaScript) elimina completamente os custos com licenciamento de software proprietário. Isso reduz drasticamente o Custo Total de Propriedade (TCO) para o cliente final.
+
+\subsection{Infraestrutura em Nuvem (Cloud Computing)}
+A infraestrutura foi planejada para operar em ambiente de nuvem (ex: AWS ou DigitalOcean), utilizando o modelo \textit{Pay-as-you-go} (pague pelo que usar).
 \begin{itemize}
-    \item \textbf{Custo Mensal Estimado (AWS + Domínio):} R\$ 100,00.
-    \item \textbf{Custo Acumulado (2,5 meses de Desenvolvimento):} R\$ 250,00.
+    \item \textbf{Ambiente de Desenvolvimento:} Utilização de camadas gratuitas (\textit{Free Tier}) para testes e validação.
+    \item \textbf{Escalabilidade:} O custo de hospedagem cresce apenas proporcionalmente ao uso do sistema, permitindo que o açougue inicie a operação com um custo operacional marginal.
 \end{itemize}
 
-\subsection{Investimento Inicial Consolidado}
+% ---
+\section{Conclusão da Viabilidade}
+% ---
 
-O investimento total necessário para a conclusão e entrega do MVP é consolidado na Tabela \ref{tab:custos_iniciais}.
+A análise demonstra que o projeto CarneUp é viável pois remove as barreiras financeiras tradicionais de desenvolvimento de software. A Tabela \ref{tab:analise_viabilidade} resume a estratégia adotada para mitigar custos.
 
 \begin{table}[htb]
-    \caption{Consolidação dos Custos Iniciais do Projeto}
-    \label{tab:custos_iniciais}
+    \caption{Matriz de Viabilidade e Mitigação de Custos}
+    \label{tab:analise_viabilidade}
     \centering
-    \begin{tabular}{|l|r|c|}
+    \begin{tabular}{|p{4cm}|p{5cm}|p{5cm}|}
         \hline
-        \textbf{Natureza do Custo} & \textbf{Valor (R\$)} & \textbf{Participação (\%)} \\
+        \textbf{Recurso Necessário} & \textbf{Classificação de Custo} & \textbf{Estratégia de Viabilidade} \\
         \hline
-        Mão de Obra (Desenvolvimento) & 50.000,00 & 99,50\% \\
+        Mão de Obra de Desenvolvimento & Alto (Valor de Mercado) & \textbf{Investimento Intelectual:} Realizado pela própria equipe como parte do requisito acadêmico. \\
         \hline
-        Infraestrutura (AWS, Domínio) & 250,00 & 0,50\% \\
+        Licenças de Software (Banco de Dados/Linguagem) & Nulo & \textbf{Open Source:} Uso de tecnologias livres (PostgreSQL, Linux, PHP). \\
         \hline
-        \textbf{INVESTIMENTO INICIAL TOTAL} & \textbf{50.250,00} & \textbf{100,00\%} \\
+        Infraestrutura de Servidores & Variável (Baixo Inicial) & \textbf{Computação em Nuvem:} Modelo elástico que evita compra de hardware físico. \\
+        \hline
+        Ferramentas de Gestão e Design & Nulo/Baixo & \textbf{Ferramentas Gratuitas:} Uso de versões acadêmicas ou gratuitas (ex: Trello, Figma). \\
         \hline
     \end{tabular}
     %\source{Elaborado pelo autor (2025).}
 \end{table}
 
-Conforme apresentado na Tabela \ref{tab:custos_iniciais}, o Investimento Inicial Total do projeto é de R\$ 50.250,00.
-
+Conclui-se que o projeto possui alta viabilidade de implementação, pois transforma o esforço acadêmico em um produto de mercado real, com custos de manutenção compatíveis com a realidade financeira de pequenos comércios.
 % ----------------------------------------------------------
 % CAPÍTULO 5: CONSIDERAÇÕES FINAIS
 % ----------------------------------------------------------
@@ -981,37 +988,6 @@ O desenvolvimento subsequente deve incluir a implementação dessas funcionalida
 O presente anexo detalha o projeto do banco de dados relacional (PostgreSQL) do sistema CarneUp, abrangendo os níveis de abstração, o modelo conceitual e o dicionário de dados (modelo lógico) completo.
 
 % ---
-\section{Modelos de Abstração}
-% ---
-
-A Tabela \ref{tab:niveis_abstracao} define os diferentes níveis de abstração utilizados no projeto do banco de dados.
-
-\begin{longtable}{|>{\raggedright\arraybackslash}m{2cm}|>{\raggedright\arraybackslash}m{2.5cm}|>{\centering\arraybackslash}m{2.5cm}|>{\raggedright\arraybackslash}m{3cm}|>{\raggedright\arraybackslash}m{4.5cm}|}
-    \caption{Níveis de Abstração do Projeto de Banco de Dados}
-    \label{tab:niveis_abstracao}\\
-    \hline
-    \textbf{Modelo} & \textbf{Nível de Abstração} & \textbf{Dependência do SGBD} & \textbf{Representação} & \textbf{Foco} \\
-    \hline
-    \endfirsthead
-    \multicolumn{5}{c}{{\bfseries \tablename\ \thetable{} -- continuação}} \\
-    \hline
-    \textbf{Modelo} & \textbf{Nível de Abstração} & \textbf{Dependência do SGBD} & \textbf{Representação} & \textbf{Foco} \\
-    \hline
-    \endhead
-    \hline
-    \endfoot
-    \hline
-    \endlastfoot
-
-    Conceitual & Mais Alto & Não (Puro negócio) & Diagrama Entidade Relacionamento (MER) & O que é o negócio (Entidades e Regras). \\
-    \hline
-    Lógico & Intermediário & Não (Puro modelo relacional) & Esquema de Tabelas e Chaves (Lógico) & Como os dados serão estruturados (Relações, PK, FK, 3FN). \\
-    \hline
-    Físico & Mais Baixo & Sim (Dependente do SQL/SGBD) & Comandos SQL DDL, Índices, Triggers & Como o SGBD irá armazenar e otimizar (Tipos de dados, Triggers). \\
-    \hline
-\end{longtable}
-
-% ---
 \section{Modelo Conceitual (MER)}
 % ---
 
@@ -1019,18 +995,18 @@ A Tabela \ref{tab:niveis_abstracao} define os diferentes níveis de abstração 
 
 \subsection{Entidades Principais}
 
-A Tabela \ref{tab:entidades_principais} descreve as entidades fundamentais do sistema.
+A Tabela \ref{tab:entidades_principais} descreve as entidades fundamentais do sistema, conforme apresentado no Diagrama Lógico.
 
 \begin{longtable}{|>{\raggedright\arraybackslash}m{3cm}|>{\raggedright\arraybackslash}m{6cm}|>{\raggedright\arraybackslash}m{6cm}|}
     \caption{Entidades Principais do Modelo Conceitual}
     \label{tab:entidades_principais}\\
     \hline
-    \textbf{Entidade} & \textbf{Descrição} & \textbf{Atributos Principais (Exemplos)} \\
+    \textbf{Entidade} & \textbf{Descrição} & \textbf{Atributos Principais (Do Diagrama)} \\
     \hline
     \endfirsthead
     \multicolumn{3}{c}{{\bfseries \tablename\ \thetable{} -- continuação}} \\
     \hline
-    \textbf{Entidade} & \textbf{Descrição} & \textbf{Atributos Principais (Exemplos)} \\
+    \textbf{Entidade} & \textbf{Descrição} & \textbf{Atributos Principais (Do Diagrama)} \\
     \hline
     \endhead
     \hline
@@ -1038,13 +1014,19 @@ A Tabela \ref{tab:entidades_principais} descreve as entidades fundamentais do si
     \hline
     \endlastfoot
 
-    PRODUTO & Carnes/itens vendidos. & ID\_Produto (Chave), Nome, Corte, Estoque\_Mínimo. \\
+    PRODUTO & Itens comercializados no sistema. & id, nome, unidade\_medida, codigo. \\
     \hline
-    CATEGORIA & Agrupa os produtos (ex: Bovino, Suíno). & ID\_Categoria (Chave), Nome\_Categoria. \\
+    CATEGORIA & Agrupamento dos produtos. & id, nome. \\
     \hline
-    FORNECEDOR & Empresas de quem se compra. & ID\_Fornecedor (Chave), Nome\_Fornecedor, CNPJ. \\
+    MARCA & Fabricante ou marca do produto. & id, nome. \\
     \hline
-    USUARIO & Pessoas que acessam o sistema (vendedores/administradores). & ID\_Usuario (Chave), Nome, Cargo. \\
+    USUARIO & Pessoas com acesso ao sistema (autenticação). & id, nome, senha, nivel\_acesso. \\
+    \hline
+    VENDA & Registro da operação de saída de mercadorias. & id, data, metodo\_pagamento, desconto. \\
+    \hline
+    COMPRA & Registro de aquisição ou entrada de estoque. & id, data. \\
+    \hline
+    ITEM & Detalhes transacionais (liga produtos a compras ou vendas). & id, quantidade, preco\_unitario\_venda, data\_validade. \\
     \hline
 \end{longtable}
 
@@ -1060,13 +1042,12 @@ O Dicionário de Dados detalha a estrutura de cada tabela, tipos de dados, chave
     \caption{Estrutura da Tabela PRODUTO} \label{tab:dic_produto} \\
     \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
     \endhead
-    id\_produto & INT & PK & NOT NULL, AUTO\_INCREMENT \\ \hline
-    id\_categoria & INT & FK & NOT NULL (Referencia CATEGORIA) \\ \hline
-    nome & VARCHAR(100) & & NOT NULL \\ \hline
-    corte & VARCHAR(50) & & NULL \\ \hline
-    estoque\_atual & DECIMAL(10, 3) & & NOT NULL \\ \hline
-    estoque\_minimo & DECIMAL(10, 3) & & NOT NULL \\ \hline
-    data\_cadastro & DATE & & NOT NULL \\ \hline
+    id & SERIAL & PK & NOT NULL, AUTO\_INCREMENT \\ \hline
+    nome & VARCHAR(255) & & NOT NULL \\ \hline
+    unidade\_medida & VARCHAR(2) & & NULL \\ \hline
+    codigo & INTEGER & & NULL \\ \hline
+    fk\_Categoria\_id & SERIAL & FK & NOT NULL (Referencia Tabela Categoria) \\ \hline
+    fk\_Marca\_id & SERIAL & FK & NOT NULL (Referencia Tabela Marca) \\ \hline
 \end{longtable}
 
 % Tabela CATEGORIA
@@ -1075,21 +1056,18 @@ O Dicionário de Dados detalha a estrutura de cada tabela, tipos de dados, chave
     \caption{Estrutura da Tabela CATEGORIA} \label{tab:dic_categoria} \\
     \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
     \endhead
-    id\_categoria & INT & PK & NOT NULL, AUTO\_INCREMENT \\ \hline
-    nome\_categoria & VARCHAR(50) & & NOT NULL \\ \hline
-    descricao & VARCHAR(255) & & NULL \\ \hline
+    id & SERIAL & PK & NOT NULL, AUTO\_INCREMENT \\ \hline
+    nome & VARCHAR(255) & & NOT NULL \\ \hline
 \end{longtable}
 
-% Tabela FORNECEDOR
-\subsection{Tabela FORNECEDOR}
+% Tabela MARCA
+\subsection{Tabela MARCA}
 \begin{longtable}{|l|l|c|p{6cm}|}
-    \caption{Estrutura da Tabela FORNECEDOR} \label{tab:dic_fornecedor} \\
+    \caption{Estrutura da Tabela MARCA} \label{tab:dic_marca} \\
     \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
     \endhead
-    id\_fornecedor & INT & PK & NOT NULL, AUTO\_INCREMENT \\ \hline
-    nome\_fornecedor & VARCHAR(150) & & NOT NULL \\ \hline
-    cnpj & VARCHAR(18) & & NOT NULL, UNIQUE \\ \hline
-    contato & VARCHAR(100) & & NULL \\ \hline
+    id & SERIAL & PK & NOT NULL, AUTO\_INCREMENT \\ \hline
+    nome & VARCHAR(255) & & NOT NULL \\ \hline
 \end{longtable}
 
 % Tabela USUARIO
@@ -1098,25 +1076,10 @@ O Dicionário de Dados detalha a estrutura de cada tabela, tipos de dados, chave
     \caption{Estrutura da Tabela USUARIO} \label{tab:dic_usuario} \\
     \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
     \endhead
-    id\_usuario & INT & PK & NOT NULL, AUTO\_INCREMENT \\ \hline
-    nome & VARCHAR(100) & & NOT NULL \\ \hline
-    email & VARCHAR(150) & & NOT NULL, UNIQUE \\ \hline
-    senha\_hash & VARCHAR(255) & & NOT NULL \\ \hline
-    cargo & ENUM('Adm', 'Vend') & & NOT NULL \\ \hline
-\end{longtable}
-
-% Tabela ESTOQUE
-\subsection{Tabela ESTOQUE}
-\begin{longtable}{|l|l|c|p{6cm}|}
-    \caption{Estrutura da Tabela ESTOQUE} \label{tab:dic_estoque} \\
-    \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
-    \endhead
-    id\_lote & INT & PK & NOT NULL, AUTO\_INCREMENT \\ \hline
-    id\_produto & INT & FK & NOT NULL (Referencia PRODUTO) \\ \hline
-    quantidade & DECIMAL(10, 3) & & NOT NULL \\ \hline
-    custo\_unit & DECIMAL(10, 2) & & NOT NULL \\ \hline
-    data\_validade & DATE & & NOT NULL \\ \hline
-    data\_entrada & DATETIME & & NOT NULL \\ \hline
+    id & SERIAL & PK & NOT NULL, AUTO\_INCREMENT \\ \hline
+    nome & VARCHAR(255) & & NOT NULL \\ \hline
+    senha & VARCHAR(60) & & NOT NULL \\ \hline
+    nivel\_acesso & VARCHAR(8) & & NOT NULL \\ \hline
 \end{longtable}
 
 % Tabela COMPRA
@@ -1125,23 +1088,24 @@ O Dicionário de Dados detalha a estrutura de cada tabela, tipos de dados, chave
     \caption{Estrutura da Tabela COMPRA} \label{tab:dic_compra} \\
     \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
     \endhead
-    id\_compra & INT & PK & NOT NULL, AUTO\_INCREMENT \\ \hline
-    id\_fornecedor & INT & FK & NOT NULL (Ref. FORNECEDOR) \\ \hline
-    data\_compra & DATE & & NOT NULL \\ \hline
-    valor\_total & DECIMAL(10, 2) & & NOT NULL \\ \hline
-    status & ENUM & & NOT NULL \\ \hline
+    id & SERIAL & PK & NOT NULL, AUTO\_INCREMENT \\ \hline
+    data & DATE & & NOT NULL \\ \hline
 \end{longtable}
 
-% Tabela ITEM_COMPRA
-\subsection{Tabela ITEM\_COMPRA}
+% Tabela ITEM
+\subsection{Tabela ITEM}
 \begin{longtable}{|l|l|c|p{6cm}|}
-    \caption{Estrutura da Tabela ITEM\_COMPRA} \label{tab:dic_item_compra} \\
+    \caption{Estrutura da Tabela ITEM} \label{tab:dic_item} \\
     \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
     \endhead
-    id\_compra & INT & PK, FK & NOT NULL (Referencia COMPRA) \\ \hline
-    id\_produto & INT & PK, FK & NOT NULL (Referencia PRODUTO) \\ \hline
-    quantidade & DECIMAL(10, 3) & & NOT NULL \\ \hline
-    custo\_unit & DECIMAL(10, 2) & & NOT NULL \\ \hline
+    id & SERIAL & PK & NOT NULL, AUTO\_INCREMENT \\ \hline
+    quantidade & NUMERIC(10,4) & & NOT NULL \\ \hline
+    preco\_unitario\_compra & NUMERIC(10,4) & & NOT NULL \\ \hline
+    preco\_unitario\_venda & NUMERIC(10,4) & & NOT NULL \\ \hline
+    data\_validade & DATE & & NOT NULL \\ \hline
+    fk\_Produto\_id & SERIAL & FK & NOT NULL (Referencia Tabela Produto) \\ \hline
+    fk\_Compra\_id & SERIAL & FK & NOT NULL (Referencia Tabela Compra) \\ \hline
+    fk\_Venda\_id & SERIAL & FK & NOT NULL (Referencia Tabela Venda) \\ \hline
 \end{longtable}
 
 % Tabela VENDA
@@ -1150,24 +1114,11 @@ O Dicionário de Dados detalha a estrutura de cada tabela, tipos de dados, chave
     \caption{Estrutura da Tabela VENDA} \label{tab:dic_venda} \\
     \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
     \endhead
-    id\_venda & INT & PK & NOT NULL, AUTO\_INCREMENT \\ \hline
-    id\_usuario & INT & FK & NOT NULL (Referencia USUARIO) \\ \hline
-    data\_venda & DATETIME & & NOT NULL \\ \hline
-    valor\_total & DECIMAL(10, 2) & & NOT NULL \\ \hline
-    status & ENUM & & NOT NULL \\ \hline
-\end{longtable}
-
-% Tabela ITEM_VENDA
-\subsection{Tabela ITEM\_VENDA}
-\begin{longtable}{|l|l|c|p{6cm}|}
-    \caption{Estrutura da Tabela ITEM\_VENDA} \label{tab:dic_item_venda} \\
-    \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
-    \endhead
-    id\_venda & INT & PK, FK & NOT NULL (Referencia VENDA) \\ \hline
-    id\_produto & INT & PK, FK & NOT NULL (Referencia PRODUTO) \\ \hline
-    quantidade & DECIMAL(10, 3) & & NOT NULL \\ \hline
-    preco\_unit & DECIMAL(10, 2) & & NOT NULL \\ \hline
-    custo\_reg & DECIMAL(10, 2) & & NOT NULL (Cálculo de lucro) \\ \hline
+    id & SERIAL & PK & NOT NULL, AUTO\_INCREMENT \\ \hline
+    data & TIMESTAMP & & NOT NULL \\ \hline
+    metodo\_pagamento & VARCHAR(9) & & NOT NULL \\ \hline
+    desconto & NUMERIC(10,4) & & NULL \\ \hline
+    fk\_Usuario\_id & SERIAL & FK & NOT NULL (Referencia Tabela Usuario) \\ \hline
 \end{longtable}
 
 \end{apendicesenv}

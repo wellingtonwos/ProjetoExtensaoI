@@ -26,18 +26,18 @@ export default function Reports() {
 	const [showValues, setShowValues] = useState(false)
 	const [isLoading, setIsLoading] = useState(false)
 
-	// Estados para os filtros
 	const [filters, setFilters] = useState({
 		paymentMethod: '',
 		brand: '',
-		category: ''
+		category: '',
+		product: ''
 	})
 
-	// Opções para os selects (serão preenchidas automaticamente)
 	const [filterOptions, setFilterOptions] = useState({
 		paymentMethods: [],
 		brands: [],
-		categories: []
+		categories: [],
+		products: []
 	})
 
 	const getPaymentMethodLabel = (method) => {
@@ -71,6 +71,7 @@ export default function Reports() {
 
 	const [showModal, setShowModal] = useState(false)
 	const [selectedSaleItems, setSelectedSaleItems] = useState([])
+	const [selectedSaleAllItems, setSelectedSaleAllItems] = useState([])
 
 	const navigate = useNavigate()
 
@@ -81,11 +82,11 @@ export default function Reports() {
 		}).format(value || 0)
 	}
 
-	// Extrai opções únicas dos dados
 	const extractFilterOptions = (salesData) => {
 		const paymentMethods = new Set()
 		const brands = new Set()
 		const categories = new Set()
+		const products = new Set()
 
 		salesData.forEach(sale => {
 			if (sale.paymentMethod) {
@@ -95,43 +96,69 @@ export default function Reports() {
 			sale.items?.forEach(item => {
 				if (item.brand) brands.add(item.brand)
 				if (item.category) categories.add(item.category)
+				if (item.productName) products.add(item.productName)
 			})
 		})
 
 		setFilterOptions({
 			paymentMethods: Array.from(paymentMethods).sort(),
 			brands: Array.from(brands).sort(),
-			categories: Array.from(categories).sort()
+			categories: Array.from(categories).sort(),
+			products: Array.from(products).sort()
 		})
 	}
 
-	// Aplica os filtros
 	const applyFilters = () => {
 		if (sales.length === 0) {
-			setFilteredSales([])
-			return
+			setFilteredSales([]);
+			return;
 		}
 
-		const filtered = sales.filter(sale => {
-			if (filters.paymentMethod && sale.paymentMethod !== filters.paymentMethod) {
-				return false
-			}
+		const filtered = sales.map(sale => {
+			const paymentMethodMatch = !filters.paymentMethod || sale.paymentMethod === filters.paymentMethod;
+			
+			if (!paymentMethodMatch) return null;
 
-			if (filters.brand || filters.category) {
-				const hasMatchingItem = sale.items?.some(item => {
-					const brandMatch = !filters.brand || item.brand === filters.brand
-					const categoryMatch = !filters.category || item.category === filters.category
-					return brandMatch && categoryMatch
-				})
-				
-				if (!hasMatchingItem) return false
-			}
+			const filteredItems = sale.items?.filter(item => {
+				const brandMatch = !filters.brand || item.brand === filters.brand;
+				const categoryMatch = !filters.category || item.category === filters.category;
+				const productMatch = !filters.product || item.productName === filters.product;
+				return brandMatch && categoryMatch && productMatch;
+			}) || [];
 
-			return true
-		})
+			const shouldIncludeSale = 
+				(!filters.brand && !filters.category && !filters.product) || 
+				filteredItems.length > 0;
 
-		setFilteredSales(filtered)
-	}
+			if (!shouldIncludeSale) return null;
+
+			const totalItemsPrice = filteredItems.reduce((sum, item) => sum + (item.total || 0), 0);
+			const discount = sale.discounts || 0;
+			const filteredTotalPrice = totalItemsPrice - discount;
+			const filteredTotalCost = filteredItems.reduce((sum, item) => {
+				const cost = (item.purchasePrice || 0) * (item.quantity || 0);
+				return sum + cost;
+			}, 0);
+
+			return {
+				...sale,
+				items: filteredItems,
+				filteredTotalPrice: filteredTotalPrice > 0 ? filteredTotalPrice : 0,
+				filteredTotalCost,
+				filteredProfit: filteredTotalPrice - filteredTotalCost
+			};
+		}).filter(sale => sale !== null);
+
+		setFilteredSales(filtered);
+	};
+
+	const faturamento = filteredSales.reduce((sum, sale) => sum + (sale.filteredTotalPrice || 0), 0);
+	const lucro = filteredSales.reduce((sum, sale) => {
+		const saleTotalPrice = sale.filteredTotalPrice || 0;
+		const saleTotalCost = sale.filteredTotalCost || 0;
+		return sum + (saleTotalPrice - saleTotalCost);
+	}, 0);
+	const lucroPercentual = faturamento > 0 ? (lucro / faturamento) * 100 : 0;
 
 	useEffect(() => {
 		applyFilters()
@@ -180,8 +207,9 @@ export default function Reports() {
 		}
 	}
 
-	const handleShowModal = (items) => {
-		setSelectedSaleItems(items || [])
+	const handleShowModal = (filteredItems, allItems) => {
+		setSelectedSaleItems(filteredItems || [])
+		setSelectedSaleAllItems(allItems || [])
 		setShowModal(true)
 	}
 
@@ -198,12 +226,19 @@ export default function Reports() {
 		setFilters({
 			paymentMethod: '',
 			brand: '',
-			category: ''
+			category: '',
+			product: ''
 		})
 	}
 
-	const faturamento = filteredSales.reduce((sum, sale) => sum + (sale.totalPrice || 0), 0)
-	const lucro = filteredSales.reduce((sum, sale) => sum + ((sale.totalPrice || 0) - (sale.totalCost || 0)), 0)
+	const isItemFiltered = (item) => {
+		const brandMatch = !filters.brand || item.brand === filters.brand;
+		const categoryMatch = !filters.category || item.category === filters.category;
+		const productMatch = !filters.product || item.productName === filters.product;
+		return brandMatch && categoryMatch && productMatch;
+	}
+
+	const hasActiveFilters = filters.brand || filters.category || filters.product;
 
 	return (
 		<Container className='mt-4'>
@@ -212,7 +247,6 @@ export default function Reports() {
 				<p className='text-muted'>Histórico e análise de vendas</p>
 			</div>
 
-			{/* Card de Filtros */}
 			<Card className='shadow-sm border-0 mb-4'>
 				<Card.Header className='bg-dark text-white'>
 					<h5 className='mb-0'>Filtros de Pesquisa</h5>
@@ -256,7 +290,7 @@ export default function Reports() {
 						</Row>
 
 						<Row className='g-3'>
-							<Col md={4}>
+							<Col md={3}>
 								<Form.Group>
 									<Form.Label className='fw-bold'>Método de Pagamento</Form.Label>
 									<Form.Select
@@ -271,7 +305,7 @@ export default function Reports() {
 									</Form.Select>
 								</Form.Group>
 							</Col>
-							<Col md={4}>
+							<Col md={3}>
 								<Form.Group>
 									<Form.Label className='fw-bold'>Marca</Form.Label>
 									<Form.Select
@@ -287,7 +321,7 @@ export default function Reports() {
 									</Form.Select>
 								</Form.Group>
 							</Col>
-							<Col md={4}>
+							<Col md={3}>
 								<Form.Group>
 									<Form.Label className='fw-bold'>Categoria</Form.Label>
 									<Form.Select
@@ -303,12 +337,28 @@ export default function Reports() {
 									</Form.Select>
 								</Form.Group>
 							</Col>
+							<Col md={3}>
+								<Form.Group>
+									<Form.Label className='fw-bold'>Produto</Form.Label>
+									<Form.Select
+										value={filters.product}
+										onChange={(e) => handleFilterChange('product', e.target.value)}
+									>
+										<option value="">Todos os produtos</option>
+										{filterOptions.products.map(product => (
+											<option key={product} value={product}>
+												{product}
+											</option>
+										))}
+									</Form.Select>
+								</Form.Group>
+							</Col>
 						</Row>
 						<div className='text-center mt-3'>
 							<Button 
 								variant='outline-secondary' 
 								onClick={clearFilters}
-								disabled={!filters.paymentMethod && !filters.brand && !filters.category}
+								disabled={!filters.paymentMethod && !filters.brand && !filters.category && !filters.product}
 							>
 								Limpar Filtros
 							</Button>
@@ -319,7 +369,6 @@ export default function Reports() {
 
 			{error && <Alert variant='danger' className='text-center'>{error}</Alert>}
 
-			{/* Card de Resultados */}
 			<Card className='shadow-sm border-0'>
 				<Card.Header className='bg-light d-flex justify-content-between align-items-center'>
 					<h5 className='mb-0'>Resultados das Vendas</h5>
@@ -327,7 +376,7 @@ export default function Reports() {
 						<Badge bg='secondary'>
 							{filteredSales.length} venda{filteredSales.length !== 1 ? 's' : ''}
 						</Badge>
-						{(filters.paymentMethod || filters.brand || filters.category) && (
+						{(filters.paymentMethod || filters.brand || filters.category || filters.product) && (
 							<Badge bg='warning' text='dark'>
 								Filtrado
 							</Badge>
@@ -360,18 +409,24 @@ export default function Reports() {
 											<small>
 												<strong>Pagamento:</strong> {getPaymentMethodLabel(sale.paymentMethod)}
 											</small>
+											<small className={sale.discounts > 0 ? 'text-danger' : 'text-muted'}>
+												<strong>Desconto:</strong> {formatMoney(sale.discounts || 0)}
+											</small>
 										</div>
 									</div>
 									<div className='d-flex align-items-center gap-3'>
 										<div className='text-end'>
 											<h6 className='text-success mb-0 fw-bold'>
-												{formatMoney(sale.totalPrice)}
+												{formatMoney(sale.filteredTotalPrice)}
 											</h6>
+											<small className='text-muted'>
+												{sale.items?.length || 0} item(s) filtrado(s)
+											</small>
 										</div>
 										<Button
 											variant='outline-primary'
 											size='sm'
-											onClick={() => handleShowModal(sale.items)}
+											onClick={() => handleShowModal(sale.items, sale.items)}
 										>
 											Ver Itens
 										</Button>
@@ -397,7 +452,9 @@ export default function Reports() {
 						</Col>
 						<Col md={4}>
 							<div className='p-3 border rounded'>
-								<small className='text-muted d-block'>Lucro</small>
+								<small className='text-muted d-block'>
+									Lucro {showValues && `(${lucroPercentual.toFixed(1)}%)`}
+								</small>
 								<h4
 									className={!showValues ? 'valor-blur' : ''}
 									style={{ color: 'blue', margin: 0 }}
@@ -422,34 +479,58 @@ export default function Reports() {
 				</Card.Footer>
 			</Card>
 
-			{/* Modal de Itens */}
 			<Modal show={showModal} onHide={handleCloseModal} size='lg' centered>
 				<Modal.Header closeButton>
-					<Modal.Title>Itens da Venda</Modal.Title>
+					<Modal.Title>
+						Itens da Venda {hasActiveFilters ? '(Itens filtrados destacados)' : ''}
+					</Modal.Title>
 				</Modal.Header>
 				<Modal.Body className='p-0'>
 					<ListGroup variant='flush'>
-						{selectedSaleItems.map((item, index) => (
-							<ListGroup.Item key={index} className='py-3'>
-								<div className='d-flex justify-content-between align-items-start mb-2'>
-									<h6 className='mb-0 fw-bold'>{item.productName}</h6>
-									<Badge bg='success'>
-										{formatMoney(item.total)}
-									</Badge>
-								</div>
-								<div className='d-flex flex-wrap gap-3 text-muted'>
-									<small><strong>Marca:</strong> {item.brand}</small>
-									<small><strong>Categoria:</strong> {item.category}</small>
-									<small><strong>Quantidade:</strong> {item.quantity}</small>
-								</div>
-								<div className='mt-2'>
-									<small className='text-muted'>
-										{item.quantity} × {formatMoney(item.salePrice)} = {formatMoney(item.total)}
-									</small>
-								</div>
-							</ListGroup.Item>
-						))}
+						{selectedSaleAllItems.map((item, index) => {
+							const isFiltered = hasActiveFilters && isItemFiltered(item);
+							
+							return (
+								<ListGroup.Item 
+									key={index} 
+									className='py-3'
+									style={{ 
+										backgroundColor: isFiltered ? '#e7f3ff' : 'white',
+										borderLeft: isFiltered ? '4px solid #0d6efd' : 'none',
+										borderRight: isFiltered ? '2px solid #0d6efd' : 'none'
+									}}
+								>
+									<div className='d-flex justify-content-between align-items-start mb-2'>
+										<div className='d-flex align-items-center gap-2'>
+											<h6 className='mb-0 fw-bold'>{item.productName}</h6>
+											{isFiltered && (
+												<Badge bg='primary'>Filtrado</Badge>
+											)}
+										</div>
+										<Badge bg={isFiltered ? 'success' : 'secondary'}>
+											{formatMoney(item.total)}
+										</Badge>
+									</div>
+									<div className='d-flex flex-wrap gap-3 text-muted'>
+										<small><strong>Marca:</strong> {item.brand}</small>
+										<small><strong>Categoria:</strong> {item.category}</small>
+										<small><strong>Quantidade:</strong> {item.quantity}</small>
+										<small><strong>Preço unit.:</strong> {formatMoney(item.salePrice)}</small>
+									</div>
+									<div className='mt-2'>
+										<small className='text-muted'>
+											{item.quantity} × {formatMoney(item.salePrice)} = {formatMoney(item.total)}
+										</small>
+									</div>
+								</ListGroup.Item>
+							);
+						})}
 					</ListGroup>
+					{selectedSaleAllItems.length === 0 && (
+						<div className='text-center py-4 text-muted'>
+							<p>Nenhum item encontrado</p>
+						</div>
+					)}
 				</Modal.Body>
 				<Modal.Footer>
 					<Button variant='secondary' onClick={handleCloseModal}>
@@ -458,7 +539,6 @@ export default function Reports() {
 				</Modal.Footer>
 			</Modal>
 
-			{/* Estilos customizados */}
 			<style>
 				{`
 					.card {
