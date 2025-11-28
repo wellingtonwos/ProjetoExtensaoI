@@ -46,6 +46,13 @@ export default function StockManagement() {
 		]
 	})
 
+	const validateQuantity = (productId, quantity, unit) => {
+		if (unit === 'UN' && !Number.isInteger(Number(quantity))) {
+			return 'Para produtos por unidade, a quantidade deve ser um número inteiro.';
+		}
+		return null;
+	};
+
 	const handleAddItem = () => {
 		setFormPurchase(prev => ({
 			...prev,
@@ -144,49 +151,59 @@ export default function StockManagement() {
 	}
 
 	async function handleCreatePurchase(e) {
-		e.preventDefault()
-		try {
-			// Verifica se todos os itens estão preenchidos
-			const hasEmptyFields = formPurchase.items.some(item => 
-				!item.product_id || !item.quantity || !item.unit_purchase_price || 
-				!item.unit_sale_price || !item.expiring_date
-			)
-			
-			if (hasEmptyFields) {
-				toast.error('Preencha todos os campos de todos os produtos')
-				return
-			}
-
-			const payload = {
-				date: new Date().toISOString().split('T')[0],
-				items: formPurchase.items.map(item => ({
-					productId: Number(item.product_id),
-					quantity: Number(item.quantity),
-					unitPurchasePrice: Number(item.unit_purchase_price),
-					unitSalePrice: Number(item.unit_sale_price),
-					expiringDate: item.expiring_date,
-				})),
-			}
-			
-			await api.post('/purchases', payload)
-			toast.success('Entrada de estoque realizada!')
-			
-			// Limpa o formulário
-			setFormPurchase({
-				items: [
-					{
-						product_id: '',
-						quantity: '',
-						unit_purchase_price: '',
-						unit_sale_price: '',
-						expiring_date: '',
-					}
-				]
-			})
-		} catch (err) {
-			toast.error('Erro ao registrar entrada.')
+	e.preventDefault()
+	try {
+		// Verifica se todos os itens estão preenchidos
+		const hasEmptyFields = formPurchase.items.some(item => 
+			!item.product_id || !item.quantity || !item.unit_purchase_price || 
+			!item.unit_sale_price || !item.expiring_date
+		)
+		
+		if (hasEmptyFields) {
+			toast.error('Preencha todos os campos de todos os produtos')
+			return
 		}
+
+		for (const item of formPurchase.items) {
+			const product = products.find(p => p.id === Number(item.product_id));
+			if (product) {
+				const validationError = validateQuantity(item.product_id, item.quantity, product.unitMeasurement);
+				if (validationError) {
+					toast.error(validationError);
+					return;
+				}
+			}
+		}
+
+		const payload = {
+			date: new Date().toISOString().split('T')[0],
+			items: formPurchase.items.map(item => ({
+				productId: Number(item.product_id),
+				quantity: Number(item.quantity),
+				unitPurchasePrice: Number(item.unit_purchase_price),
+				unitSalePrice: Number(item.unit_sale_price),
+				expiringDate: item.expiring_date,
+			})),
+		}
+		
+		await api.post('/purchases', payload)
+		toast.success('Entrada de estoque realizada!')
+		
+		setFormPurchase({
+			items: [
+				{
+					product_id: '',
+					quantity: '',
+					unit_purchase_price: '',
+					unit_sale_price: '',
+					expiring_date: '',
+				}
+			]
+		})
+	} catch (err) {
+		toast.error('Erro ao registrar entrada.')
 	}
+}
 
 	return (
 		<Container className='mt-4'>
