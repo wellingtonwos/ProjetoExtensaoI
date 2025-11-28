@@ -259,7 +259,7 @@ O Escopo do projeto abrange a criação de um sistema web focado nas operações
 \noindent\textbf{O projeto abrange:}
 \begin{itemize}
     \item Gestão de Vendas (PDV) com integração de código de barras.
-    \item Controle de Estoque (Entrada/Saída), incluindo fornecedor, valor de custo e validade.
+    \item Controle de Estoque (Entrada/Saída), incluindo marca, valor de custo e validade.
     \item Emissão de alertas de validade.
     \item Geração de relatórios básicos de vendas.
     \item Aplicação de padrões de acessibilidade (WCAG) na interface web.
@@ -313,23 +313,19 @@ A Tabela \ref{tab:requisitos_funcionais} lista os requisitos funcionais que defi
     \hline
     \endlastfoot
 
-    RF01 & O sistema deve permitir o registro de vendas através da leitura do código de barras gerado pela balança. \\ 
+    RF01 & O sistema deve calcular automaticamente o valor total da venda ao capturar o peso e o valor unitário do item lido via código de barras. \\ 
     \hline
-    RF02 & O sistema deve calcular automaticamente o valor total da venda ao capturar o peso e o valor unitário do item lido via código de barras. \\ 
+    RF02 & O sistema deve permitir o registro de novas entradas de estoque (compras), incluindo valor de custo, marca e validade. \\ 
     \hline
-    RF03 & O sistema deve permitir o registro de novas entradas de estoque (compras), incluindo valor de custo, fornecedor e validade. \\ 
+    RF03 & O sistema deve permitir a busca e visualização de peças de estoque por fornecedor. \\ 
     \hline
-    RF04 & O sistema deve permitir a busca e visualização de peças de estoque por fornecedor. \\ 
+    RF04 & O sistema deve calcular a margem de lucro de cada peça de carne vendida (Valor de Venda - Valor de Custo). \\ 
     \hline
-    RF05 & O sistema deve calcular a margem de lucro de cada peça de carne vendida (Valor de Venda - Valor de Custo). \\ 
+    RF05 & O sistema deve emitir um alerta visual para o usuário quando a validade de uma peça de estoque estiver a 7 dias ou menos do vencimento. \\ 
     \hline
-    RF06 & O sistema deve emitir um alerta visual e via e-mail para o administrador quando a validade de uma peça de estoque estiver a 7 dias ou menos do vencimento. \\ 
+    RF06 & O sistema deve permitir o descarte de peças de estoque (baixa) e registrar o motivo do descarte (ex: vencimento, perda de qualidade). \\ 
     \hline
-    RF07 & O sistema deve permitir o descarte de peças de estoque (baixa) e registrar o motivo do descarte (ex: vencimento, perda de qualidade). \\ 
-    \hline
-    RF08 & O sistema deve gerar relatórios diários de vendas, detalhando a quantidade e o valor total vendido. \\ 
-    \hline
-    RF09 & O sistema deve gerenciar o cadastro completo de fornecedores e seus respectivos contatos. \\ 
+    RF07 & O sistema deve permitir a geração de relatórios de vendas, detalhando a quantidade e o valor total vendido. \\ 
     \hline
 \end{longtable}
 
@@ -357,15 +353,13 @@ A Tabela \ref{tab:requisitos_rn} apresenta as regras de negócio obrigatórias, 
     \hline
     \endlastfoot
      
-    RN01 & A venda só pode ser registrada se o código de barras lido for reconhecido e o item tiver estoque disponível. & RF01, RF02 \\ 
+    RN01 & A venda só pode ser registrada se o código de barras lido, ou inserido manualmente, for reconhecido e o item tiver estoque disponível. & RF01, RF02 \\ 
     \hline
-    RN02 & O valor de custo por peça deve ser registrado no momento da entrada no estoque para cálculo de margem de lucro. & RF03, RF05 \\ 
+    RN02 & O valor de compra por peça deve ser registrado no momento da entrada no estoque para cálculo de margem de lucro. & RF03, RF05 \\ 
     \hline
-    RN03 & Peças com validade expirada devem ser automaticamente bloqueadas para venda e movidas para a lista de descarte. & RF07, RNF01 \\ 
+    RN03 & O sistema deve manter o histórico de vendas para cada produto no estoque para fins de rastreabilidade. & RF04 \\ 
     \hline
-    RN04 & O sistema deve manter o histórico de fornecedores para cada peça de carne no estoque para fins de rastreabilidade. & RF04 \\ 
-    \hline
-    RN05 & A peça de carne vendida deve ter seu estoque subtraído em tempo real no momento do registro da venda. & RF02, RNF01 \\ 
+    RN04 & A peça de carne vendida deve ter seu estoque subtraído em tempo real no momento do registro da venda. & RF02, RNF01 \\ 
     \hline
 \end{longtable}
 
@@ -772,7 +766,7 @@ O modelo é composto pelas seguintes entidades principais:
 
 % AQUI ESTÁ A MUDANÇA: [H] em vez de [htb]
 \begin{figure}[H] 
-    \caption{Estrutura do Banco de Dados (MER)}
+    \caption{Diagrama Entidade - Relacionamento (DER)}
     \label{fig:mer_conceitual}
     \centering
     \includegraphics[width=0.9\textwidth]{Imagens/BD2.jpg}
@@ -780,15 +774,15 @@ O modelo é composto pelas seguintes entidades principais:
 \end{figure}
 
 % ---
-\subsection{Modelo Lógico de Dados (DER)}
+\subsection{Modelo Lógico de Dados }
 % ---
 
 Após a definição das entidades e relacionamentos no nível conceitual, foi elaborado o Modelo Lógico de Dados. Nesta etapa, a estrutura do banco de dados é refinada, detalhando os atributos com seus respectivos tipos de dados (como \texttt{INTEGER}, \texttt{VARCHAR}, \texttt{NUMERIC}, \texttt{DATE}, \texttt{TIMESTAMP}) e estabelecendo as regras de integridade referencial através de Chaves Primárias (PK) e Chaves Estrangeiras (FK).
 
-A Figura \ref{fig:der_logico} apresenta o Diagrama Entidade-Relacionamento (DER) lógico do sistema CarneUp.
+A Figura \ref{fig:der_logico} apresenta o modelo lógico do sistema CarneUp.
 
 \begin{figure}[H]
-    \caption{Diagrama Lógico de Dados (DER)}
+    \caption{Modelo Lógico }
     \label{fig:der_logico}
     \centering
     \includegraphics[width=0.9\textwidth]{Documentacao/Imagens/BD.jpg} % Certifique-se que o nome do arquivo é BD.jpg
