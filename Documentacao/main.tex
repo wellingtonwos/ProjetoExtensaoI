@@ -79,7 +79,7 @@ SP3098567\\WELLINGTON OLIVEIRA DE SOUSA SP3161307}
 
 \local{São Paulo - SP - Brasil}
 \data{2025}
-\orientador{Marcelo Tavares de Santana}
+\orientador{Johnata Souza Santicioli}
 
 \instituicao{%
    IFSP- Instituto Federal de Educação, Ciência e Tecnologia
@@ -166,7 +166,7 @@ SP3098567\\WELLINGTON OLIVEIRA DE SOUSA SP3161307}
 % resumo em português
 \setlength{\absparsep}{18pt} % ajusta o espaçamento dos parágrafos do resumo
 \begin{resumo}
- Este trabalho propõe o desenvolvimento do CarneUp, um sistema de gerenciamento de açougues focado em digitalizar e otimizar as operações de venda, compra e controle de estoque de carnes. A ausência de controle digital em muitas boutiques e açougues de pequeno e médio porte, onde as vendas e o gerenciamento de estoque ainda são feitos de forma analógica em cadernos, gera ineficiência e perda de informações cruciais. O CarneUp visa solucionar este problema, oferecendo uma plataforma robusta e intuitiva para o gerenciamento completo do negócio, desde o registro de vendas com captura automática de peso/valor via código de barras, até o controle de validade e a rastreabilidade por fornecedor. O sistema é projetado para açougues de pequeno e médio porte, fornecendo ferramentas essenciais para aumentar a precisão do estoque, melhorar o controle financeiro por peça e reduzir o desperdício, \textbf{visando assim} a eficiência e a competitividade do negócio. 
+ Este trabalho propõe o desenvolvimento do CarneUp, um sistema de gerenciamento de açougues focado em digitalizar e otimizar as operações de venda, compra e controle de estoque de carnes. A ausência de controle digital em muitas boutiques e açougues de pequeno e médio porte, onde as vendas e o gerenciamento de estoque ainda são feitos de forma analógica em cadernos, gera ineficiência e perda de informações cruciais. O CarneUp visa solucionar este problema, oferecendo uma plataforma robusta e intuitiva para o gerenciamento completo do negócio, desde o registro de vendas, até o controle de validade e a rastreabilidade por fornecedor. O sistema é projetado para açougues de pequeno e médio porte, fornecendo ferramentas essenciais para aumentar a precisão do estoque, melhorar o controle financeiro por peça e reduzir o desperdício, \textbf{visando assim} a eficiência e a competitividade do negócio. 
 
  \textbf{Palavras-chaves}: Gestão de açougue, Controle de estoque de carnes, Sistema de vendas, Software de açougue.
 \end{resumo}
@@ -174,7 +174,7 @@ SP3098567\\WELLINGTON OLIVEIRA DE SOUSA SP3161307}
 % resumo em inglês
 \begin{resumo}[Abstract]
  \begin{otherlanguage*}{english}
-   This work proposes the development of CarneUp, a butcher shop management system focused on digitizing and optimizing sales, purchasing, and meat stock control operations. The lack of digital control in many small and medium-sized butcher shops, where sales and inventory management are still carried out analogically in notebooks, leads to inefficiency and loss of crucial information. CarneUp aims to solve this problem by offering a robust and intuitive platform for complete business management, from sales registration with automatic weight/value capture via barcode, to validity control and traceability by supplier. The system is designed for small and medium-sized butcher shops, providing essential tools to increase inventory accuracy, improve financial control per piece, and reduce waste, \textbf{thereby aiming for} business efficiency and competitiveness.
+   This work proposes the development of CarneUp, a butcher shop management system focused on digitizing and optimizing sales, purchasing, and meat stock control operations. The lack of digital control in many small and medium-sized butcher shops, where sales and inventory management are still carried out analogically in notebooks, leads to inefficiency and loss of crucial information. CarneUp aims to solve this problem by offering a robust and intuitive platform for complete business management, from sales registration, to expiration control and traceability by supplier. The system is designed for small and medium-sized butcher shops, providing essential tools to increase inventory accuracy, improve financial control per piece, and reduce waste, \textbf{thereby aiming for} business efficiency and competitiveness.
 
    \vspace{\onelineskip}
  
@@ -246,7 +246,7 @@ O principal objetivo do projeto CarneUp é desenvolver um sistema de gerenciamen
 
 O problema central que motiva este projeto é a gestão predominantemente analógica e ineficiente encontrada em muitos desses estabelecimentos. Atualmente, operações críticas como o controle de vendas, o registro de compras e o acompanhamento de estoque são realizados manualmente em cadernos ou planilhas. Esta abordagem é não apenas propensa a erros, mas também impede uma análise precisa da margem de lucro por corte e um controle detalhado por fornecedor ou validade. Consequentemente, a falta de um sistema digital resulta em desperdício de estoque vencido e na perda de dados valiosos para a tomada de decisão estratégica.
 
-Diante desse cenário, a relevância do CarneUp reside na necessidade urgente de modernização deste setor. A solução proposta visa digitalizar e centralizar a gestão do açougue, oferecendo uma aplicação web robusta e com foco na facilidade de uso para o público-alvo. Ao automatizar o registro de vendas via código de barras e implementar um controle de validade e de custos por fornecedor, o sistema impacta diretamente a eficiência operacional, o controle financeiro e a redução de desperdício.
+Diante desse cenário, a relevância do CarneUp reside na necessidade urgente de modernização deste setor. A solução proposta visa digitalizar e centralizar a gestão do açougue, oferecendo uma aplicação web robusta e com foco na facilidade de uso para o público-alvo. Ao implementar um controle de validade e de custos por fornecedor, o sistema impacta diretamente a eficiência operacional, o controle financeiro e a redução de desperdício.
 
 % ----------------------------------------------------------
 % CAPÍTULO 1: ESCOPO E OBJETIVOS
@@ -258,7 +258,7 @@ O Escopo do projeto abrange a criação de um sistema web focado nas operações
 
 \noindent\textbf{O projeto abrange:}
 \begin{itemize}
-    \item Gestão de Vendas (PDV) com integração de código de barras.
+    \item Gestão de Vendas (PDV) %$com integração de código de barras.
     \item Controle de Estoque (Entrada/Saída), incluindo marca, valor de custo e validade.
     \item Emissão de alertas de validade.
     \item Geração de relatórios básicos de vendas.
@@ -277,7 +277,7 @@ Os objetivos específicos do projeto incluem:
 \begin{itemize}
     \item \textbf{Gerenciar Vendas:} Permitir o registro rápido e eficiente de vendas de carnes.
     \item \textbf{Controle de Estoque:} Fornecer uma visão em tempo real do estoque de carnes, incluindo o controle das peças vendidas, suas validades e fornecedores.
-    \item \textbf{Digitalização de Pesagem:} Integrar-se com códigos de barras gerados pela balança para capturar automaticamente o valor e o peso da peça no momento da venda.
+    %\item \textbf{Digitalização de Pesagem:} Integrar-se com códigos de barras gerados pela balança para capturar automaticamente o valor e o peso da peça no momento da venda.
     \item \textbf{Otimização de Compras:} Registrar o valor pago nas carnes e seus fornecedores para análises de custo e rastreabilidade.
 \end{itemize}
 
@@ -313,7 +313,7 @@ A Tabela \ref{tab:requisitos_funcionais} lista os requisitos funcionais que defi
     \hline
     \endlastfoot
 
-    RF01 & O sistema deve permitir a inserção manual de itens na venda (peso e valor), bem como calcular automaticamente via leitura de código de barras. \\ 
+    RF01 & O sistema deve permitir a inserção manual de itens na venda (peso e valor). \\ 
     \hline
     RF02 & O sistema deve permitir o registro de novas entradas de estoque (compras), incluindo valor de custo, marca e validade. \\ 
     \hline
@@ -353,7 +353,7 @@ A Tabela \ref{tab:requisitos_rn} apresenta as regras de negócio obrigatórias, 
     \hline
     \endlastfoot
      
-    RN01 & A venda só pode ser registrada se o código de barras lido, ou inserido manualmente, for reconhecido e o item tiver estoque disponível. & RF01, RF02 \\ 
+    RN01 & A venda só pode ser registrada se o item tiver estoque disponível. & RF01, RF02 \\ 
     \hline
     RN02 & O valor de compra por peça deve ser registrado no momento da entrada no estoque para cálculo de margem de lucro. & RF03, RF05 \\ 
     \hline
@@ -391,7 +391,7 @@ A Tabela \ref{tab:requisitos_rnf} detalha os requisitos não funcionais que defi
     \hline
     RNF02 & Escalabilidade & O sistema deve ser capaz de suportar picos de até 10 usuários simultâneos (caixas + gerentes) sem degradação perceptível de performance. \\ 
     \hline
-    RNF03 & Usabilidade & A interface de registro de vendas deve ser intuitiva e otimizada para telas de toque e leitores de código de barras. \\ 
+    RNF03 & Usabilidade & A interface de registro de vendas deve ser intuitiva e otimizada para telas de toque.\\ 
     \hline
     RNF04 & Segurança & Todos os dados sensíveis (informações financeiras, cadastros) devem ser armazenados de forma criptografada (ex: senhas via bcrypt, dados via SSL). \\ 
     \hline
@@ -417,7 +417,7 @@ A Tabela \ref{tab:requisitos_wcag} detalha os requisitos de acessibilidade aplic
         \hline
         \textbf{Perceptível} & A interface deve ter contraste de cor adequado (Ex: Textos escuros sobre fundos claros). Ícones de ação (como "Vender" ou "Descartar") devem ser acompanhados de texto descritivo. \\ 
         \hline
-        \textbf{Operável} & Todas as funcionalidades devem ser acessíveis via teclado, permitindo que o operador de caixa use o leitor de código de barras e a tecla "Enter" sem depender do mouse. \\ 
+        \textbf{Operável} & Todas as funcionalidades devem ser acessíveis via teclado, sem depender de mouse. \\ 
         \hline
         \textbf{Compreensível} & A navegação será consistente. Alertas (como "Estoque Baixo" ou "Validade Próxima") serão escritos em linguagem clara e direta, evitando jargões técnicos. \\ 
         \hline
@@ -471,7 +471,7 @@ O quadro apresentado na Tabela \ref{tab:comparativo_concorrentes} resume as prin
         \textbf{Funcionalidade} & \textbf{CarneUp} & \textbf{ConnectPlug} & \textbf{Aliar Sistemas} & \textbf{SOFTClass} \\ \hline
         Registro de Vendas & X & X & X & X \\ \hline
         Controle Básico de Estoque & X & X & X & X \\ \hline
-        Captura de Valor/Peso por Código de Barras da Balança & X & X & X & X \\ \hline
+%        Captura de Valor/Peso por Código de Barras da Balança & X & X & X & X \\ \hline
         Rastreabilidade de Peça: Fornecedor e Valor de Compra & X & X & - & - \\ \hline
         Alertas de Validade por Peça/Lote & X & - & - & - \\ \hline
         Foco em Pequenos/Médios Açougues e Facilidade de Uso & X & - & - & X \\ \hline
@@ -490,7 +490,7 @@ A presente seção detalha o planejamento, a organização e o controle das ativ
 \section{Organização da Equipe}
 % ---
 
-O projeto será desenvolvido por uma equipe de cinco membros, com papéis definidos para cobrir as áreas de desenvolvimento, administração de dados e gestão, conforme apresentado na Tabela \ref{tab:equipe}.
+O projeto foi desenvolvido por uma equipe de cinco membros, com papéis definidos para cobrir as áreas de desenvolvimento, administração de dados e gestão, conforme apresentado na Tabela \ref{tab:equipe}.
 
 \begin{longtable}{|>{\raggedright\arraybackslash}m{3.5cm}|>{\raggedright\arraybackslash}m{4cm}|>{\raggedright\arraybackslash}m{7.5cm}|}
     \caption{Papéis, Integrantes e Responsabilidades Chave}
@@ -611,7 +611,7 @@ O CarneUp foi concebido sob uma arquitetura de aplicação web em três camadas 
 O Back-end é o \textit{core} transacional do sistema e está logicamente dividido em módulos que se comunicam via API RESTful:
 
 \begin{itemize}
-    \item \textbf{Módulo de Gestão de Vendas (PDV):} Focado na eficiência do caixa (RNF01), gerencia o registro rápido de vendas. Sua principal característica é a integração com a leitura de código de barras da balança (ou inserção manual do item), permitindo a captura automática do item, peso e valor, e garantindo a baixa de estoque em tempo real (RF01, RF02).
+    \item \textbf{Módulo de Gestão de Vendas (PDV):} Focado na eficiência do caixa (RNF01), gerencia o registro rápido de vendas. %REVER TEXTOAQUI Sua principal característica é a integração com a leitura de código de barras da balança (ou inserção manual do item), permitindo a captura automática do item, peso e valor, e garantindo a baixa de estoque em tempo real (RF01, RF02).
      
     \item \textbf{Módulo de Estoque e Rastreabilidade:} Permite o registro da entrada de estoque com informações cruciais para a análise de custo e rastreabilidade: valor de custo, marca e data de validade (RF03). O módulo é responsável pela emissão de alertas visuais quando a validade das peças está próxima (RF05).
      
@@ -656,12 +656,12 @@ As Histórias de Usuário a seguir detalham o escopo do Mínimo Produto Viável 
 
 \subsection{Descrição das Histórias de Usuário}
 
-\begin{itemize}
-    \item \textbf{US01: Registrar Venda com ou sem Código de Barras (RF01, RF02)}
-    \begin{itemize}
-        \item \textit{Descrição:} Como um operador de caixa, quero registrar uma venda lendo o código de barras da balança (ou inserindo o item manualmente), para que o sistema preencha automaticamente o item, peso e valor, agilizando o atendimento.
-        \item \textit{Critérios de Aceitação:} O código de barras deve ser lido pelo leitor, ou o item deve ser selecionado manualmente. O sistema deve exibir o item e valor unitário. O operador deve confirmar a venda e o estoque deve ser atualizado.
-    \end{itemize}
+%\begin{itemize}
+ %   \item \textbf{US01: Registrar Venda com ou sem Código de Barras (RF01, RF02)}
+  %  \begin{itemize}
+   %     \item \textit{Descrição:} Como um operador de caixa, quero registrar uma venda lendo o código de barras da balança (ou inserindo o item manualmente), para que o sistema preencha automaticamente o item, peso e valor, agilizando o atendimento.
+    %    \item \textit{Critérios de Aceitação:} O código de barras deve ser lido pelo leitor, ou o item deve ser selecionado manualmente. O sistema deve exibir o item e valor unitário. O operador deve confirmar a venda e o estoque deve ser atualizado.
+    %\end{itemize}
 
     \item \textbf{US02: Inclusão de Estoque com Rastreabilidade (RF03, RF07)}
     \begin{itemize}
@@ -935,7 +935,7 @@ Com a entrega do Produto Mínimo Viável (MVP), o projeto demonstrou a viabilida
 
 Esta seção sintetiza os principais resultados alcançados, as decisões estratégicas tomadas e o alinhamento do projeto com sua proposta de valor.
 
-O CarneUp cumpriu seus requisitos técnicos, concentrando o foco em um sistema robusto e confiável. A decisão de utilizar o PostgreSQL foi fundamental para oferecer a robustez e a integridade transacional exigidas para dados financeiros e de estoque. O Investimento Inicial total estimado para o desenvolvimento do MVP foi de R\$ 50.250,00.
+O CarneUp cumpriu seus requisitos técnicos, concentrando o foco em um sistema robusto e confiável. A decisão de utilizar o PostgreSQL foi fundamental para oferecer a robustez e a integridade transacional exigidas para dados financeiros e de estoque. %O Investimento Inicial total estimado para o desenvolvimento do MVP foi de R\$ 50.250,00.
 
 \subsection{Dificuldades e Lições Aprendidas}
 
