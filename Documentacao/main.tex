@@ -74,8 +74,7 @@
 % ---
 \titulo{CarneUp: Sistema de Gestão de Açougue de Pequeno e Média Porte}
 
-\autor{BRENO DIAS OLIVEIRA SP3015645\\FELIPE DALBOSCO PALUDO SP3123766\\GUSTAVO GOUVEA ANDRADE SP3076725\\PEDRO AUGUSTO SILVA SANTOS SP3098559\\RAQUEL CORREIA DA SILVA 
-SP3098567\\WELLINGTON OLIVEIRA DE SOUSA SP3161307}
+\autor{BRENO DIAS OLIVEIRA SP3015645\\FELIPE DALBOSCO PALUDO SP3123766\\GUSTAVO GOUVEA ANDRADE SP3076725\\PEDRO AUGUSTO SILVA SANTOS SP3098559\\WELLINGTON OLIVEIRA DE SOUSA SP3161307}
 
 \local{São Paulo - SP - Brasil}
 \data{2025}
@@ -242,11 +241,11 @@ SP3098567\\WELLINGTON OLIVEIRA DE SOUSA SP3161307}
 \chapter*{Introdução}
 \addcontentsline{toc}{chapter}{Introdução} % Adiciona manualmente ao sumário
 
-O principal objetivo do projeto CarneUp é desenvolver um sistema de gerenciamento digital focado nas operações de açougues de pequeno e médio porte. Este sistema visa permitir a digitalização e a otimização da gestão de estoque e do processo de vendas no Ponto de Venda (PDV).
+O principal objetivo do projeto CarneUp é desenvolver um sistema de gerenciamento digital focado nas operações de açougues de pequeno e médio porte. Este sistema visa permitir a digitalização e a otimização da gestão de estoque, do processo de vendas no Ponto de Venda (PDV) e do monitoramento da saúde financeira e da base de clientes.
 
-O problema central que motiva este projeto é a gestão predominantemente analógica e ineficiente encontrada em muitos desses estabelecimentos. Atualmente, operações críticas como o controle de vendas, o registro de compras e o acompanhamento de estoque são realizados manualmente em cadernos ou planilhas. Esta abordagem é não apenas propensa a erros, mas também impede uma análise precisa da margem de lucro por corte e um controle detalhado por fornecedor ou validade. Consequentemente, a falta de um sistema digital resulta em desperdício de estoque vencido e na perda de dados valiosos para a tomada de decisão estratégica.
+O problema central que motiva este projeto é a gestão predominantemente analógica e ineficiente encontrada em muitos desses estabelecimentos. Atualmente, operações críticas como o controle de vendas, o registro de compras, a pesagem de itens e o acompanhamento de estoque são realizados manualmente. Esta abordagem impede uma análise precisa da margem de lucro e um controle rigoroso de perdas e validades. Consequentemente, a falta de um sistema digital resulta em desperdício de estoque, dificuldade em manter a fidelidade dos clientes e na ausência de alertas estratégicos para evitar prejuízos.
 
-Diante desse cenário, a relevância do CarneUp reside na necessidade urgente de modernização deste setor. A solução proposta visa digitalizar e centralizar a gestão do açougue, oferecendo uma aplicação web robusta e com foco na facilidade de uso para o público-alvo. Ao implementar um controle de validade e de custos por fornecedor, o sistema impacta diretamente a eficiência operacional, o controle financeiro e a redução de desperdício.
+Diante desse cenário, a relevância do CarneUp reside na modernização deste setor. A solução proposta digitaliza e centraliza a gestão, oferecendo cálculos automatizados de venda por peso, controle de descarte categorizado, relatórios de lucratividade e alertas proativos sobre o comportamento dos clientes e a rentabilidade do negócio.
 
 % ----------------------------------------------------------
 % CAPÍTULO 1: ESCOPO E OBJETIVOS
@@ -254,14 +253,15 @@ Diante desse cenário, a relevância do CarneUp reside na necessidade urgente de
 \chapter{Escopo e Objetivos}
 \label{cap:escopo}
 
-O Escopo do projeto abrange a criação de um sistema web focado nas operações de retaguarda (\textit{back-office}) e no ponto de venda (PDV) de açougues. O sistema tem como foco principal a rastreabilidade e o controle financeiro detalhado de cada peça de carne.
+O Escopo do projeto abrange a criação de um sistema web focado nas operações de retaguarda (\textit{back-office}) e no ponto de venda (PDV). O sistema tem como foco a automação comercial, a gestão de perdas e a rastreabilidade financeira.
 
 \noindent\textbf{O projeto abrange:}
 \begin{itemize}
-    \item Gestão de Vendas (PDV) %$com integração de código de barras.
-    \item Controle de Estoque (Entrada/Saída), incluindo marca, valor de custo e validade.
-    \item Emissão de alertas de validade.
-    \item Geração de relatórios básicos de vendas.
+    \item Registro de vendas com cálculo automático (peso e valor unitário).
+    \item Controle de estoque (entrada, busca com filtros por marca/unidade e descarte categorizado).
+    \item Gestão de Clientes e monitoramento de inatividade.
+    \item Alertas visuais de vencimento e indicadores de lucro abaixo do esperado.
+    \item Relatórios personalizados de faturamento e lucro por período.
     \item Aplicação de padrões de acessibilidade (WCAG) na interface web.
 \end{itemize}
 
@@ -272,13 +272,15 @@ O Escopo do projeto abrange a criação de um sistema web focado nas operações
     \item Aplicativo móvel nativo (foco em aplicação web responsiva).
 \end{itemize}
 
-Os objetivos específicos do projeto incluem:
+
+
+\noindent\textbf{Os objetivos específicos do projeto incluem:}
 
 \begin{itemize}
-    \item \textbf{Gerenciar Vendas:} Permitir o registro rápido e eficiente de vendas de carnes.
-    \item \textbf{Controle de Estoque:} Fornecer uma visão em tempo real do estoque de carnes, incluindo o controle das peças vendidas, suas validades e fornecedores.
-    %\item \textbf{Digitalização de Pesagem:} Integrar-se com códigos de barras gerados pela balança para capturar automaticamente o valor e o peso da peça no momento da venda.
-    \item \textbf{Otimização de Compras:} Registrar o valor pago nas carnes e seus fornecedores para análises de custo e rastreabilidade.
+    \item \textbf{Gerenciar Vendas:} Automatizar o cálculo de vendas ao capturar peso e valores, permitindo o atrelamento de clientes ao pedido.
+    \item \textbf{Controle de Estoque:} Fornecer visão em tempo real do estoque, facilitando a busca por filtros e o registro de entradas e descartes (roubo, vencimento).
+    \item \textbf{Análise Financeira:} Calcular automaticamente o lucro e faturamento, alertando o gestor sobre desempenhos abaixo do esperado.
+    \item \textbf{Monitoramento de Validade e Clientes:} Gerar alertas preventivos sobre produtos próximos ao vencimento e clientes que deixaram de comprar.
 \end{itemize}
 
 % ---
@@ -291,7 +293,7 @@ Para alcançar os objetivos propostos, o \textit{CarneUp} atende a um conjunto d
 
 A Tabela \ref{tab:requisitos_funcionais} lista os requisitos funcionais que definem as ações e operações que o sistema deve ser capaz de realizar.
 
-% Tabela de Requisitos Funcionais
+% Tabela de Requisitos Funcionais - ATUALIZADA COM OS 12 REQUISITOS
 \begin{longtable}{|>{\centering\arraybackslash}m{1.5cm}|>{\raggedright\arraybackslash}m{13cm}|}
     \caption{Requisitos Funcionais (RF)}
     \label{tab:requisitos_funcionais}\\
@@ -313,25 +315,35 @@ A Tabela \ref{tab:requisitos_funcionais} lista os requisitos funcionais que defi
     \hline
     \endlastfoot
 
-    RF01 & O sistema deve permitir a inserção manual de itens na venda (peso e valor). \\ 
+    RF01 & O sistema deve permitir o registro de vendas através do cadastro manual dos produtos relacionados a aquela venda. \\ 
     \hline
-    RF02 & O sistema deve permitir o registro de novas entradas de estoque (compras), incluindo valor de custo, marca e validade. \\ 
+    RF02 & O sistema deve calcular automaticamente o valor total da venda ao capturar peso e o valor unitário dos itens adicionados. \\ 
     \hline
-    RF03 & O sistema deve permitir a busca e visualização de peças de estoque por fornecedor. \\ 
+    RF03 & O sistema deve permitir o registro de produtos no estoque. \\ 
     \hline
-    RF04 & O sistema deve calcular a margem de lucro de cada peça de carne vendida (Valor de Venda - Valor de Custo). \\ 
+    RF04 & O sistema deve permitir a entrada de compras no estoque, atualizando a quantidade de produtos. \\ 
     \hline
-    RF05 & O sistema deve emitir um alerta visual para o usuário quando a validade de uma peça de estoque estiver a 7 dias ou menos do vencimento. \\ 
+    RF05 & O sistema deve permitir a busca e visualização de produtos no estoque, podendo filtrar por categorias como marca e unidade de medida. \\ 
     \hline
-    RF06 & O sistema deve permitir o descarte de peças de estoque (baixa) e registrar o motivo do descarte (ex: vencimento, perda de qualidade). \\ 
+    RF06 & O sistema deve calcular o lucro e faturamento da loja com base nas vendas realizadas em determinado período. \\ 
     \hline
-    RF07 & O sistema deve permitir a geração de relatórios de vendas, detalhando a quantidade e o valor total vendido. \\ 
+    RF07 & O sistema deve gerar um alerta visual para produtos próximos da data de vencimento. \\ 
+    \hline
+    RF08 & O sistema deve permitir o descarte de produtos e categorizar o tipo de descarte (ex: roubo, vencimento). \\ 
+    \hline
+    RF09 & O sistema deve permitir a visualização de relatórios de vendas personalizados, podendo selecionar o período e filtrar os produtos desejados. \\ 
+    \hline
+    RF10 & O sistema deve permitir o cadastro de clientes, que posteriormente podem ser atrelados a vendas. \\ 
+    \hline
+    RF11 & O sistema deve alertar o usuário quando um cliente não realiza um pedido em um determinado período. \\ 
+    \hline
+    RF12 & O sistema deve alertar o usuário caso o lucro esteja abaixo do esperado. \\ 
     \hline
 \end{longtable}
 
-A Tabela \ref{tab:requisitos_rn} apresenta as regras de negócio obrigatórias, que se referem a regras e restrições de operação.
+A Tabela \ref{tab:requisitos_rn} apresenta as regras de negócio obrigatórias, com referências atualizadas aos novos requisitos funcionais.
 
-% Tabela de Regras de Negócio
+% Tabela de Regras de Negócio - ATUALIZADA
 \begin{longtable}{|>{\centering\arraybackslash}m{1.5cm}|>{\raggedright\arraybackslash}m{9cm}|>{\centering\arraybackslash}m{4cm}|}
     \caption{Regras de Negócio (RN)}
     \label{tab:requisitos_rn}\\
@@ -353,13 +365,13 @@ A Tabela \ref{tab:requisitos_rn} apresenta as regras de negócio obrigatórias, 
     \hline
     \endlastfoot
      
-    RN01 & A venda só pode ser registrada se o item tiver estoque disponível. & RF01, RF02 \\ 
+    RN01 & A venda só pode ser registrada se o item tiver estoque disponível. & RF01, RF03 \\ 
     \hline
-    RN02 & O valor de compra por peça deve ser registrado no momento da entrada no estoque para cálculo de margem de lucro. & RF03, RF05 \\ 
+    RN02 & O cálculo do lucro deve considerar o valor de custo registrado na entrada do estoque frente ao valor final da venda. & RF04, RF06 \\ 
     \hline
-    RN03 & O sistema deve manter o histórico de vendas para cada produto no estoque para fins de rastreabilidade. & RF04 \\ 
+    RN03 & O sistema deve impedir a venda de produtos que constem como descartados no sistema. & RF01, RF08 \\ 
     \hline
-    RN04 & A peça de carne vendida deve ter seu estoque subtraído em tempo real no momento do registro da venda. & RF02, RNF01 \\ 
+    RN04 & A quantidade de produtos em estoque deve ser subtraída automaticamente após a confirmação da venda. & RF01, RF02 \\ 
     \hline
 \end{longtable}
 
@@ -373,19 +385,8 @@ A Tabela \ref{tab:requisitos_rnf} detalha os requisitos não funcionais que defi
     \textbf{Código} & \textbf{Módulo} & \textbf{Descrição} \\ 
     \hline
     \endfirsthead
-
-    \multicolumn{3}{c}%
-    {{\bfseries \tablename\ \thetable{} -- continuação}} \\
-    \hline
-    \textbf{Código} & \textbf{Módulo} & \textbf{Descrição} \\ 
     \hline
     \endhead
-    \hline
-    \multicolumn{3}{|r|}{{Continua...}} \\
-    \hline
-    \endfoot
-    \hline
-    \endlastfoot
 
     RNF01 & Performance & O registro de venda e a baixa de estoque devem ser processados em no máximo 2 segundos para visar o fluxo rápido de caixa. \\ 
     \hline
@@ -393,38 +394,11 @@ A Tabela \ref{tab:requisitos_rnf} detalha os requisitos não funcionais que defi
     \hline
     RNF03 & Usabilidade & A interface de registro de vendas deve ser intuitiva e otimizada para telas de toque.\\ 
     \hline
-    RNF04 & Segurança & Todos os dados sensíveis (informações financeiras, cadastros) devem ser armazenados de forma criptografada (ex: senhas via bcrypt, dados via SSL). \\ 
+    RNF04 & Segurança & Todos os dados sensíveis devem ser armazenados de forma criptografada e trafegados via protocolo HTTPS/SSL. \\ 
     \hline
-    RNF05 & Manutenibilidade & O código deve seguir uma convenção de código (\textit{Code Convention}) e utilizar logs detalhados para facilitar a identificação e correção de erros. \\ 
+    RNF05 & Manutenibilidade & O código deve seguir uma convenção de código (\textit{Code Convention}) e utilizar logs detalhados para facilitar a correção de erros. \\ 
     \hline
 \end{longtable}
-
-\subsection{Justificativa da Plataforma e Acessibilidade (WCAG)}
-
-A escolha por uma \textbf{aplicação web} como plataforma principal se justifica por sua acessibilidade inerente. Diferente de aplicações nativas, um sistema web responsivo pode ser acessado de qualquer dispositivo com um navegador (computadores de caixa, tablets de gestão, celulares), sem a necessidade de instalação e facilitando a manutenção e atualização.
-
-Este modelo de plataforma está alinhado aos requisitos de acessibilidade digital, que são cruciais para o projeto. O \textit{CarneUp} propõe-se a seguir as diretrizes do WCAG (\textit{Web Content Accessibility Guidelines}), focando em seus quatro princípios fundamentais para tornar a interface utilizável pelo maior número de pessoas, incluindo operadores de caixa com diferentes níveis de habilidade tecnológica.
-
-A Tabela \ref{tab:requisitos_wcag} detalha os requisitos de acessibilidade aplicados.
-
-\begin{table}[htb]
-    \centering
-    \caption{Requisitos de Acessibilidade (WCAG)}
-    \label{tab:requisitos_wcag}
-    \begin{tabular}{|>{\centering\arraybackslash}m{2.5cm}|>{\raggedright\arraybackslash}m{12cm}|}
-        \hline
-        \textbf{Princípio} & \textbf{Aplicação no \textit{CarneUp}} \\ 
-        \hline
-        \textbf{Perceptível} & A interface deve ter contraste de cor adequado (Ex: Textos escuros sobre fundos claros). Ícones de ação (como "Vender" ou "Descartar") devem ser acompanhados de texto descritivo. \\ 
-        \hline
-        \textbf{Operável} & Todas as funcionalidades devem ser acessíveis via teclado, sem depender de mouse. \\ 
-        \hline
-        \textbf{Compreensível} & A navegação será consistente. Alertas (como "Estoque Baixo" ou "Validade Próxima") serão escritos em linguagem clara e direta, evitando jargões técnicos. \\ 
-        \hline
-        \textbf{Robusto} & O sistema será compatível com os principais navegadores (Chrome, Firefox) e utilizará HTML semântico para auxiliar tecnologias assistivas. \\ 
-        \hline
-    \end{tabular}
-\end{table}
 
 
 \section{Análise da Concorrência}
@@ -513,7 +487,7 @@ O projeto foi desenvolvido por uma equipe de cinco membros, com papéis definido
     \hline
     \endlastfoot
 
-    Product Owner & Raquel Correia da Silva & Definição e priorização do Product Backlog, validação das entregas, documentação.\\
+    Product Owner & xxxx & Definição e priorização do Product Backlog, validação das entregas, documentação.\\
     \hline
     Desenvolvedor Full Stack & Felipe Dalbosco Paludo &Elaboração da documentação, desenvolvimento Latex, desenvolvimento Front-end e Back-end. \\
     \hline
