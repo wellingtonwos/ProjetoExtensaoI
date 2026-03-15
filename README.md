@@ -2,7 +2,7 @@
 
 > **Sistema de Gestão para Açougues de Pequeno e Médio Porte.**
 
-## 💻 Sobre o Projeto (main push test)
+## 💻 Sobre o Projeto
 
 O **CarneUp** é uma solução tecnológica desenvolvida como parte do **Projeto de Extensão I / Projeto Integrado** do curso de Análise e Desenvolvimento de Sistemas do **IFSP - Câmpus São Paulo**.
 
