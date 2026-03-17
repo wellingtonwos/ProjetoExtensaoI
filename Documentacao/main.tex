@@ -400,59 +400,61 @@ A Tabela \ref{tab:requisitos_rnf} detalha os requisitos não funcionais que defi
     \hline
 \end{longtable}
 
-
 \section{Análise da Concorrência}
 
-O CarneUp se posiciona contra sistemas de gestão (PDV) mais genéricos, que não possuem a granularidade necessária para o controle de carnes com base em peso variável, validade e fornecedor, sendo adaptados para o segmento de açougues.
+O CarneUp diferencia-se no mercado ao priorizar a simplicidade absoluta e a rapidez operacional, sendo projetado especificamente para pequenos açougues que necessitam de uma transição digital sem barreiras técnicas. Enquanto os concorrentes oferecem ecossistemas complexos com módulos fiscais e financeiros densos, o CarneUp foca no essencial: agilidade no PDV com cálculo automático de valor por peso, alertas inteligentes de rentabilidade e ferramentas diretas para fidelização de clientes.
 
 \subsection{Concorrente 1: ConnectPlug}
-
-O ConnectPlug é um sistema de PDV (Ponto de Venda) e gestão comercial mais abrangente, atendendo diversos segmentos, incluindo açougues. Ele oferece funcionalidades como frente de caixa, gestão de estoque e emissão de notas fiscais \cite{connectplug}.
-
+O ConnectPlug é um sistema de PDV e gestão focado em integração total de processos e pagamentos \cite{connectplug}.
 \begin{itemize}
-    \item Foco: Solução completa de gestão comercial.
-    \item Diferencial (para o CarneUp): Pode ser adaptado para açougues, mas pode não ter o foco e a profundidade de rastreabilidade (valor de compra, fornecedor, validade individualizada) que o CarneUp busca.
+    \item Diferencial (para o CarneUp): Por ser uma solução completa com foco em ERP, possui uma interface mais densa, o que pode sobrecarregar o pequeno lojista que busca apenas agilidade no balcão e alertas estratégicos.
 \end{itemize}
 
 \subsection{Concorrente 2: Aliar Sistemas}
-
-A Aliar Sistemas oferece soluções específicas para o varejo de carnes, com foco em açougues e frigoríficos. Seu sistema inclui gestão de produção, rastreabilidade e controle de estoque \cite{aliar}.
-
+Especialista no setor de carnes, oferece funcionalidades como o desmembramento de carcaças e controle de frigoríficos \cite{aliar}.
 \begin{itemize}
-    \item Foco: Soluções específicas para o setor de carnes.
-    \item Por focar em frigoríficos e grandes açougues, pode ter um custo elevado e complexidade excessiva para açougues de pequeno porte, que é o alvo do CarneUp.
+    \item Diferencial (para o CarneUp): Foca em processos industriais e de produção, gerando uma complexidade desnecessária para o pequeno açougue de bairro que o CarneUp visa atender.
 \end{itemize}
 
-\subsection{Concorrente 3: SOFTClass}
-
-A SOFTClass oferece software de gestão para diversos segmentos do varejo, incluindo açougues. Possui módulos de frente de caixa, estoque e financeiro \cite{softclass}.
-
+\subsection{Concorrente 3: MarketUP}
+Uma plataforma de gestão gratuita voltada para micro e pequenas empresas, com forte apelo em custo zero \cite{marketup}.
 \begin{itemize}
-    \item Foco: Solução de gestão empresarial para varejo.
-    \item Semelhante ao ConnectPlug, pode ser mais um sistema de PDV adaptado, carecendo da simplicidade e do foco no ciclo de vida da carne (compra/validade/fornecedor) que é o diferencial do CarneUp.
+    \item Diferencial (para o CarneUp): Por ser generalista, carece dos alertas específicos para o ramo de carnes (como inatividade de clientes e lucro por peso) presentes no CarneUp.
 \end{itemize}
 
-\subsection{Comparativo}
-O quadro apresentado na Tabela \ref{tab:comparativo_concorrentes} resume as principais funcionalidades e destaca o diferencial do CarneUp.
+\subsection{Concorrente 4: Hiper}
+Sistema especialista em pequenos varejos, com forte integração com balanças e funcionamento offline \cite{hiper}.
+\begin{itemize}
+    \item Diferencial (para o CarneUp): Embora eficiente, o Hiper exige maior esforço de configuração inicial. O CarneUp destaca-se pela baixa curva de aprendizado, permitindo operação imediata.
+\end{itemize}
+
+\subsection{Concorrente 5: SOFTClass}
+A SOFTClass oferece software de gestão para diversos segmentos do varejo, incluindo módulos de frente de caixa e estoque \cite{softclass}.
+\begin{itemize}
+    \item Diferencial (para o CarneUp): Semelhante a outras soluções generalistas, carece da simplicidade focada no pequeno varejo de carnes e dos alertas automatizados de rentabilidade que o CarneUp propõe.
+\end{itemize}
+
+\subsection{Comparativo de Funcionalidades}
+O quadro na Tabela \ref{tab:comparativo_concorrentes} resume as funcionalidades comparadas com base nos requisitos do sistema.
 
 \begin{table}[h]
     \centering
-    \caption{Comparativo de Funcionalidades}
+    \caption{Comparativo de Funcionalidades entre Sistemas}
     \label{tab:comparativo_concorrentes}
     \resizebox{\textwidth}{!}{%
-    \begin{tabular}{|m{4cm}|c|c|c|c|}
+    \begin{tabular}{|m{5.5cm}|c|c|c|c|c|}
         \hline
-        \textbf{Funcionalidade} & \textbf{CarneUp} & \textbf{ConnectPlug} & \textbf{Aliar Sistemas} & \textbf{SOFTClass} \\ \hline
-        Registro de Vendas & X & X & X & X \\ \hline
-        Controle Básico de Estoque & X & X & X & X \\ \hline
-%        Captura de Valor/Peso por Código de Barras da Balança & X & X & X & X \\ \hline
-        Rastreabilidade de Peça: Fornecedor e Valor de Compra & X & X & - & - \\ \hline
-        Alertas de Validade por Peça/Lote & X & - & - & - \\ \hline
-        Foco em Pequenos/Médios Açougues e Facilidade de Uso & X & - & - & X \\ \hline
+        \textbf{Funcionalidade} & \textbf{CarneUp} & \textbf{CPlug} & \textbf{Aliar} & \textbf{MarketUP} & \textbf{Hiper} \\ \hline
+        Cálculo Automático (Peso $\times$ Valor Unitário) & X & X & X & X & X \\ \hline
+        Registro de Descartes por Categoria & X & - & X & - & - \\ \hline
+        Alerta Visual de Vencimento de Produtos & X & X & X & - & X \\ \hline
+        Alerta de Inatividade de Clientes & X & - & - & - & - \\ \hline
+        Alerta de Lucro Abaixo do Esperado & X & - & - & - & - \\ \hline
+        \textbf{Baixa Curva de Aprendizado / Simplicidade} & \textbf{X} & - & - & - & - \\ \hline
     \end{tabular}%
     }
+    \small Fonte: Elaborado pelos autores (2026).
 \end{table}
-
 % ----------------------------------------------------------
 % CAPÍTULO 2: GESTÃO DO PROJETO
 % ----------------------------------------------------------
