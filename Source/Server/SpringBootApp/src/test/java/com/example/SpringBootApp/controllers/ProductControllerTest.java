@@ -46,8 +46,15 @@ class ProductControllerTest {
         setup();
 
         // Arrange
-        ProductCreateDTO request = new ProductCreateDTO("Picanha", UnitMeasurement.KG, 1001, 1L, 1L);
-        Product savedProduct = new Product(1L, "Picanha", UnitMeasurement.KG, 1001, null, null, null);
+        ProductCreateDTO request = new ProductCreateDTO("Picanha", UnitMeasurement.KG, "001001", 1L, 1L);
+        Product savedProduct = {
+            Product p = new Product();
+            p.setId();
+            p.setName();
+            p.setUnitMeasurement(UnitMeasurement.);
+            p.setCode();
+            p;
+        };
 
         when(catalogService.createProducts(any(ProductCreateDTO.class))).thenReturn(savedProduct);
 
@@ -65,7 +72,7 @@ class ProductControllerTest {
         setup();
 
         // Arrange
-        ProductCreateDTO request = new ProductCreateDTO("Picanha", UnitMeasurement.KG, 1001, 1L, 1L);
+        ProductCreateDTO request = new ProductCreateDTO("Picanha", UnitMeasurement.KG, "001001", 1L, 1L);
 
         when(catalogService.createProducts(any(ProductCreateDTO.class)))
                 .thenThrow(new ResourceAlreadyExistsException("Product code already exists"));
@@ -84,7 +91,7 @@ class ProductControllerTest {
         setup();
 
         // Arrange
-        ProductCreateDTO request = new ProductCreateDTO("Picanha", UnitMeasurement.KG, 1001, 999L, 1L);
+        ProductCreateDTO request = new ProductCreateDTO("Picanha", UnitMeasurement.KG, "001001", 999L, 1L);
 
         when(catalogService.createProducts(any(ProductCreateDTO.class)))
                 .thenThrow(new ResourceNotFoundException("Category not found"));
@@ -103,7 +110,7 @@ class ProductControllerTest {
         setup();
 
         // Arrange
-        ProductCreateDTO request = new ProductCreateDTO("Picanha", UnitMeasurement.KG, 1001, 1L, 999L);
+        ProductCreateDTO request = new ProductCreateDTO("Picanha", UnitMeasurement.KG, "001001", 1L, 999L);
 
         when(catalogService.createProducts(any(ProductCreateDTO.class)))
                 .thenThrow(new ResourceNotFoundException("Brand not found"));
@@ -175,3 +182,5 @@ class ProductControllerTest {
                 .andExpect(status().isBadRequest());
     }
 }
+
+

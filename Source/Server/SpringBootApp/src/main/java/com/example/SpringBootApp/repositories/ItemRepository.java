@@ -11,10 +11,10 @@ import java.util.List;
 
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Long> {
-    @Query("SELECT SUM(i.quantity) FROM Item i WHERE i.purchase.id = :purchaseId")
+    @Query("SELECT SUM(m.quantity) FROM Item m WHERE m.purchase.id = :purchaseId")
     BigDecimal sumQuantityByPurchaseId(@Param("purchaseId") Long purchaseId);
 
     List<Item> findByPurchaseIdAndProductId(Long purchaseId, Long productId);
 
-		Item findFirstByPurchaseIdAndProductIdAndSaleIsNull(Long purchaseId, Long productId);
+    Item findFirstByPurchaseIdAndProductIdAndSaleIsNull(Long purchaseId, Long productId);
 }

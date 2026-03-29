@@ -11,7 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotEmpty;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -19,16 +19,20 @@ import java.util.List;
 @AllArgsConstructor
 public class SaleCreateDTO {
 
-    private LocalDateTime timestamp;
+    private LocalDate saleDate;
+
+    @NotNull(message = "Total value is required")
+    private BigDecimal totalValue;
 
     @NotNull(message = "Payment method is required")
     private PaymentMethod paymentMethod;
 
-    @PositiveOrZero(message = "Discount must be equal or greater than zero")
-    private BigDecimal discount;
+    private Boolean hasDiscount;
 
     @NotNull(message = "User ID is required")
     private Long userId;
+
+    private Long clienteId;
 
     @NotEmpty(message = "Items list cannot be empty")
     private List<@Valid SaleItemDTO> items;

@@ -21,9 +21,9 @@ public class ProductCreateDTO {
     @NotNull(message = "Unit measurement is required")
     private UnitMeasurement unitMeasurement;
 
-    @Schema(description = "Unique product code", example = "1001")
+    @Schema(description = "Unique product code", example = "000001")
     @NotNull(message = "Code is required")
-    private Integer code;
+    private String code;
 
     @Schema(description = "Category ID", example = "1")
     @NotNull(message = "Category ID is required")

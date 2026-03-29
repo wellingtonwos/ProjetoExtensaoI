@@ -43,12 +43,41 @@ class InventoryServiceTest {
         PurchaseItemDTO item2 = new PurchaseItemDTO(2L, new BigDecimal("5.0"), new BigDecimal("32.50"), new BigDecimal("49.90"), LocalDate.of(2024, 3, 1));
         PurchaseCreateDTO purchaseDTO = new PurchaseCreateDTO(LocalDate.of(2024, 1, 15), List.of(item1, item2));
 
-        Product product1 = new Product(1L, "Picanha", UnitMeasurement.KG, 1001, null, null, null);
-        Product product2 = new Product(2L, "Alcatra", UnitMeasurement.KG, 1002, null, null, null);
+        Product product1 = new Product();
+        product1.setId(1L);
+        product1.setName("Picanha");
+        product1.setUnitMeasurement(UnitMeasurement.KG);
+        product1.setCode("000001");
+        
+        Product product2 = new Product();
+        product2.setId(2L);
+        product2.setName("Alcatra");
+        product2.setUnitMeasurement(UnitMeasurement.KG);
+        product2.setCode("000002");
 
-        Purchase savedPurchase = new Purchase(1L, LocalDate.of(2024, 1, 15), null);
-        Item savedItem1 = new Item(1L, new BigDecimal("10.5"), new BigDecimal("45.90"), new BigDecimal("69.90"), LocalDate.of(2024, 2, 15), product1, savedPurchase, null);
-        Item savedItem2 = new Item(2L, new BigDecimal("5.0"), new BigDecimal("32.50"), new BigDecimal("49.90"), LocalDate.of(2024, 3, 1), product2, savedPurchase, null);
+        Purchase savedPurchase = new Purchase();
+        savedPurchase.setId(1L);
+        savedPurchase.setPurchaseDate(LocalDate.of(2024, 1, 15));
+        
+        Item savedItem1 = new Item();
+        savedItem1.setId(1L);
+        savedItem1.setQuantity(new BigDecimal("10.5"));
+        savedItem1.setPurchaseUnitPrice(new BigDecimal("45.90"));
+        savedItem1.setSaleUnitPrice(new BigDecimal("69.90"));
+        savedItem1.setExpirationDate(LocalDate.of(2024, 2, 15));
+        savedItem1.setProduct(product1);
+        savedItem1.setPurchase(savedPurchase);
+        savedItem1.setMovementType(MovementType.COMPRA);
+        
+        Item savedItem2 = new Item();
+        savedItem2.setId(2L);
+        savedItem2.setQuantity(new BigDecimal("5.0"));
+        savedItem2.setPurchaseUnitPrice(new BigDecimal("32.50"));
+        savedItem2.setSaleUnitPrice(new BigDecimal("49.90"));
+        savedItem2.setExpirationDate(LocalDate.of(2024, 3, 1));
+        savedItem2.setProduct(product2);
+        savedItem2.setPurchase(savedPurchase);
+        savedItem2.setMovementType(MovementType.COMPRA);
 
         when(purchaseRepository.save(any(Purchase.class))).thenReturn(savedPurchase);
         when(productRepository.findById(1L)).thenReturn(Optional.of(product1));
@@ -60,7 +89,7 @@ class InventoryServiceTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals(LocalDate.of(2024, 1, 15), result.getDate());
+        assertEquals(LocalDate.of(2024, 1, 15), result.getPurchaseDate());
         assertEquals(1L, result.getId());
 
         verify(purchaseRepository).save(any(Purchase.class));
@@ -75,9 +104,24 @@ class InventoryServiceTest {
         PurchaseItemDTO item = new PurchaseItemDTO(1L, new BigDecimal("10.5"), new BigDecimal("45.90"), new BigDecimal("69.90"), null);
         PurchaseCreateDTO purchaseDTO = new PurchaseCreateDTO(null, List.of(item));
 
-        Product product = new Product(1L, "Picanha", UnitMeasurement.KG, 1001, null, null, null);
-        Purchase savedPurchase = new Purchase(1L, LocalDate.now(), null);
-        Item savedItem = new Item(1L, new BigDecimal("10.5"), new BigDecimal("45.90"), new BigDecimal("69.90"), null, product, savedPurchase, null);
+        Product product = new Product();
+        product.setId(1L);
+        product.setName("Picanha");
+        product.setUnitMeasurement(UnitMeasurement.KG);
+        product.setCode("000001");
+        
+        Purchase savedPurchase = new Purchase();
+        savedPurchase.setId(1L);
+        savedPurchase.setPurchaseDate(LocalDate.now());
+        
+        Item savedItem = new Item();
+        savedItem.setId(1L);
+        savedItem.setQuantity(new BigDecimal("10.5"));
+        savedItem.setPurchaseUnitPrice(new BigDecimal("45.90"));
+        savedItem.setSaleUnitPrice(new BigDecimal("69.90"));
+        savedItem.setProduct(product);
+        savedItem.setPurchase(savedPurchase);
+        savedItem.setMovementType(MovementType.COMPRA);
 
         when(purchaseRepository.save(any(Purchase.class))).thenReturn(savedPurchase);
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
@@ -88,7 +132,7 @@ class InventoryServiceTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals(LocalDate.now(), result.getDate());
+        assertEquals(LocalDate.now(), result.getPurchaseDate());
     }
 
     @Test
@@ -116,8 +160,15 @@ class InventoryServiceTest {
         PurchaseItemDTO itemDTO = new PurchaseItemDTO(1L, new BigDecimal("10.5"), new BigDecimal("45.90"), new BigDecimal("69.90"), expiringDate);
         PurchaseCreateDTO purchaseDTO = new PurchaseCreateDTO(LocalDate.now(), List.of(itemDTO));
 
-        Product product = new Product(1L, "Picanha", UnitMeasurement.KG, 1001, null, null, null);
-        Purchase savedPurchase = new Purchase(1L, LocalDate.now(), null);
+        Product product = new Product();
+        product.setId(1L);
+        product.setName("Picanha");
+        product.setUnitMeasurement(UnitMeasurement.KG);
+        product.setCode("000001");
+        
+        Purchase savedPurchase = new Purchase();
+        savedPurchase.setId(1L);
+        savedPurchase.setPurchaseDate(LocalDate.now());
 
         when(purchaseRepository.save(any(Purchase.class))).thenReturn(savedPurchase);
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
@@ -132,9 +183,18 @@ class InventoryServiceTest {
             assertEquals(product, item.getProduct());
             assertEquals(savedPurchase, item.getPurchase());
             assertNull(item.getSale());
-            return new Item(1L, item.getQuantity(), item.getPurchaseUnitPrice(),
-                    item.getSaleUnitPrice(), item.getExpirationDate(),
-                    item.getProduct(), item.getPurchase(), item.getSale());
+            assertEquals(MovementType.COMPRA, item.getMovementType());
+            
+            Item returnItem = new Item();
+            returnItem.setId(1L);
+            returnItem.setQuantity(item.getQuantity());
+            returnItem.setPurchaseUnitPrice(item.getPurchaseUnitPrice());
+            returnItem.setSaleUnitPrice(item.getSaleUnitPrice());
+            returnItem.setExpirationDate(item.getExpirationDate());
+            returnItem.setProduct(item.getProduct());
+            returnItem.setPurchase(item.getPurchase());
+            returnItem.setMovementType(item.getMovementType());
+            return returnItem;
         });
 
         // Act
@@ -145,3 +205,5 @@ class InventoryServiceTest {
         verify(itemRepository).save(any(Item.class));
     }
 }
+
+

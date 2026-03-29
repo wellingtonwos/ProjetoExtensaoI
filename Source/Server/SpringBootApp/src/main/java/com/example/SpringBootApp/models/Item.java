@@ -9,38 +9,47 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+// Item is now an alias for Movimentacao for backward compatibility
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "item")
+@Table(name = "movimentacao")
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "quantidade")
-    private BigDecimal quantity;
+    private BigDecimal quantidade;
 
     @Column(name = "preco_unitario_compra")
-    private BigDecimal purchaseUnitPrice;
+    private BigDecimal precoUnitarioCompra;
 
     @Column(name = "preco_unitario_venda")
-    private BigDecimal saleUnitPrice;
+    private BigDecimal precoUnitarioVenda;
 
     @Column(name = "data_validade")
-    private LocalDate expirationDate;
+    private LocalDate dataValidade;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_movimentacao")
+    private MovementType tipoMovimentacao;
 
     @ManyToOne
     @JoinColumn(name = "fk_produto_id")
-    private Product product;
+    private Produto produto;
 
     @ManyToOne
     @JoinColumn(name = "fk_compra_id")
-    private Purchase purchase;
+    private Compra compra;
+
+    @ManyToOne
+    @JoinColumn(name = "fk_descarte_id")
+    private Descarte descarte;
 
     @ManyToOne
     @JoinColumn(name = "fk_venda_id")
-    private Sale sale;
+    private Venda venda;
 }

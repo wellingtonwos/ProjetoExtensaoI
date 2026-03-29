@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -39,8 +39,8 @@ public class SaleController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SaleReportDTO>> getSalesReport(@RequestParam LocalDateTime startDate,
-                                                              @RequestParam LocalDateTime endDate) {
+    public ResponseEntity<List<SaleReportDTO>> getSalesReport(@RequestParam LocalDate startDate,
+                                                              @RequestParam LocalDate endDate) {
         List<SaleReportDTO> sales = reportService.getSalesReport(startDate, endDate);
         return ResponseEntity.ok(sales);
     }

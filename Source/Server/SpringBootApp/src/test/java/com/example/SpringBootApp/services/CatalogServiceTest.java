@@ -41,14 +41,14 @@ class CatalogServiceTest {
     @Test
     void createProduct_ShouldReturnProduct_WhenValidInput() {
         // Arrange
-        ProductCreateDTO productDTO = new ProductCreateDTO("Picanha", UnitMeasurement.KG, 1001, 1L, 1L);
+        ProductCreateDTO productDTO = new ProductCreateDTO("Picanha", UnitMeasurement.KG, "000001", 1L, 1L);
         Category category = new Category(1L, "Bovino", null);
         Brand brand = new Brand(1L, "Friboi", null);
-        Product expectedProduct = new Product(1L, "Picanha", UnitMeasurement.KG, 1001, category, brand, null);
+        Product expectedProduct = new Product(1L, "Picanha", UnitMeasurement.KG, "000001", category, brand, null);
 
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
         when(brandRepository.findById(1L)).thenReturn(Optional.of(brand));
-        when(productRepository.existsByCode(1001)).thenReturn(false);
+        when(productRepository.existsByCode("000001")).thenReturn(false);
         when(productRepository.save(any(Product.class))).thenReturn(expectedProduct);
 
         // Act
@@ -58,20 +58,20 @@ class CatalogServiceTest {
         assertNotNull(result);
         assertEquals("Picanha", result.getName());
         assertEquals(UnitMeasurement.KG, result.getUnitMeasurement());
-        assertEquals(1001, result.getCode());
+        assertEquals("000001", result.getCode());
         assertEquals(category, result.getCategory());
         assertEquals(brand, result.getBrand());
 
         verify(categoryRepository).findById(1L);
         verify(brandRepository).findById(1L);
-        verify(productRepository).existsByCode(1001);
+        verify(productRepository).existsByCode("000001");
         verify(productRepository).save(any(Product.class));
     }
 
     @Test
     void createProduct_ShouldThrowException_WhenCategoryNotFound() {
         // Arrange
-        ProductCreateDTO productDTO = new ProductCreateDTO("Picanha", UnitMeasurement.KG, 1001, 999L, 1L);
+        ProductCreateDTO productDTO = new ProductCreateDTO("Picanha", UnitMeasurement.KG, "000001", 999L, 1L);
 
         when(categoryRepository.findById(999L)).thenReturn(Optional.empty());
 
@@ -89,7 +89,7 @@ class CatalogServiceTest {
     @Test
     void createProduct_ShouldThrowException_WhenBrandNotFound() {
         // Arrange
-        ProductCreateDTO productDTO = new ProductCreateDTO("Picanha", UnitMeasurement.KG, 1001, 1L, 999L);
+        ProductCreateDTO productDTO = new ProductCreateDTO("Picanha", UnitMeasurement.KG, "000001", 1L, 999L);
         Category category = new Category(1L, "Bovino", null);
 
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
@@ -109,13 +109,13 @@ class CatalogServiceTest {
     @Test
     void createProduct_ShouldThrowException_WhenCodeAlreadyExists() {
         // Arrange
-        ProductCreateDTO productDTO = new ProductCreateDTO("Picanha", UnitMeasurement.KG, 1001, 1L, 1L);
+        ProductCreateDTO productDTO = new ProductCreateDTO("Picanha", UnitMeasurement.KG, "000001", 1L, 1L);
         Category category = new Category(1L, "Bovino", null);
         Brand brand = new Brand(1L, "Friboi", null);
 
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
         when(brandRepository.findById(1L)).thenReturn(Optional.of(brand));
-        when(productRepository.existsByCode(1001)).thenReturn(true);
+        when(productRepository.existsByCode("000001")).thenReturn(true);
 
         // Act & Assert
         ResourceAlreadyExistsException exception = assertThrows(ResourceAlreadyExistsException.class,
@@ -124,7 +124,7 @@ class CatalogServiceTest {
         assertEquals("Product code already exists", exception.getMessage());
         verify(categoryRepository).findById(1L);
         verify(brandRepository).findById(1L);
-        verify(productRepository).existsByCode(1001);
+        verify(productRepository).existsByCode("000001");
         verify(productRepository, never()).save(any());
     }
 
@@ -200,3 +200,6 @@ class CatalogServiceTest {
         verify(brandRepository, never()).save(any());
     }
 }
+
+
+

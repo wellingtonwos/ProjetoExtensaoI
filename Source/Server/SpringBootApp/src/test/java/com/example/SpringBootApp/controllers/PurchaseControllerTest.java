@@ -58,7 +58,7 @@ class PurchaseControllerTest {
                 new BigDecimal("10.5"),
                 new BigDecimal("45.90"),
                 new BigDecimal("69.90"),
-                LocalDate.of(2024, 2, 15)
+                LocalDate.of("002024", 2, 15)
         );
 
         PurchaseItemDTO item2 = new PurchaseItemDTO(
@@ -66,13 +66,13 @@ class PurchaseControllerTest {
                 new BigDecimal("5.0"),
                 new BigDecimal("32.50"),
                 new BigDecimal("49.90"),
-                LocalDate.of(2024, 3, 1)
+                LocalDate.of("002024", 3, 1)
         );
 
         PurchaseCreateDTO request =
-                new PurchaseCreateDTO(LocalDate.of(2024, 1, 15), List.of(item1, item2));
+                new PurchaseCreateDTO(LocalDate.of("002024", 1, 15), List.of(item1, item2));
 
-        Purchase savedPurchase = new Purchase(1L, LocalDate.of(2024, 1, 15), null);
+        Purchase savedPurchase = new Purchase(1L, LocalDate.of("002024", 1, 15), null);
 
         when(inventoryService.createPurchase(any(PurchaseCreateDTO.class))).thenReturn(savedPurchase);
 
@@ -174,3 +174,5 @@ class PurchaseControllerTest {
                 .andExpect(status().isBadRequest());
     }
 }
+
+
