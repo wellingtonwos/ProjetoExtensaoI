@@ -23,5 +23,6 @@ public class Cliente {
     private String nickname;
 
     @OneToMany(mappedBy = "cliente", fetch = FetchType.LAZY)
-    private List<Sale> sales;
+    private List<Venda> sales;
 }
+

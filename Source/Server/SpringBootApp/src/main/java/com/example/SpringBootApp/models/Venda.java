@@ -22,7 +22,7 @@ public class Venda {
     private Long id;
 
     @Column(name = "data_venda")
-    private LocalDate datavenda;
+    private LocalDate dataVenda;
 
     @Column(name = "valor_total")
     private BigDecimal valorTotal;
@@ -43,5 +43,5 @@ public class Venda {
     private Cliente cliente;
 
     @OneToMany(mappedBy = "venda", fetch = FetchType.LAZY)
-    private List<Item> itens;
+    private List<Movimentacao> itens;
 }

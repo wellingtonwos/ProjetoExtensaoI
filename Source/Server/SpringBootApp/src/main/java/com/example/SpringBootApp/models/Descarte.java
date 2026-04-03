@@ -27,5 +27,6 @@ public class Descarte {
     private String reason;
 
     @OneToMany(mappedBy = "descarte", fetch = FetchType.LAZY)
-    private List<Item> movements;
+    private List<Movimentacao> movements;
 }
+

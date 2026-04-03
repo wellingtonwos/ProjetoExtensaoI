@@ -23,5 +23,5 @@ public class Compra {
     private LocalDate dataCompra;
 
     @OneToMany(mappedBy = "compra", fetch = FetchType.LAZY)
-    private List<Item> itens;
+    private List<Movimentacao> itens;
 }

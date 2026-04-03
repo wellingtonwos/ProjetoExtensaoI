@@ -9,7 +9,7 @@ import java.util.List;
 
 @Repository
 public interface ProdutoRepository extends JpaRepository<Produto, Long> {
-    boolean existsByCode(String code);
+    boolean existsByCodigo(String codigo);
 
     @Query("""
         SELECT DISTINCT p FROM Produto p
@@ -17,3 +17,4 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
         """)
     List<Produto> findAllWithItems();
 }
+

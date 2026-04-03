@@ -1,14 +1,14 @@
 package com.example.SpringBootApp.services;
 
-import com.example.SpringBootApp.DTOs.ProductWithPurchaseInStockDTO;
-import com.example.SpringBootApp.DTOs.PurchaseCreateDTO;
-import com.example.SpringBootApp.DTOs.PurchaseInStockDTO;
-import com.example.SpringBootApp.DTOs.PurchaseItemDTO;
+import com.example.SpringBootApp.DTOs.ProdutoComCompraEmEstoqueDTO;
+import com.example.SpringBootApp.DTOs.CompraCreateDTO;
+import com.example.SpringBootApp.DTOs.CompraEmEstoqueDTO;
+import com.example.SpringBootApp.DTOs.CompraItemDTO;
 import com.example.SpringBootApp.exceptions.ResourceNotFoundException;
 import com.example.SpringBootApp.models.*;
-import com.example.SpringBootApp.repositories.PurchaseRepository;
+import com.example.SpringBootApp.repositories.CompraRepository;
 import com.example.SpringBootApp.repositories.ItemRepository;
-import com.example.SpringBootApp.repositories.ProductRepository;
+import com.example.SpringBootApp.repositories.ProdutoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,61 +21,61 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class InventoryService {
+public class InventarioService {
 
-    private final PurchaseRepository purchaseRepository;
+    private final CompraRepository CompraRepository;
     private final ItemRepository itemRepository;
-    private final ProductRepository productRepository;
+    private final ProdutoRepository ProdutoRepository;
 
-    public Purchase createPurchase(PurchaseCreateDTO purchaseDTO) {
-        for (PurchaseItemDTO itemDTO : purchaseDTO.getItems()) {
-            productRepository.findById(itemDTO.getProductId())
+    public Compra createPurchase(CompraCreateDTO purchaseDTO) {
+        for (CompraItemDTO itemDTO : purchaseDTO.getItems()) {
+            ProdutoRepository.findById(itemDTO.getProductId())
                     .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + itemDTO.getProductId()));
         }
 
-        Purchase purchase = new Purchase();
-        purchase.setPurchaseDate(purchaseDTO.getDate() != null ? purchaseDTO.getDate() : LocalDate.now());
+        Compra Compra = new Compra();
+        Compra.setDataCompra(purchaseDTO.getDate() != null ? purchaseDTO.getDate() : LocalDate.now());
 
-        Purchase savedPurchase = purchaseRepository.save(purchase);
+        Compra savedPurchase = CompraRepository.save(Compra);
 
-        List<Item> items = new ArrayList<>();
-        for (PurchaseItemDTO itemDTO : purchaseDTO.getItems()) {
-            Product product = productRepository.findById(itemDTO.getProductId()).get();
+        List<Movimentacao> items = new ArrayList<>();
+        for (CompraItemDTO itemDTO : purchaseDTO.getItems()) {
+            Produto Produto = ProdutoRepository.findById(itemDTO.getProductId()).get();
 
-            Item item = new Item();
-            item.setQuantity(itemDTO.getQuantity());
-            item.setPurchaseUnitPrice(itemDTO.getUnitPurchasePrice());
-            item.setSaleUnitPrice(itemDTO.getUnitSalePrice());
-            item.setExpirationDate(itemDTO.getExpiringDate());
-            item.setProduct(product);
-            item.setPurchase(savedPurchase);
-            item.setSale(null);
-            item.setMovementType(MovementType.COMPRA);
+            Movimentacao Movimentacao = new Movimentacao();
+            Movimentacao.setQuantidade(itemDTO.getQuantity());
+            Movimentacao.setPrecoUnitarioCompra(itemDTO.getUnitPurchasePrice());
+            Movimentacao.setPrecoUnitarioVenda(itemDTO.getUnitSalePrice());
+            Movimentacao.setDataValidade(itemDTO.getExpiringDate());
+            Movimentacao.setProduto(Produto);
+            Movimentacao.setCompra(savedPurchase);
+            Movimentacao.setVenda(null);
+            Movimentacao.setTipoMovimentacao(MovementType.COMPRA);
 
-            items.add(itemRepository.save(item));
+            items.add(itemRepository.save(Movimentacao));
         }
 
-        savedPurchase.setItems(items);
+        savedPurchase.setItens(items);
         return savedPurchase;
     }
 
-    public List<ProductWithPurchaseInStockDTO> getProductsWithPurchaseInStock(){
-        List<Product> products = productRepository.findAllWithItems()
+    public List<ProdutoComCompraEmEstoqueDTO> getProductsWithPurchaseInStock(){
+        List<Produto> products = ProdutoRepository.findAllWithItems()
                 .stream()
-                .filter(product -> !product.getItems().isEmpty())
+                .filter(Produto -> !Produto.getItens().isEmpty())
                 .toList();
         return products.stream()
-                .map(product -> {
+                .map(Produto -> {
 
-                    ProductWithPurchaseInStockDTO dto = new ProductWithPurchaseInStockDTO();
+                    ProdutoComCompraEmEstoqueDTO dto = new ProdutoComCompraEmEstoqueDTO();
 
-                    dto.setId(product.getId().intValue());
-                    dto.setCode(product.getCode());
-                    dto.setProduct_name(product.getName());
-                    dto.setBrand_name(product.getBrand() != null ? product.getBrand().getName() : null);
-                    dto.setUnitMeasurement(product.getUnitMeasurement());
+                    dto.setId(Produto.getId().intValue());
+                    dto.setCode(Produto.getCodigo());
+                    dto.setProduct_name(Produto.getNome());
+                    dto.setBrand_name(Produto.getMarca() != null ? Produto.getMarca().getNome() : null);
+                    dto.setUnitMeasurement(Produto.getUnidadeMedida());
 
-                    List<PurchaseInStockDTO> groupedPurchases = groupItemsByPurchase(product.getItems());
+                    List<CompraEmEstoqueDTO> groupedPurchases = groupItemsByPurchase(Produto.getItens());
                     dto.setPurchases(groupedPurchases);
 
                     return dto;
@@ -83,40 +83,40 @@ public class InventoryService {
                 .toList();
     }
 
-    private List<PurchaseInStockDTO> groupItemsByPurchase(List<Item> items) {
+    private List<CompraEmEstoqueDTO> groupItemsByPurchase(List<Movimentacao> items) {
 
         return items.stream()
-                .filter(item -> item.getPurchase() != null)
+                .filter(Movimentacao -> Movimentacao.getCompra() != null)
                 .collect(Collectors.groupingBy(
-                        item -> item.getPurchase().getId()
+                        Movimentacao -> Movimentacao.getCompra().getId()
                 ))
                 .values()
                 .stream()
                 .map(group -> {
 
-                    Item reference = group.getFirst();
+                    Movimentacao reference = group.getFirst();
 
-                    LocalDate purchaseDate = reference.getPurchase().getPurchaseDate();
-                    Long purchaseId = reference.getPurchase().getId();
+                    LocalDate purchaseDate = reference.getCompra().getDataCompra();
+                    Long purchaseId = reference.getCompra().getId();
 
                     LocalDate expiration =
                             group.stream()
-                                    .map(Item::getExpirationDate)
+                                    .map(Movimentacao::getDataValidade)
                                     .filter(Objects::nonNull)
                                     .min(LocalDate::compareTo)
                                     .orElse(null);
 
                     BigDecimal totalQuantity =
                             group.stream()
-                                    .map(Item::getQuantity)
+                                    .map(Movimentacao::getQuantidade)
                                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-                    PurchaseInStockDTO dto = new PurchaseInStockDTO();
+                    CompraEmEstoqueDTO dto = new CompraEmEstoqueDTO();
                     dto.setPurchase_id(purchaseId);
                     dto.setPurchase_date(purchaseDate);
                     dto.setExpiring_date(expiration);
                     dto.setQuantity(totalQuantity);
-                    dto.setUnitSalePrice(reference.getSaleUnitPrice());
+                    dto.setUnitSalePrice(reference.getPrecoUnitarioVenda());
 
                     return dto;
                 })
@@ -124,3 +124,6 @@ public class InventoryService {
     }
 
 }
+
+
+

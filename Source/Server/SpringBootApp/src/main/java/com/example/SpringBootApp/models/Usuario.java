@@ -21,10 +21,10 @@ public class Usuario {
     private Long id;
 
     @Column(name = "nome")
-    private String name;
+    private String nome;
 
     @Column(name = "senha")
-    private String password;
+    private String senha;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "nivel_acesso")

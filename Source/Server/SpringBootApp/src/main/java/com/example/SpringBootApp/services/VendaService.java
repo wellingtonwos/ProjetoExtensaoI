@@ -7,67 +7,70 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.SpringBootApp.DTOs.SaleCreateDTO;
-import com.example.SpringBootApp.DTOs.SaleItemDTO;
+import com.example.SpringBootApp.DTOs.VendCreateDTO;
+import com.example.SpringBootApp.DTOs.VendItemDTO;
 import com.example.SpringBootApp.exceptions.ResourceNotFoundException;
 import com.example.SpringBootApp.models.*;
 import com.example.SpringBootApp.repositories.ItemRepository;
-import com.example.SpringBootApp.repositories.ProductRepository;
-import com.example.SpringBootApp.repositories.PurchaseRepository;
-import com.example.SpringBootApp.repositories.SaleRepository;
-import com.example.SpringBootApp.repositories.UserRepository;
+import com.example.SpringBootApp.repositories.ProdutoRepository;
+import com.example.SpringBootApp.repositories.CompraRepository;
+import com.example.SpringBootApp.repositories.VendaRepository;
+import com.example.SpringBootApp.repositories.UsuarioRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class SalesService {
+public class VendaService {
 
-    private final SaleRepository saleRepository;
+    private final VendaRepository vendaRepository;
     private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
-    private final ProductRepository productRepository;
-    private final PurchaseRepository purchaseRepository;
-    public Sale createSale(SaleCreateDTO saleDTO) {
-        User user = userRepository.findById(saleDTO.getUserId()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    private final UsuarioRepository usuarioRepository;
+    private final ProdutoRepository produtoRepository;
+    private final CompraRepository compraRepository;
+    
+    public Venda createSale(VendCreateDTO saleDTO) {
+        Usuario usuario = usuarioRepository.findById(saleDTO.getUserId()).orElseThrow(() -> new ResourceNotFoundException("Usuario not found"));
 
-        Sale sale = new Sale();
-        sale.setSaleDate(saleDTO.getSaleDate());
-        sale.setTotalValue(saleDTO.getTotalValue());
-        sale.setPaymentMethod(saleDTO.getPaymentMethod());
-        sale.setHasDiscount(saleDTO.getHasDiscount());
-        sale.setUser(user);
+        Venda venda = new Venda();
+        venda.setDataVenda(saleDTO.getSaleDate());
+        venda.setValorTotal(saleDTO.getTotalValue());
+        venda.setMetodoPagamento(saleDTO.getPaymentMethod());
+        venda.setTemDesconto(saleDTO.getHasDiscount());
+        venda.setUsuario(usuario);
 
-        Sale savedSale = saleRepository.save(sale);
+        Venda savedSale = vendaRepository.save(venda);
 
-        List<Item> items = new ArrayList<>();
-        for (SaleItemDTO itemDTO : saleDTO.getItems()) {
-            Product product = productRepository.findById(itemDTO.getProductId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + itemDTO.getProductId()));
-            Purchase purchase = purchaseRepository.findById(itemDTO.getPurchaseId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Purchase not found with id: " + itemDTO.getPurchaseId()));
+        List<Movimentacao> items = new ArrayList<>();
+        for (VendItemDTO itemDTO : saleDTO.getItems()) {
+            Produto produto = produtoRepository.findById(itemDTO.getProductId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Produto not found with id: " + itemDTO.getProductId()));
+            Compra compra = compraRepository.findById(itemDTO.getPurchaseId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Compra not found with id: " + itemDTO.getPurchaseId()));
 
-            Item stockItem = itemRepository.findFirstByPurchaseIdAndProductIdAndSaleIsNull(purchase.getId(), product.getId());
+            Movimentacao stockItem = itemRepository.findFirstByCompraIdAndProdutoIdAndVendaIsNull(compra.getId(), produto.getId());
             
             if (stockItem == null) {
-                throw new ResourceNotFoundException("Lote de estoque não encontrado para a compra ID: " + purchase.getId());
+                throw new ResourceNotFoundException("Lote de estoque não encontrado para a compra ID: " + compra.getId());
             }
 
-            Item item = new Item();
-            item.setProduct(product);
-            item.setPurchase(purchase);
-            item.setSale(savedSale);
-            item.setQuantity(itemDTO.getQuantity().multiply(BigDecimal.valueOf(-1)));
-            item.setMovementType(MovementType.VENDA);
+            Movimentacao movimentacao = new Movimentacao();
+            movimentacao.setProduto(produto);
+            movimentacao.setCompra(compra);
+            movimentacao.setVenda(savedSale);
+            movimentacao.setQuantidade(itemDTO.getQuantity().multiply(BigDecimal.valueOf(-1)));
+            movimentacao.setTipoMovimentacao(MovementType.VENDA);
 
-            item.setSaleUnitPrice(stockItem.getSaleUnitPrice());
-            item.setPurchaseUnitPrice(stockItem.getPurchaseUnitPrice());
+            movimentacao.setPrecoUnitarioVenda(stockItem.getPrecoUnitarioVenda());
+            movimentacao.setPrecoUnitarioCompra(stockItem.getPrecoUnitarioCompra());
 
-            items.add(itemRepository.save(item));
+            items.add(itemRepository.save(movimentacao));
         }
 
-        savedSale.setItems(items);
+        savedSale.setItens(items);
         return savedSale;
     }
 }
+
+

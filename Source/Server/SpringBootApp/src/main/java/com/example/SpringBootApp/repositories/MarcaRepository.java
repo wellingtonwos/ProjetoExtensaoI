@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MarcaRepository extends JpaRepository<Marca, Long> {
 
-    boolean existsByName(String name);
+    boolean existsByNome(String nome);
 }

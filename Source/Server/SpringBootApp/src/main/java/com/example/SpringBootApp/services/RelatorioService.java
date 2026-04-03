@@ -1,56 +1,54 @@
 package com.example.SpringBootApp.services;
 
-import com.example.SpringBootApp.DTOs.SaleItemReportDTO;
-import com.example.SpringBootApp.DTOs.SaleReportDTO;
-import com.example.SpringBootApp.models.Item;
-import com.example.SpringBootApp.models.Sale;
-import com.example.SpringBootApp.repositories.SaleRepository;
+import com.example.SpringBootApp.DTOs.VendItemReportDTO;
+import com.example.SpringBootApp.DTOs.VendReportDTO;
+import com.example.SpringBootApp.models.Movimentacao;
+import com.example.SpringBootApp.models.Venda;
+import com.example.SpringBootApp.repositories.VendaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
-public class ReportService {
+public class RelatorioService {
 
-    private final SaleRepository saleRepository;
+    private final VendaRepository vendaRepository;
 
-    public List<SaleReportDTO> getSalesReport(LocalDate startDate, LocalDate endDate) {
-        List<Sale> sales = saleRepository.findBySaleDateBetweenWithMovements(startDate, endDate);
+    public List<VendReportDTO> getSalesReport(LocalDate startDate, LocalDate endDate) {
+        List<Venda> sales = vendaRepository.findByDatavendaBetweenWithMovements(startDate, endDate);
 
         return sales.stream()
-                .map(this::convertToSaleReportDTO)
+                .map(this::convertToVendReportDTO)
                 .collect(Collectors.toList());
     }
 
-    private SaleReportDTO convertToSaleReportDTO(Sale sale) {
-        SaleReportDTO reportDTO = new SaleReportDTO();
+    private VendReportDTO convertToVendReportDTO(Venda venda) {
+        VendReportDTO reportDTO = new VendReportDTO();
 
-        reportDTO.setId(sale.getId());
-        reportDTO.setSaleDate(sale.getSaleDate());
-        reportDTO.setPaymentMethod(sale.getPaymentMethod().name());
-        reportDTO.setSalesmanName(sale.getUser().getName());
-        reportDTO.setHasDiscount(sale.getHasDiscount());
+        reportDTO.setId(venda.getId());
+        reportDTO.setSaleDate(venda.getDataVenda());
+        reportDTO.setPaymentMethod(venda.getMetodoPagamento().name());
+        reportDTO.setSalesmanName(venda.getUsuario().getNome());
+        reportDTO.setHasDiscount(venda.getTemDesconto());
 
-        List<SaleItemReportDTO> itemDTOs = sale.getItems().stream()
-                .filter(item -> item.getQuantity().compareTo(BigDecimal.ZERO) < 0)
-                .map(this::convertToSaleItemReportDTO)
+        List<VendItemReportDTO> itemDTOs = venda.getItens().stream()
+                .filter(movimentacao -> movimentacao.getQuantidade().compareTo(BigDecimal.ZERO) < 0)
+                .map(this::convertToVendItemReportDTO)
                 .collect(Collectors.toList());
 
         reportDTO.setItems(itemDTOs);
 
         BigDecimal totalPrice = itemDTOs.stream()
-                .map(item -> item.getSalePrice().multiply(item.getQuantity().abs()))
+                .map(itemDTO -> itemDTO.getSalePrice().multiply(itemDTO.getQuantity().abs()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal totalCost = itemDTOs.stream()
-                .map(item -> item.getPurchasePrice().multiply(item.getQuantity().abs()))
+                .map(itemDTO -> itemDTO.getPurchasePrice().multiply(itemDTO.getQuantity().abs()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         reportDTO.setTotalCost(totalCost);
@@ -59,17 +57,21 @@ public class ReportService {
         return reportDTO;
     }
 
-    private SaleItemReportDTO convertToSaleItemReportDTO(Item item) {
-        SaleItemReportDTO itemDTO = new SaleItemReportDTO();
+    private VendItemReportDTO convertToVendItemReportDTO(Movimentacao movimentacao) {
+        VendItemReportDTO itemDTO = new VendItemReportDTO();
 
-        itemDTO.setProductName(item.getProduct().getName());
-        itemDTO.setBrand(item.getProduct().getBrand().getName());
-        itemDTO.setCategory(item.getProduct().getCategory().getName());
-        itemDTO.setQuantity(item.getQuantity().abs());
-        itemDTO.setPurchasePrice(item.getPurchaseUnitPrice());
-        itemDTO.setSalePrice(item.getSaleUnitPrice());
+        itemDTO.setProductName(movimentacao.getProduto().getNome());
+        itemDTO.setMarca(movimentacao.getProduto().getMarca().getNome());
+        itemDTO.setCategoria(movimentacao.getProduto().getCategoria().getNome());
+        itemDTO.setQuantity(movimentacao.getQuantidade().abs());
+        itemDTO.setPurchasePrice(movimentacao.getPrecoUnitarioCompra());
+        itemDTO.setSalePrice(movimentacao.getPrecoUnitarioVenda());
         itemDTO.setTotal(itemDTO.getSalePrice().multiply(itemDTO.getQuantity()));
 
         return itemDTO;
     }
 }
+
+
+
+

@@ -76,6 +76,19 @@ CREATE TABLE Despesa (
     tipo VARCHAR(255)
 );
 
+ CREATE TABLE recuperacao_senha_token (
+     id BIGSERIAL PRIMARY KEY,
+     token VARCHAR(255) UNIQUE NOT NULL,
+     fk_usuario_id BIGINT NOT NULL REFERENCES usuario(id),
+     expiracao TIMESTAMP NOT NULL,
+     utilizado BOOLEAN DEFAULT FALSE,
+     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+ );
+
+CREATE INDEX idx_token ON recuperacao_senha_token (token);
+
+CREATE INDEX idx_usuario_criado ON recuperacao_senha_token (fk_usuario_id, criado_em DESC);
+
 ALTER TABLE Produto ADD CONSTRAINT FK_Produto_2
     FOREIGN KEY (fk_Categoria_id)
     REFERENCES Categoria (id)

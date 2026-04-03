@@ -16,14 +16,15 @@ public interface VendaRepository extends JpaRepository<Venda, Long> {
 
     @Query("""
         SELECT DISTINCT v FROM Venda v
-        LEFT JOIN FETCH v.itens item
-        LEFT JOIN FETCH item.compra compra
-        LEFT JOIN FETCH item.produto p
+        LEFT JOIN FETCH v.itens m
+        LEFT JOIN FETCH m.compra compra
+        LEFT JOIN FETCH m.produto p
         LEFT JOIN FETCH p.marca
         LEFT JOIN FETCH v.usuario
-        WHERE v.datavenda BETWEEN :startDate AND :endDate
-        ORDER BY v.datavenda DESC
+        WHERE v.dataVenda BETWEEN :startDate AND :endDate
+        ORDER BY v.dataVenda DESC
         """)
     List<Venda> findByDatavendaBetweenWithMovements(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 }
+
 

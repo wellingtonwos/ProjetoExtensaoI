@@ -3,12 +3,12 @@ package com.example.SpringBootApp.services;
 import com.example.SpringBootApp.DTOs.*;
 import com.example.SpringBootApp.exceptions.ResourceAlreadyExistsException;
 import com.example.SpringBootApp.exceptions.ResourceNotFoundException;
-import com.example.SpringBootApp.models.Brand;
-import com.example.SpringBootApp.models.Category;
-import com.example.SpringBootApp.models.Product;
-import com.example.SpringBootApp.repositories.BrandRepository;
-import com.example.SpringBootApp.repositories.CategoryRepository;
-import com.example.SpringBootApp.repositories.ProductRepository;
+import com.example.SpringBootApp.models.Marca;
+import com.example.SpringBootApp.models.Categoria;
+import com.example.SpringBootApp.models.Produto;
+import com.example.SpringBootApp.repositories.MarcaRepository;
+import com.example.SpringBootApp.repositories.CategoriaRepository;
+import com.example.SpringBootApp.repositories.ProdutoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,94 +20,97 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class CatalogService {
+public class CatalogoService {
 
-	private final ProductRepository productRepository;
+	private final ProdutoRepository ProdutoRepository;
 
-	private final CategoryRepository categoryRepository;
+	private final CategoriaRepository CategoriaRepository;
 
-	private final BrandRepository brandRepository;
+	private final MarcaRepository MarcaRepository;
 
-	public Product createProducts(ProductCreateDTO productDTO) {
-		Category category = categoryRepository.findById(productDTO.getCategoryId())
+	public Produto createProducts(ProdutoCreateDTO productDTO) {
+		Categoria Categoria = CategoriaRepository.findById(productDTO.getCategoryId())
 				.orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
-		Brand brand = brandRepository.findById(productDTO.getBrandId())
+		Marca Marca = MarcaRepository.findById(productDTO.getBrandId())
 				.orElseThrow(() -> new ResourceNotFoundException("Brand not found"));
 
-		if (productRepository.existsByCode(productDTO.getCode())) {
+		if (ProdutoRepository.existsByCodigo(productDTO.getCode())) {
 			throw new ResourceAlreadyExistsException("Product code already exists");
 		}
 
-		Product product = new Product();
-		product.setName(productDTO.getName());
-		product.setUnitMeasurement(productDTO.getUnitMeasurement());
-		product.setCode(productDTO.getCode());
-		product.setCategory(category);
-		product.setBrand(brand);
+		Produto Produto = new Produto();
+		Produto.setNome(productDTO.getName());
+		Produto.setUnidadeMedida(productDTO.getUnitMeasurement());
+		Produto.setCodigo(productDTO.getCode());
+		Produto.setCategoria(Categoria);
+		Produto.setMarca(Marca);
 
-		return productRepository.save(product);
+		return ProdutoRepository.save(Produto);
 	}
 
-	public Category createCategory(CategoryCreateDTO categoryDTO) {
-		if (categoryRepository.existsByName(categoryDTO.getName())) {
+	public Categoria createCategory(CategoriaCreateDTO CategoriaDTO) {
+		if (CategoriaRepository.existsByNome(CategoriaDTO.getName())) {
 			throw new ResourceAlreadyExistsException("Category name already exists");
 		}
 
-		Category category = new Category();
-		category.setName(categoryDTO.getName());
+		Categoria Categoria = new Categoria();
+		Categoria.setNome(CategoriaDTO.getName());
 
-		return categoryRepository.save(category);
+		return CategoriaRepository.save(Categoria);
 	}
 
-	public Brand createBrand(BrandCreateDTO brandDTO) {
-		if (brandRepository.existsByName(brandDTO.getName())) {
+	public Marca createBrand(MarcaCreateDTO MarcaDTO) {
+		if (MarcaRepository.existsByNome(MarcaDTO.getName())) {
 			throw new ResourceAlreadyExistsException("Brand name already exists");
 		}
 
-		Brand brand = new Brand();
-		brand.setName(brandDTO.getName());
+		Marca Marca = new Marca();
+		Marca.setNome(MarcaDTO.getName());
 
-		return brandRepository.save(brand);
+		return MarcaRepository.save(Marca);
 	}
 
-	public List<BrandDTO> getAllBrands() {
-		List<Brand> brands = brandRepository.findAll();
-		List<BrandDTO> brandsDTO = new ArrayList<>();
+	public List<MarcaDTO> getAllBrands() {
+		List<Marca> brands = MarcaRepository.findAll();
+		List<MarcaDTO> brandsDTO = new ArrayList<>();
 
-		for (Brand brand : brands) {
-			BrandDTO currentBrand = new BrandDTO();
-			currentBrand.setId(brand.getId());
-			currentBrand.setBrandName(brand.getName());
+		for (Marca Marca : brands) {
+			MarcaDTO currentBrand = new MarcaDTO();
+			currentBrand.setId(Marca.getId());
+			currentBrand.setBrandName(Marca.getNome());
 			brandsDTO.add(currentBrand);
 		}
 		return brandsDTO;
 	}
 
-	public List<CategoryDTO> getAllCategories() {
-		List<Category> categories = categoryRepository.findAll();
-		List<CategoryDTO> categoriesDTO = new ArrayList<>();
+	public List<CategoriaDTO> getAllCategories() {
+		List<Categoria> categories = CategoriaRepository.findAll();
+		List<CategoriaDTO> categoriesDTO = new ArrayList<>();
 
-		for (Category category : categories) {
-			CategoryDTO currentCategory = new CategoryDTO();
-			currentCategory.setId(category.getId());
-			currentCategory.setCategoryName(category.getName());
+		for (Categoria Categoria : categories) {
+			CategoriaDTO currentCategory = new CategoriaDTO();
+			currentCategory.setId(Categoria.getId());
+			currentCategory.setCategoryName(Categoria.getNome());
 			categoriesDTO.add(currentCategory);
 		}
 		return categoriesDTO;
 	}
 
-	public List<ProductResponseDTO> getAllProducts() {
-		List<Product> products = productRepository.findAll();
+	public List<ProdutoResponseDTO> getAllProducts() {
+		List<Produto> products = ProdutoRepository.findAll();
 
-		return products.stream().map(product -> {
-			ProductResponseDTO dto = new ProductResponseDTO();
-			dto.setId(product.getId());
-			dto.setName(product.getName());
-			dto.setCode(product.getCode());
-			dto.setBrandName(product.getBrand().getName());
-			dto.setUnitMeasurement(product.getUnitMeasurement() != null ? product.getUnitMeasurement().name() : null);
+		return products.stream().map(Produto -> {
+			ProdutoResponseDTO dto = new ProdutoResponseDTO();
+			dto.setId(Produto.getId());
+			dto.setName(Produto.getNome());
+			dto.setCode(Produto.getCodigo());
+			dto.setBrandName(Produto.getMarca().getNome());
+			dto.setUnitMeasurement(Produto.getUnidadeMedida() != null ? Produto.getUnidadeMedida().name() : null);
 			return dto;
 		}).collect(Collectors.toList());
 	}
 }
+
+
+
