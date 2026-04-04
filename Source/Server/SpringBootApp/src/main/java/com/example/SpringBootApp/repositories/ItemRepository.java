@@ -1,6 +1,6 @@
 package com.example.SpringBootApp.repositories;
 
-import com.example.SpringBootApp.models.Item;
+import com.example.SpringBootApp.models.Movimentacao;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,11 +10,12 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Repository
-public interface ItemRepository extends JpaRepository<Item, Long> {
-    @Query("SELECT SUM(i.quantity) FROM Item i WHERE i.purchase.id = :purchaseId")
+public interface ItemRepository extends JpaRepository<Movimentacao, Long> {
+    @Query("SELECT SUM(m.quantidade) FROM Movimentacao m WHERE m.compra.id = :purchaseId")
     BigDecimal sumQuantityByPurchaseId(@Param("purchaseId") Long purchaseId);
 
-    List<Item> findByPurchaseIdAndProductId(Long purchaseId, Long productId);
+    List<Movimentacao> findByCompraIdAndProdutoId(Long purchaseId, Long productId);
 
-		Item findFirstByPurchaseIdAndProductIdAndSaleIsNull(Long purchaseId, Long productId);
+    Movimentacao findFirstByCompraIdAndProdutoIdAndVendaIsNull(Long purchaseId, Long productId);
 }
+
