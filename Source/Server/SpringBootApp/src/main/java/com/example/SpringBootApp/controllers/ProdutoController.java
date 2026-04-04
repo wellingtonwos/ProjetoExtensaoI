@@ -1,0 +1,56 @@
+package com.example.SpringBootApp.controllers;
+
+import com.example.SpringBootApp.DTOs.ProdutoCreateDTO;
+import com.example.SpringBootApp.DTOs.ProdutoComCompraEmEstoqueDTO;
+import com.example.SpringBootApp.models.Produto;
+import com.example.SpringBootApp.services.CatalogoService;
+import com.example.SpringBootApp.services.InventarioService;
+import com.example.SpringBootApp.DTOs.ProdutoResponseDTO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
+import java.util.List;
+
+@RestController
+@RequestMapping("/products")
+@RequiredArgsConstructor
+public class ProdutoController {
+
+    private final CatalogoService CatalogoService;
+    private final InventarioService InventarioService;
+
+    @Operation(summary = "Create a new Produto")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Produto created successfully"),
+            @ApiResponse(responseCode = "409", description = "Produto code already exists"),
+            @ApiResponse(responseCode = "404", description = "Categoria or Marca not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+    })
+
+    @PostMapping
+    public ResponseEntity<?> createProducts(@Valid @RequestBody ProdutoCreateDTO productDTO) {
+        Produto Produto = CatalogoService.createProducts(productDTO);
+        return ResponseEntity.created(URI.create("/products/" + Produto.getId())).build();
+    }
+
+    @GetMapping("/purchases")
+    public ResponseEntity<List<ProdutoComCompraEmEstoqueDTO>> getProductsWithPurchasesInStock() {
+        List<ProdutoComCompraEmEstoqueDTO> products = InventarioService.getProductsWithPurchaseInStock();
+        return ResponseEntity.ok(products);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ProdutoResponseDTO>> getAllProducts() {
+        List<ProdutoResponseDTO> products = CatalogoService.getAllProducts();
+        return ResponseEntity.ok(products);
+    }
+}
+
+
+

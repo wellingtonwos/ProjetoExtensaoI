@@ -1,0 +1,116 @@
+package com.example.SpringBootApp.services;
+
+import com.example.SpringBootApp.DTOs.*;
+import com.example.SpringBootApp.exceptions.ResourceAlreadyExistsException;
+import com.example.SpringBootApp.exceptions.ResourceNotFoundException;
+import com.example.SpringBootApp.models.Marca;
+import com.example.SpringBootApp.models.Categoria;
+import com.example.SpringBootApp.models.Produto;
+import com.example.SpringBootApp.repositories.MarcaRepository;
+import com.example.SpringBootApp.repositories.CategoriaRepository;
+import com.example.SpringBootApp.repositories.ProdutoRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class CatalogoService {
+
+	private final ProdutoRepository ProdutoRepository;
+
+	private final CategoriaRepository CategoriaRepository;
+
+	private final MarcaRepository MarcaRepository;
+
+	public Produto createProducts(ProdutoCreateDTO productDTO) {
+		Categoria Categoria = CategoriaRepository.findById(productDTO.getCategoryId())
+				.orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+
+		Marca Marca = MarcaRepository.findById(productDTO.getBrandId())
+				.orElseThrow(() -> new ResourceNotFoundException("Brand not found"));
+
+		if (ProdutoRepository.existsByCodigo(productDTO.getCode())) {
+			throw new ResourceAlreadyExistsException("Product code already exists");
+		}
+
+		Produto Produto = new Produto();
+		Produto.setNome(productDTO.getName());
+		Produto.setUnidadeMedida(productDTO.getUnitMeasurement());
+		Produto.setCodigo(productDTO.getCode());
+		Produto.setCategoria(Categoria);
+		Produto.setMarca(Marca);
+
+		return ProdutoRepository.save(Produto);
+	}
+
+	public Categoria createCategory(CategoriaCreateDTO CategoriaDTO) {
+		if (CategoriaRepository.existsByNome(CategoriaDTO.getName())) {
+			throw new ResourceAlreadyExistsException("Category name already exists");
+		}
+
+		Categoria Categoria = new Categoria();
+		Categoria.setNome(CategoriaDTO.getName());
+
+		return CategoriaRepository.save(Categoria);
+	}
+
+	public Marca createBrand(MarcaCreateDTO MarcaDTO) {
+		if (MarcaRepository.existsByNome(MarcaDTO.getName())) {
+			throw new ResourceAlreadyExistsException("Brand name already exists");
+		}
+
+		Marca Marca = new Marca();
+		Marca.setNome(MarcaDTO.getName());
+
+		return MarcaRepository.save(Marca);
+	}
+
+	public List<MarcaDTO> getAllBrands() {
+		List<Marca> brands = MarcaRepository.findAll();
+		List<MarcaDTO> brandsDTO = new ArrayList<>();
+
+		for (Marca Marca : brands) {
+			MarcaDTO currentBrand = new MarcaDTO();
+			currentBrand.setId(Marca.getId());
+			currentBrand.setBrandName(Marca.getNome());
+			brandsDTO.add(currentBrand);
+		}
+		return brandsDTO;
+	}
+
+	public List<CategoriaDTO> getAllCategories() {
+		List<Categoria> categories = CategoriaRepository.findAll();
+		List<CategoriaDTO> categoriesDTO = new ArrayList<>();
+
+		for (Categoria Categoria : categories) {
+			CategoriaDTO currentCategory = new CategoriaDTO();
+			currentCategory.setId(Categoria.getId());
+			currentCategory.setCategoryName(Categoria.getNome());
+			categoriesDTO.add(currentCategory);
+		}
+		return categoriesDTO;
+	}
+
+	public List<ProdutoResponseDTO> getAllProducts() {
+		List<Produto> products = ProdutoRepository.findAll();
+
+		return products.stream().map(Produto -> {
+			ProdutoResponseDTO dto = new ProdutoResponseDTO();
+			dto.setId(Produto.getId());
+			dto.setName(Produto.getNome());
+			dto.setCode(Produto.getCodigo());
+			dto.setBrandName(Produto.getMarca().getNome());
+			dto.setUnitMeasurement(Produto.getUnidadeMedida() != null ? Produto.getUnidadeMedida().name() : null);
+			return dto;
+		}).collect(Collectors.toList());
+	}
+}
+
+
+
