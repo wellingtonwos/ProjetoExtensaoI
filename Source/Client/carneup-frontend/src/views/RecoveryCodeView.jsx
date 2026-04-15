@@ -1,3 +1,4 @@
+import React, { useState, useRef } from 'react'
 import styled from 'styled-components'
 import { Button } from '../components/Button'
 
@@ -41,12 +42,43 @@ const ResendText = styled.div`
 `
 
 export const RecoveryCodeView = ({ navigate }) => {
+	const [code, setCode] = useState(['', '', '', '', '', ''])
+	const inputRefs = useRef([])
+
+	const handleChange = (index, value) => {
+		if (value !== '' && !/^[a-zA-Z0-9]+$/.test(value)) return
+
+		const upperValue = value.toUpperCase()
+
+		const newCode = [...code]
+		newCode[index] = upperValue
+		setCode(newCode)
+
+		if (upperValue !== '' && index < 5) {
+			inputRefs.current[index + 1].focus()
+		}
+	}
+
+	const handleKeyDown = (index, e) => {
+		if (e.key === 'Backspace' && code[index] === '' && index > 0) {
+			inputRefs.current[index - 1].focus()
+		}
+	}
+
 	return (
 		<>
 			<ViewTitle>Digite o código recebido</ViewTitle>
 			<PinContainer>
-				{[1, 2, 3, 4, 5, 6].map((_, index) => (
-					<PinInput key={index} type='text' maxLength='1' />
+				{code.map((digit, index) => (
+					<PinInput
+						key={index}
+						type='text'
+						maxLength='1'
+						value={digit}
+						ref={(el) => (inputRefs.current[index] = el)}
+						onChange={(e) => handleChange(index, e.target.value)}
+						onKeyDown={(e) => handleKeyDown(index, e)}
+					/>
 				))}
 			</PinContainer>
 			<ResendText>Reenviar em 01:00</ResendText>
