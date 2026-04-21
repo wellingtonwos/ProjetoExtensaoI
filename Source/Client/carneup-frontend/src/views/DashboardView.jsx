@@ -618,7 +618,7 @@ const BottomFooter = styled.footer`
 // COMPONENTE PRINCIPAL
 // ==========================================
 
-export const DashboardView = () => {
+export const DashboardView = ({ navigate }) => {
 	return (
 		<Wrapper>
 			<Sidebar>
@@ -671,7 +671,7 @@ export const DashboardView = () => {
 				</Nav>
 
 				<SidebarFooter>
-					<NovaVendaBtn>Nova Venda</NovaVendaBtn>
+					<NovaVendaBtn onClick={() => navigate('sales')}>Nova Venda</NovaVendaBtn>
 					<UserProfile>
 						<img
 							src='https://lh3.googleusercontent.com/aida-public/AB6AXuA5VgXi1wbpjE8KAklFI9S7PH4-zOdOwyty8vIE8CukR8J06_oAYGqlx_F97T93mlCzAfsCs-ek9omgmFIItVCNVVmT9_H9xdkVmmCjlnYK-64bRQA1Qibx459vqUCYXOEui3IDScurxBZAcBzTK-wWgMC2T_Z62AWTruk-v-kAmTpb1lS4ggOMVm5INqrKwaZSRpSRP-RSq-1TT22vsNfwOv4AMFqu2HiZTWAKM6orM1JS8A7DTGog5DAvXXqJW1Zq0IG27PKpuCQ'
@@ -726,7 +726,7 @@ export const DashboardView = () => {
 							>
 								shopping_cart
 							</span>
-							<div className='content'>
+							<div className='content' onClick={() => navigate('sales')}>
 								<h2>Nova Venda</h2>
 								<p>Inicie um novo pedido rapidamente</p>
 							</div>

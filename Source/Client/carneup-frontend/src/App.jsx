@@ -1,8 +1,11 @@
 import { useState } from 'react'
+
 import { GlobalStyle } from './GlobalStyle'
 
 import { LoginView } from './views/LoginView'
 import { DashboardView } from './views/DashboardView'
+import { SalesView } from './views/SalesView'
+
 import { ForgotPasswordView } from './views/ForgotPasswordView'
 
 export default function App() {
@@ -14,6 +17,8 @@ export default function App() {
 				return <LoginView navigate={setCurrentView} />
 			case 'dashboard':
 				return <DashboardView navigate={setCurrentView} />
+			case 'sales':
+				return <SalesView navigate={setCurrentView} />
 			case 'forgot':
 				return <ForgotPasswordView navigate={setCurrentView} />
 			default:

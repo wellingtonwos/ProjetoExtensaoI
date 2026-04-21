@@ -1,52 +1,177 @@
 import styled from 'styled-components'
+import { useState } from 'react'
 
-// --- ESTILOS ---
-const VendasWrapper = styled.div`
+// ==========================================
+// ESTILOS
+// ==========================================
+
+const Wrapper = styled.div`
 	background-color: #fafaf9; /* stone-50 */
-	color: #1a1c1c;
+	color: #1c1917; /* stone-900 */
 	display: flex;
 	height: 100vh;
 	overflow: hidden;
 	font-family: 'Work Sans', sans-serif;
 `
 
-const CompactSidebar = styled.aside`
+const Sidebar = styled.aside`
 	display: flex;
 	flex-direction: column;
 	height: 100%;
 	background-color: #f5f5f4; /* stone-100 */
 	width: 80px;
 	border-right: 1px solid #e7e5e4;
+	transition: width 0.3s;
+	flex-shrink: 0;
 
 	@media (min-width: 1024px) {
 		width: 256px;
 	}
 `
 
-const LogoArea = styled.div`
-	padding: 24px;
+const SidebarHeader = styled.div`
+	padding: 16px;
 	text-align: center;
+	flex-shrink: 0;
+
 	@media (min-width: 1024px) {
+		padding: 24px;
 		text-align: left;
 	}
 
 	h1 {
-		font-family: 'Epilogue', sans-serif;
-		font-size: 24px;
+		font-size: 20px;
 		font-weight: 900;
 		color: #7f1d1d;
+		font-family: 'Epilogue', sans-serif;
+		letter-spacing: -0.05em;
+		@media (min-width: 1024px) {
+			font-size: 24px;
+		}
 	}
+
 	p {
 		display: none;
 		font-size: 10px;
 		text-transform: uppercase;
+		letter-spacing: 0.1em;
 		color: #78716c;
+		font-family: 'Epilogue', sans-serif;
+		margin-top: 4px;
 		@media (min-width: 1024px) {
 			display: block;
 		}
 	}
 `
 
+const Nav = styled.nav`
+	flex: 1;
+	margin-top: 16px;
+	padding: 0 8px;
+	overflow-y: auto;
+	min-height: 0;
+
+	@media (min-width: 1024px) {
+		padding: 0 12px;
+	}
+
+	&::-webkit-scrollbar {
+		width: 0px;
+	} /* Oculta a barra na sidebar */
+`
+
+const NavItem = styled.a`
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+	padding: 12px 8px;
+	margin-bottom: 8px;
+	border-radius: 4px;
+	text-decoration: none;
+	transition: all 0.2s;
+
+	background-color: ${(props) => (props.$active ? '#ffffff' : 'transparent')};
+	color: ${(props) => (props.$active ? '#b91c1c' : '#57534e')};
+	box-shadow: ${(props) =>
+		props.$active ? '0 1px 2px rgba(0,0,0,0.05)' : 'none'};
+
+	@media (min-width: 1024px) {
+		flex-direction: row;
+		gap: 12px;
+	}
+
+	&:hover {
+		background-color: ${(props) => (props.$active ? '#ffffff' : '#e7e5e4')};
+	}
+
+	span.icon {
+		font-size: 24px;
+	}
+	span.text {
+		font-size: 10px;
+		font-weight: 700;
+		font-family: 'Epilogue', sans-serif;
+		text-transform: uppercase;
+		@media (min-width: 1024px) {
+			font-size: 14px;
+		}
+	}
+`
+
+const SidebarFooter = styled.div`
+	padding: 8px;
+	margin-top: auto;
+	flex-shrink: 0;
+	@media (min-width: 1024px) {
+		padding: 16px;
+	}
+
+	.profile-box {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 12px;
+		padding: 8px;
+		background-color: #e7e5e4;
+		border-radius: 8px;
+
+		@media (min-width: 1024px) {
+			flex-direction: row;
+		}
+
+		img {
+			width: 32px;
+			height: 32px;
+			border-radius: 50%;
+			filter: grayscale(100%);
+			object-fit: cover;
+		}
+
+		.info {
+			display: none;
+			overflow: hidden;
+			@media (min-width: 1024px) {
+				display: block;
+			}
+			p.name {
+				font-size: 12px;
+				font-weight: 700;
+				color: #7f1d1d;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+			p.role {
+				font-size: 9px;
+				text-transform: uppercase;
+				opacity: 0.6;
+			}
+		}
+	}
+`
+
+// --- ÁREA CENTRAL ---
 const MainArea = styled.div`
 	flex: 1;
 	display: flex;
@@ -80,6 +205,48 @@ const Header = styled.header`
 			font-size: 14px;
 			width: 100%;
 			margin-left: 8px;
+			&::placeholder {
+				color: #a8a29e;
+				letter-spacing: 0.05em;
+			}
+		}
+	}
+
+	.actions {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+
+		.caixa-btn {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 8px 16px;
+			border: 2px solid rgba(97, 0, 5, 0.2);
+			color: #610005;
+			border-radius: 4px;
+			font-family: 'Epilogue', sans-serif;
+			font-weight: 700;
+			font-size: 12px;
+			text-transform: uppercase;
+			background: transparent;
+			cursor: pointer;
+			transition: background 0.2s;
+			&:hover {
+				background-color: rgba(97, 0, 5, 0.05);
+			}
+		}
+
+		.divider {
+			height: 32px;
+			width: 1px;
+			background-color: #e7e5e4;
+		}
+		img {
+			width: 32px;
+			height: 32px;
+			border-radius: 50%;
+			border: 1px solid #e7e5e4;
 		}
 	}
 `
@@ -87,13 +254,15 @@ const Header = styled.header`
 const ContentArea = styled.main`
 	flex: 1;
 	display: flex;
-	overflow: hidden;
+	overflow: hidden; /* Mantém o grid e o carrinho rolando independentemente */
 `
 
+// --- GRID DE PRODUTOS ---
 const ProductSection = styled.section`
 	flex: 1;
 	display: flex;
 	flex-direction: column;
+	min-width: 0;
 	background-color: #fafaf9;
 `
 
@@ -104,6 +273,11 @@ const Categories = styled.div`
 	display: flex;
 	gap: 12px;
 	overflow-x: auto;
+	flex-shrink: 0;
+
+	&::-webkit-scrollbar {
+		display: none;
+	}
 
 	button {
 		padding: 16px 32px;
@@ -114,6 +288,7 @@ const Categories = styled.div`
 		border: none;
 		cursor: pointer;
 		white-space: nowrap;
+		transition: all 0.2s;
 
 		&.active {
 			background-color: #610005;
@@ -123,20 +298,35 @@ const Categories = styled.div`
 		&.inactive {
 			background-color: #f5f5f4;
 			color: #44403c;
+			&:hover {
+				background-color: #e7e5e4;
+			}
 		}
 	}
 `
 
 const ProductGrid = styled.div`
 	flex: 1;
-	overflow-y: auto;
+	overflow-y: auto; /* Rolagem independente para os produtos */
 	padding: 24px;
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
 	gap: 24px;
 	align-content: flex-start;
+
 	@media (min-width: 1280px) {
 		grid-template-columns: repeat(3, 1fr);
+	}
+	@media (min-width: 1536px) {
+		grid-template-columns: repeat(4, 1fr);
+	}
+
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+	&::-webkit-scrollbar-thumb {
+		background-color: #d6d3d1;
+		border-radius: 4px;
 	}
 `
 
@@ -150,43 +340,66 @@ const ProductCard = styled.button`
 	display: flex;
 	flex-direction: column;
 	transition: all 0.2s;
+	padding: 0;
 
 	&:hover {
 		transform: translateY(-4px);
 		box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 	}
+	&:active {
+		transform: scale(0.98);
+	}
 
-	img {
+	.img-wrapper {
 		width: 100%;
 		aspect-ratio: 16/10;
-		object-fit: cover;
+		overflow: hidden;
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
 	}
+
 	.info {
 		padding: 20px;
 		flex: 1;
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
+		width: 100%;
 	}
+
 	.category {
 		font-size: 10px;
 		font-family: 'Epilogue', sans-serif;
 		font-weight: 900;
 		color: #991b1b;
 		text-transform: uppercase;
+		display: block;
+		margin-bottom: 4px;
 	}
 	h3 {
 		font-family: 'Epilogue', sans-serif;
 		font-size: 20px;
 		font-weight: 800;
 		text-transform: uppercase;
-		margin-top: 4px;
+		line-height: 1.2;
+		color: #1c1917;
 	}
+
 	.price-row {
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-end;
 		margin-top: 24px;
+		width: 100%;
+	}
+	.price-label {
+		font-size: 12px;
+		font-family: 'Work Sans', sans-serif;
+		font-weight: 700;
+		color: #a8a29e;
 	}
 	.price {
 		font-size: 30px;
@@ -196,6 +409,7 @@ const ProductCard = styled.button`
 	}
 `
 
+// --- CARRINHO LATERAL ---
 const CartSidebar = styled.aside`
 	width: 450px;
 	background-color: #ffffff;
@@ -204,17 +418,121 @@ const CartSidebar = styled.aside`
 	flex-direction: column;
 	z-index: 20;
 	box-shadow: -10px 0 30px rgba(0, 0, 0, 0.05);
+	flex-shrink: 0;
 `
 
 const CartHeader = styled.div`
 	padding: 24px;
 	border-bottom: 1px solid #f5f5f4;
 	background-color: rgba(250, 250, 249, 0.5);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-shrink: 0;
+
 	h2 {
 		font-family: 'Epilogue', sans-serif;
 		font-size: 24px;
 		font-weight: 900;
 		text-transform: uppercase;
+		color: #1c1917;
+		letter-spacing: -0.05em;
+	}
+	p {
+		font-size: 11px;
+		font-family: 'Epilogue', sans-serif;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		color: #78716c;
+		font-weight: 700;
+	}
+
+	.delete-btn {
+		background: none;
+		border: none;
+		color: #d6d3d1;
+		cursor: pointer;
+		transition: color 0.2s;
+		&:hover {
+			color: #dc2626;
+		}
+		span {
+			font-size: 30px;
+		}
+	}
+`
+
+const CartItemsList = styled.div`
+	flex: 1;
+	overflow-y: auto; /* Rolagem independente para o carrinho */
+	padding: 24px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+
+	&::-webkit-scrollbar {
+		width: 4px;
+	}
+	&::-webkit-scrollbar-thumb {
+		background-color: #e7e5e4;
+		border-radius: 4px;
+	}
+`
+
+const CartItem = styled.div`
+	padding: 16px;
+	background-color: #fafaf9;
+	border-radius: 8px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+
+	.details {
+		h4 {
+			font-family: 'Epilogue', sans-serif;
+			font-size: 16px;
+			font-weight: 900;
+			text-transform: uppercase;
+			color: #292524;
+		}
+		p {
+			font-size: 14px;
+			color: #78716c;
+			font-weight: 700;
+			margin-top: 4px;
+		}
+	}
+
+	.actions {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 8px;
+		p.total {
+			font-family: 'Epilogue', sans-serif;
+			font-weight: 900;
+			font-size: 18px;
+			color: #1c1917;
+		}
+		.controls {
+			display: flex;
+			gap: 8px;
+			button {
+				width: 40px;
+				height: 40px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background-color: #ffffff;
+				border: 1px solid #e7e5e4;
+				border-radius: 6px;
+				color: #57534e;
+				cursor: pointer;
+				&:hover {
+					background-color: #f5f5f4;
+				}
+			}
+		}
 	}
 `
 
@@ -222,6 +540,10 @@ const CartFooter = styled.div`
 	padding: 24px;
 	background-color: #ffffff;
 	border-top: 2px solid #f5f5f4;
+	flex-shrink: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
 
 	.total-box {
 		background-color: #1c1917;
@@ -231,7 +553,7 @@ const CartFooter = styled.div`
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-end;
-		margin-bottom: 24px;
+		box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 
 		.label {
 			font-size: 10px;
@@ -241,11 +563,38 @@ const CartFooter = styled.div`
 			letter-spacing: 0.1em;
 			opacity: 0.6;
 		}
+		.discount {
+			font-size: 10px;
+			font-family: 'Epilogue', sans-serif;
+			font-weight: 700;
+			text-transform: uppercase;
+			letter-spacing: 0.1em;
+			color: #f87171;
+			margin-top: 4px;
+		}
 		.value {
 			font-size: 48px;
 			font-family: 'Epilogue', sans-serif;
 			font-weight: 900;
 			line-height: 1;
+		}
+	}
+
+	.payment-section {
+		p.title {
+			font-size: 10px;
+			font-family: 'Epilogue', sans-serif;
+			font-weight: 900;
+			color: #a8a29e;
+			text-transform: uppercase;
+			letter-spacing: 0.2em;
+			margin-bottom: 12px;
+			margin-left: 4px;
+		}
+		.grid {
+			display: grid;
+			grid-template-columns: repeat(4, 1fr);
+			gap: 12px;
 		}
 	}
 
@@ -266,20 +615,105 @@ const CartFooter = styled.div`
 		justify-content: center;
 		align-items: center;
 		gap: 12px;
+		box-shadow: 0 10px 30px rgba(97, 0, 5, 0.3);
+		transition: all 0.2s;
+
+		&:hover {
+			filter: brightness(1.1);
+		}
+		&:active {
+			transform: scale(0.98);
+		}
+		span {
+			font-size: 24px;
+			transition: transform 0.2s;
+		}
+		&:hover span {
+			transform: translateX(4px);
+		}
 	}
 `
 
-// --- COMPONENTE ---
-export const VendasView = () => {
+const PaymentButton = styled.button`
+	aspect-ratio: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	background-color: ${(props) => (props.$active ? '#fef2f2' : '#ffffff')};
+	border: 2px solid ${(props) => (props.$active ? '#610005' : '#e7e5e4')};
+	border-radius: 12px;
+	cursor: pointer;
+	transition: all 0.2s;
+
+	&:hover {
+		border-color: #610005;
+		background-color: #fef2f2;
+	}
+	&:active {
+		transform: scale(0.95);
+	}
+
+	span.icon {
+		font-size: 30px;
+		margin-bottom: 4px;
+		color: ${(props) => (props.$active ? '#610005' : '#a8a29e')};
+		transition: color 0.2s;
+	}
+	span.text {
+		font-size: 10px;
+		font-family: 'Epilogue', sans-serif;
+		font-weight: 900;
+		text-transform: uppercase;
+		color: ${(props) => (props.$active ? '#610005' : '#1c1917')};
+		transition: color 0.2s;
+	}
+
+	&:hover span.icon,
+	&:hover span.text {
+		color: #610005;
+	}
+`
+
+// ==========================================
+// COMPONENTE PRINCIPAL
+// ==========================================
+
+export const SalesView = ({ navigate }) => {
+	const [pagamentoSelecionado, setPagamentoSelecionado] = useState('dinheiro')
+
 	return (
-		<VendasWrapper>
-			<CompactSidebar>
-				<LogoArea>
+		<Wrapper>
+			<Sidebar>
+				<SidebarHeader>
 					<h1>CarneUp</h1>
 					<p>Master Butcher</p>
-				</LogoArea>
-				{/* Adicionar ícones de navegação aqui */}
-			</CompactSidebar>
+				</SidebarHeader>
+				<Nav>
+					<NavItem href='#' onClick={() => navigate('sales')}>
+						<span className='material-symbols-outlined icon'>dashboard</span>
+						<span className='text'>Início</span>
+					</NavItem>
+					<NavItem href='#' $active>
+						<span className='material-symbols-outlined icon'>
+							point_of_sale
+						</span>
+						<span className='text'>Vendas</span>
+					</NavItem>
+				</Nav>
+				<SidebarFooter>
+					<div className='profile-box'>
+						<img
+							src='https://lh3.googleusercontent.com/aida-public/AB6AXuAfpZm9ef8_i11nasHAZDfJfV1PBVhNqwd3Cv0nxAfweHZbOtixrQnTQ_2GATUQGn9pnCduYVCTJj0wi6dhzmzj0q0qiUJGQifJCTNTtZBPZWjxshQ2BKoyr7YXe2_7WRjMt-1TvFQGFUi_DFL5Eue2BQu9Gg55yNB8V9dotM-ebWymTDIJIXp8gmwIw9ifH0u4iYG8N-79KGfpOmmUU17dwGQkJ7mQKA4QKwq5nxOmekLt5KFQRedtykVZRUiwHtjjc3pUigwEoLg'
+							alt='Operador'
+						/>
+						<div className='info'>
+							<p className='name'>Matheus S.</p>
+							<p className='role'>Operador</p>
+						</div>
+					</div>
+				</SidebarFooter>
+			</Sidebar>
 
 			<MainArea>
 				<Header>
@@ -292,6 +726,22 @@ export const VendasView = () => {
 						</span>
 						<input type='text' placeholder='PESQUISAR PRODUTO...' />
 					</div>
+					<div className='actions'>
+						<button className='caixa-btn'>
+							<span
+								className='material-symbols-outlined'
+								style={{ fontSize: '18px' }}
+							>
+								account_balance
+							</span>
+							Caixa
+						</button>
+						<div className='divider' />
+						<img
+							src='https://lh3.googleusercontent.com/aida-public/AB6AXuAbN4N9JVG2kPOiW0XGm82oEJ_M1ylsBPLvW4OnB_umj11o1FIThDhEP_2XNgGbM0X1Q6_ADrv7WkPvOM1ed5BfwfieqtqfBs124qHrV5mW9oayirHYRXTnpVysYDSBASL6jFjZiIjpiBj8YUN0owMk8D_3yUH1igJY4-ByxzSxJdszM6BzdBJAI8bbc3lH5yfaJLV8Ur7skT1vVHBbJWa1Ds2tzQjYhyFTHMP76pc4uOqB8SM2V8l9sB5Q1UqDeDbRD3jypmT8f5w'
+							alt='Avatar'
+						/>
+					</div>
 				</Header>
 
 				<ContentArea>
@@ -301,53 +751,179 @@ export const VendasView = () => {
 							<button className='inactive'>BOVINO</button>
 							<button className='inactive'>SUÍNO</button>
 							<button className='inactive'>FRANGO</button>
+							<button className='inactive'>CORTES ESPECIAIS</button>
 						</Categories>
 
 						<ProductGrid>
 							<ProductCard>
-								<img
-									src='https://lh3.googleusercontent.com/aida-public/AB6AXuC84ad8Fmzd2bqdgT_W5PBpqhxtiUITlJ9RBl0MojB8HhALiMllTu7c9iK1Ia271QYrIs69BvI1eVchZvIQQAZjG1RRgGRfHy0JNhviJbhmOTu3oWvqn5jpgKws40VgSzmOGYUitSKyJqCMqCwH2vc1CN6o5QvgVTafcWP-mOVlwXJaRBuAhLCI72bvvFkbx9JMI8xZKEKAZTfNOTWGfESxEfXgmZK-evGWiY2AerdLEsdaZDIUT-SV1YsmFRYj1TTNyYUlGmER_bk'
-									alt='Picanha'
-								/>
+								<div className='img-wrapper'>
+									<img
+										src='https://lh3.googleusercontent.com/aida-public/AB6AXuC84ad8Fmzd2bqdgT_W5PBpqhxtiUITlJ9RBl0MojB8HhALiMllTu7c9iK1Ia271QYrIs69BvI1eVchZvIQQAZjG1RRgGRfHy0JNhviJbhmOTu3oWvqn5jpgKws40VgSzmOGYUitSKyJqCMqCwH2vc1CN6o5QvgVTafcWP-mOVlwXJaRBuAhLCI72bvvFkbx9JMI8xZKEKAZTfNOTWGfESxEfXgmZK-evGWiY2AerdLEsdaZDIUT-SV1YsmFRYj1TTNyYUlGmER_bk'
+										alt='Picanha Maturatta'
+									/>
+								</div>
 								<div className='info'>
 									<div>
 										<span className='category'>Bovino</span>
 										<h3>Picanha Maturatta</h3>
 									</div>
 									<div className='price-row'>
-										<span
-											style={{
-												fontSize: '12px',
-												fontWeight: 'bold',
-												color: '#a8a29e',
-											}}
-										>
-											R$ / KG
-										</span>
+										<span className='price-label'>R$ / KG</span>
 										<span className='price'>124,50</span>
 									</div>
 								</div>
 							</ProductCard>
-							{/* Replicar o ProductCard para os outros itens */}
+
+							<ProductCard>
+								<div className='img-wrapper'>
+									<img
+										src='https://lh3.googleusercontent.com/aida-public/AB6AXuCZxWh1EL-cZEja1sjsigHMTCspchHj61ggo23tHmHBZuPZwrt3Mw4-n-NWJ6LTDce7tziAHJ8KQ66a9i8Vp-5lMjAzJuCTf0hS0zW_7GX_koJHBXKWAwa5xUixAe8J-mZtdSVF3XIDmL97uXXreQ33t1a8fv0nAFkZbqqAbDg1-2ZhzDzyUHvavUmWhOSOd1nSosWzAPcnhak88kPkVn9dEHQ2oJ3-N6sejrS_nc0APZ5dY9pLeGTJyL5SrIp-ithnv1LsfTb6UUM'
+										alt='Ribeye Premium'
+									/>
+								</div>
+								<div className='info'>
+									<div>
+										<span className='category'>Bovino</span>
+										<h3>Ribeye Premium</h3>
+									</div>
+									<div className='price-row'>
+										<span className='price-label'>R$ / KG</span>
+										<span className='price'>89,90</span>
+									</div>
+								</div>
+							</ProductCard>
+
+							<ProductCard>
+								<div className='img-wrapper'>
+									<img
+										src='https://lh3.googleusercontent.com/aida-public/AB6AXuAVSYHyMqu41HzoBI-ywOMthFeZF-UgldiAUVlW3gjSMtZJVuRJEYHDutTJq7woASF9406issI1ojtyU6aYxHMusUv4nnHXaUHe476kytBqjaiHlz-GYC_yQJ-mnIic-GWMjh9_GYCKVLo57NHXsmx9azmgKWTwSmRxwhNpAf6QQPBbCbUsPsPvWCnO0-x9AbskvEbfH7VQtWgI8--GJa81P8T6NsikBLVT5iPSj5M6t71eU4XrQ5z6U3T01UpZxVEu58yFNPDiL-E'
+										alt='T-Bone Porterhouse'
+									/>
+								</div>
+								<div className='info'>
+									<div>
+										<span className='category'>Bovino</span>
+										<h3>T-Bone Porterhouse</h3>
+									</div>
+									<div className='price-row'>
+										<span className='price-label'>R$ / KG</span>
+										<span className='price'>95,00</span>
+									</div>
+								</div>
+							</ProductCard>
 						</ProductGrid>
 					</ProductSection>
 
 					<CartSidebar>
 						<CartHeader>
-							<h2>Pedido Atual</h2>
+							<div>
+								<h2>Pedido Atual</h2>
+								<p>Mesa 04 • #88241</p>
+							</div>
+							<button className='delete-btn'>
+								<span className='material-symbols-outlined'>delete_sweep</span>
+							</button>
 						</CartHeader>
 
-						<div style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
-							{/* Lista de itens do carrinho */}
-						</div>
+						<CartItemsList>
+							<CartItem>
+								<div className='details'>
+									<h4>Picanha Maturatta</h4>
+									<p>1.450 kg × R$ 124,50</p>
+								</div>
+								<div className='actions'>
+									<p className='total'>R$ 180,52</p>
+									<div className='controls'>
+										<button>
+											<span className='material-symbols-outlined'>remove</span>
+										</button>
+										<button>
+											<span className='material-symbols-outlined'>add</span>
+										</button>
+									</div>
+								</div>
+							</CartItem>
+
+							<CartItem>
+								<div className='details'>
+									<h4>Ribeye Premium</h4>
+									<p>0.820 kg × R$ 89,90</p>
+								</div>
+								<div className='actions'>
+									<p className='total'>R$ 73,71</p>
+									<div className='controls'>
+										<button>
+											<span className='material-symbols-outlined'>remove</span>
+										</button>
+										<button>
+											<span className='material-symbols-outlined'>add</span>
+										</button>
+									</div>
+								</div>
+							</CartItem>
+						</CartItemsList>
 
 						<CartFooter>
 							<div className='total-box'>
 								<div>
 									<p className='label'>Valor Total</p>
+									<p className='discount'>Desconto: R$ 0,00</p>
 								</div>
 								<div className='value'>R$ 254,23</div>
 							</div>
+
+							<div className='payment-section'>
+								<p className='title'>Forma de Pagamento</p>
+								<div className='grid'>
+									<PaymentButton
+										$active={pagamentoSelecionado === 'pix'}
+										onClick={() => setPagamentoSelecionado('pix')}
+									>
+										<span className='material-symbols-outlined icon'>
+											qr_code
+										</span>
+										<span className='text'>PIX</span>
+									</PaymentButton>
+
+									<PaymentButton
+										$active={pagamentoSelecionado === 'dinheiro'}
+										onClick={() => setPagamentoSelecionado('dinheiro')}
+									>
+										<span
+											className='material-symbols-outlined icon'
+											style={
+												pagamentoSelecionado === 'dinheiro'
+													? { fontVariationSettings: "'FILL' 1" }
+													: {}
+											}
+										>
+											payments
+										</span>
+										<span className='text'>Dinheiro</span>
+									</PaymentButton>
+
+									<PaymentButton
+										$active={pagamentoSelecionado === 'credito'}
+										onClick={() => setPagamentoSelecionado('credito')}
+									>
+										<span className='material-symbols-outlined icon'>
+											credit_card
+										</span>
+										<span className='text'>Crédito</span>
+									</PaymentButton>
+
+									<PaymentButton
+										$active={pagamentoSelecionado === 'debito'}
+										onClick={() => setPagamentoSelecionado('debito')}
+									>
+										<span className='material-symbols-outlined icon'>
+											contactless
+										</span>
+										<span className='text'>Débito</span>
+									</PaymentButton>
+								</div>
+							</div>
+
 							<button className='finalize-btn'>
 								Finalizar Venda
 								<span className='material-symbols-outlined'>chevron_right</span>
@@ -356,6 +932,6 @@ export const VendasView = () => {
 					</CartSidebar>
 				</ContentArea>
 			</MainArea>
-		</VendasWrapper>
+		</Wrapper>
 	)
 }
