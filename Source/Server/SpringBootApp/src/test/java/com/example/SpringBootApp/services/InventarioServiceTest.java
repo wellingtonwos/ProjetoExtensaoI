@@ -5,7 +5,7 @@ import com.example.SpringBootApp.DTOs.CompraItemDTO;
 import com.example.SpringBootApp.exceptions.ResourceNotFoundException;
 import com.example.SpringBootApp.models.*;
 import com.example.SpringBootApp.repositories.CompraRepository;
-import com.example.SpringBootApp.repositories.ItemRepository;
+import com.example.SpringBootApp.repositories.MovimentacaoRepository;
 import com.example.SpringBootApp.repositories.ProdutoRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +28,7 @@ class InventarioServiceTest {
     private CompraRepository compraRepository;
 
     @Mock
-    private ItemRepository itemRepository;
+    private MovimentacaoRepository movimentacaoRepository;
 
     @Mock
     private ProdutoRepository produtoRepository;
@@ -82,7 +82,7 @@ class InventarioServiceTest {
         when(compraRepository.save(any(Compra.class))).thenReturn(savedCompra);
         when(produtoRepository.findById(1L)).thenReturn(Optional.of(produto1));
         when(produtoRepository.findById(2L)).thenReturn(Optional.of(produto2));
-        when(itemRepository.save(any(Movimentacao.class))).thenReturn(savedItem1, savedItem2);
+        when(movimentacaoRepository.save(any(Movimentacao.class))).thenReturn(savedItem1, savedItem2);
 
         // Act
         Compra result = inventarioService.createPurchase(compraDTO);
@@ -95,7 +95,7 @@ class InventarioServiceTest {
         verify(compraRepository).save(any(Compra.class));
         verify(produtoRepository, times(2)).findById(1L);
         verify(produtoRepository, times(2)).findById(2L);
-        verify(itemRepository, times(2)).save(any(Movimentacao.class));
+        verify(movimentacaoRepository, times(2)).save(any(Movimentacao.class));
     }
 
     @Test
@@ -125,7 +125,7 @@ class InventarioServiceTest {
 
         when(compraRepository.save(any(Compra.class))).thenReturn(savedCompra);
         when(produtoRepository.findById(1L)).thenReturn(Optional.of(produto));
-        when(itemRepository.save(any(Movimentacao.class))).thenReturn(savedItem);
+        when(movimentacaoRepository.save(any(Movimentacao.class))).thenReturn(savedItem);
 
         // Act
         Compra result = inventarioService.createPurchase(compraDTO);
@@ -150,7 +150,7 @@ class InventarioServiceTest {
         assertEquals("Product not found with id: 999", exception.getMessage());
         verify(produtoRepository).findById(999L);
         verify(compraRepository, never()).save(any());
-        verify(itemRepository, never()).save(any());
+        verify(movimentacaoRepository, never()).save(any());
     }
 
     @Test
@@ -173,7 +173,7 @@ class InventarioServiceTest {
         when(compraRepository.save(any(Compra.class))).thenReturn(savedCompra);
         when(produtoRepository.findById(1L)).thenReturn(Optional.of(produto));
 
-        when(itemRepository.save(any(Movimentacao.class))).thenAnswer(invocation -> {
+        when(movimentacaoRepository.save(any(Movimentacao.class))).thenAnswer(invocation -> {
             Movimentacao movimentacao = invocation.getArgument(0);
             assertEquals(new BigDecimal("10.5"), movimentacao.getQuantidade());
             assertEquals(new BigDecimal("45.90"), movimentacao.getPrecoUnitarioCompra());
@@ -201,7 +201,7 @@ class InventarioServiceTest {
 
         // Assert
         assertNotNull(result);
-        verify(itemRepository).save(any(Movimentacao.class));
+        verify(movimentacaoRepository).save(any(Movimentacao.class));
     }
 }
 

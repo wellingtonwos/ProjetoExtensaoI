@@ -7,7 +7,7 @@ import com.example.SpringBootApp.DTOs.CompraItemDTO;
 import com.example.SpringBootApp.exceptions.ResourceNotFoundException;
 import com.example.SpringBootApp.models.*;
 import com.example.SpringBootApp.repositories.CompraRepository;
-import com.example.SpringBootApp.repositories.ItemRepository;
+import com.example.SpringBootApp.repositories.MovimentacaoRepository;
 import com.example.SpringBootApp.repositories.ProdutoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class InventarioService {
 
     private final CompraRepository CompraRepository;
-    private final ItemRepository itemRepository;
+    private final MovimentacaoRepository movimentacaoRepository;
     private final ProdutoRepository ProdutoRepository;
 
     public Compra createPurchase(CompraCreateDTO purchaseDTO) {
@@ -52,7 +52,7 @@ public class InventarioService {
             Movimentacao.setVenda(null);
             Movimentacao.setTipoMovimentacao(MovementType.COMPRA);
 
-            items.add(itemRepository.save(Movimentacao));
+            items.add(movimentacaoRepository.save(Movimentacao));
         }
 
         savedPurchase.setItens(items);

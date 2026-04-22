@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Repository
-public interface ItemRepository extends JpaRepository<Movimentacao, Long> {
+public interface MovimentacaoRepository extends JpaRepository<Movimentacao, Long> {
     @Query("SELECT SUM(m.quantidade) FROM Movimentacao m WHERE m.compra.id = :purchaseId")
     BigDecimal sumQuantityByPurchaseId(@Param("purchaseId") Long purchaseId);
 

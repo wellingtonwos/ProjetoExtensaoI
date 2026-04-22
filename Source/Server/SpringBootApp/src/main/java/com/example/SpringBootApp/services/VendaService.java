@@ -11,7 +11,7 @@ import com.example.SpringBootApp.DTOs.VendCreateDTO;
 import com.example.SpringBootApp.DTOs.VendItemDTO;
 import com.example.SpringBootApp.exceptions.ResourceNotFoundException;
 import com.example.SpringBootApp.models.*;
-import com.example.SpringBootApp.repositories.ItemRepository;
+import com.example.SpringBootApp.repositories.MovimentacaoRepository;
 import com.example.SpringBootApp.repositories.ProdutoRepository;
 import com.example.SpringBootApp.repositories.CompraRepository;
 import com.example.SpringBootApp.repositories.VendaRepository;
@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class VendaService {
 
     private final VendaRepository vendaRepository;
-    private final ItemRepository itemRepository;
+    private final MovimentacaoRepository movimentacaoRepository;
     private final UsuarioRepository usuarioRepository;
     private final ProdutoRepository produtoRepository;
     private final CompraRepository compraRepository;
@@ -49,7 +49,7 @@ public class VendaService {
             Compra compra = compraRepository.findById(itemDTO.getPurchaseId())
                     .orElseThrow(() -> new ResourceNotFoundException("Compra not found with id: " + itemDTO.getPurchaseId()));
 
-            Movimentacao stockItem = itemRepository.findFirstByCompraIdAndProdutoIdAndVendaIsNull(compra.getId(), produto.getId());
+            Movimentacao stockItem = movimentacaoRepository.findFirstByCompraIdAndProdutoIdAndVendaIsNull(compra.getId(), produto.getId());
             
             if (stockItem == null) {
                 throw new ResourceNotFoundException("Lote de estoque não encontrado para a compra ID: " + compra.getId());
@@ -65,7 +65,7 @@ public class VendaService {
             movimentacao.setPrecoUnitarioVenda(stockItem.getPrecoUnitarioVenda());
             movimentacao.setPrecoUnitarioCompra(stockItem.getPrecoUnitarioCompra());
 
-            items.add(itemRepository.save(movimentacao));
+            items.add(movimentacaoRepository.save(movimentacao));
         }
 
         savedSale.setItens(items);
