@@ -3,6 +3,7 @@ package com.example.SpringBootApp.services;
 import com.example.SpringBootApp.DTOs.*;
 import com.example.SpringBootApp.exceptions.ResourceAlreadyExistsException;
 import com.example.SpringBootApp.exceptions.ResourceNotFoundException;
+import com.example.SpringBootApp.exceptions.BusinessException;
 import com.example.SpringBootApp.models.Marca;
 import com.example.SpringBootApp.models.Categoria;
 import com.example.SpringBootApp.models.Produto;
@@ -54,8 +55,12 @@ public class CatalogoService {
 	}
 
 	public Categoria createCategory(CategoriaCreateDTO CategoriaDTO) {
-		if (CategoriaRepository.existsByNome(CategoriaDTO.getName())) {
-			throw new ResourceAlreadyExistsException("Category name already exists");
+		String normalized = normalize(CategoriaDTO.getName());
+		List<Categoria> existing = CategoriaRepository.findAll();
+		for (Categoria c : existing) {
+			if (normalize(c.getNome()).equals(normalized)) {
+				throw new ResourceAlreadyExistsException("Category name already exists");
+			}
 		}
 
 		Categoria Categoria = new Categoria();
@@ -65,8 +70,12 @@ public class CatalogoService {
 	}
 
 	public Marca createBrand(MarcaCreateDTO MarcaDTO) {
-		if (MarcaRepository.existsByNome(MarcaDTO.getName())) {
-			throw new ResourceAlreadyExistsException("Brand name already exists");
+		String normalized = normalize(MarcaDTO.getName());
+		List<Marca> existing = MarcaRepository.findAll();
+		for (Marca m : existing) {
+			if (normalize(m.getNome()).equals(normalized)) {
+				throw new ResourceAlreadyExistsException("Brand name already exists");
+			}
 		}
 
 		Marca Marca = new Marca();
@@ -124,6 +133,71 @@ public class CatalogoService {
 		}
 
 		return ProdutoRepository.searchProductsWithStock(termo, pageable);
+	}
+
+	public Categoria updateCategory(Long id, CategoriaCreateDTO CategoriaDTO) {
+		Categoria categoria = CategoriaRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+
+		String normalized = normalize(CategoriaDTO.getName());
+		List<Categoria> existing = CategoriaRepository.findAll();
+		for (Categoria c : existing) {
+			if (!c.getId().equals(id) && normalize(c.getNome()).equals(normalized)) {
+				throw new ResourceAlreadyExistsException("Category name already exists");
+			}
+		}
+
+		categoria.setNome(CategoriaDTO.getName());
+		return CategoriaRepository.save(categoria);
+	}
+
+	public Marca updateBrand(Long id, MarcaCreateDTO MarcaDTO) {
+		Marca marca = MarcaRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Brand not found"));
+
+		String normalized = normalize(MarcaDTO.getName());
+		List<Marca> existing = MarcaRepository.findAll();
+		for (Marca m : existing) {
+			if (!m.getId().equals(id) && normalize(m.getNome()).equals(normalized)) {
+				throw new ResourceAlreadyExistsException("Brand name already exists");
+			}
+		}
+
+		marca.setNome(MarcaDTO.getName());
+		return MarcaRepository.save(marca);
+	}
+
+	public void deleteCategory(Long id) {
+		Categoria categoria = CategoriaRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+
+		boolean used = ProdutoRepository.findAll().stream().anyMatch(p ->
+				p.getCategoria() != null && p.getCategoria().getId().equals(id));
+		if (used) {
+			throw new BusinessException("Category is linked to products and cannot be deleted");
+		}
+
+		CategoriaRepository.delete(categoria);
+	}
+
+	public void deleteBrand(Long id) {
+		Marca marca = MarcaRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Brand not found"));
+
+		boolean used = ProdutoRepository.findAll().stream().anyMatch(p ->
+				p.getMarca() != null && p.getMarca().getId().equals(id));
+		if (used) {
+			throw new BusinessException("Brand is linked to products and cannot be deleted");
+		}
+
+		MarcaRepository.delete(marca);
+	}
+
+	private String normalize(String input) {
+		if (input == null) return "";
+		String normalized = java.text.Normalizer.normalize(input, java.text.Normalizer.Form.NFD);
+		normalized = normalized.replaceAll("\\p{M}", "");
+		return normalized.toLowerCase().trim();
 	}
 }
 

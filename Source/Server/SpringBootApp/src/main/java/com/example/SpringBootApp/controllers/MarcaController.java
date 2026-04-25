@@ -39,5 +39,17 @@ public class MarcaController {
         List<MarcaDTO> brands = CatalogoService.getAllBrands();
         return ResponseEntity.ok(brands);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateBrand(@PathVariable Long id, @Valid @RequestBody MarcaCreateDTO MarcaDTO) {
+        Marca updated = CatalogoService.updateBrand(id, MarcaDTO);
+        return ResponseEntity.ok().header("Location", "/brands/" + updated.getId()).build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteBrand(@PathVariable Long id) {
+        CatalogoService.deleteBrand(id);
+        return ResponseEntity.noContent().build();
+    }
 }
 

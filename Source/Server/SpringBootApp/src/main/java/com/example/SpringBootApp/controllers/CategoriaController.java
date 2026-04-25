@@ -39,5 +39,17 @@ public class CategoriaController {
         List<CategoriaDTO> categories = CatalogoService.getAllCategories();
         return ResponseEntity.ok(categories);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoriaCreateDTO CategoriaDTO) {
+        Categoria updated = CatalogoService.updateCategory(id, CategoriaDTO);
+        return ResponseEntity.ok().header("Location", "/categories/" + updated.getId()).build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCategory(@PathVariable Long id) {
+        CatalogoService.deleteCategory(id);
+        return ResponseEntity.noContent().build();
+    }
 }
 

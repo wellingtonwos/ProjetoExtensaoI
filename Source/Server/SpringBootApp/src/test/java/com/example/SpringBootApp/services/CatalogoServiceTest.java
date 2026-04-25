@@ -143,7 +143,7 @@ class CatalogoServiceTest {
         CategoriaCreateDTO categoriaDTO = new CategoriaCreateDTO("Suíno");
         Categoria expectedCategoria = new Categoria(1L, "Suíno", null);
 
-        when(categoriaRepository.existsByNome("Suíno")).thenReturn(false);
+        when(categoriaRepository.findAll()).thenReturn(new ArrayList<>());
         when(categoriaRepository.save(any(Categoria.class))).thenReturn(expectedCategoria);
 
         // Act
@@ -153,7 +153,7 @@ class CatalogoServiceTest {
         assertNotNull(result);
         assertEquals("Suíno", result.getNome());
 
-        verify(categoriaRepository).existsByNome("Suíno");
+        verify(categoriaRepository).findAll();
         verify(categoriaRepository).save(any(Categoria.class));
     }
 
@@ -162,14 +162,14 @@ class CatalogoServiceTest {
         // Arrange
         CategoriaCreateDTO categoriaDTO = new CategoriaCreateDTO("Bovino");
 
-        when(categoriaRepository.existsByNome("Bovino")).thenReturn(true);
+        when(categoriaRepository.findAll()).thenReturn(List.of(new Categoria(1L, "Bovino", null)));
 
         // Act & Assert
         ResourceAlreadyExistsException exception = assertThrows(ResourceAlreadyExistsException.class,
                 () -> catalogService.createCategory(categoriaDTO));
 
         assertEquals("Category name already exists", exception.getMessage());
-        verify(categoriaRepository).existsByNome("Bovino");
+        verify(categoriaRepository).findAll();
         verify(categoriaRepository, never()).save(any());
     }
 
@@ -179,7 +179,7 @@ class CatalogoServiceTest {
         MarcaCreateDTO marcaDTO = new MarcaCreateDTO("Sadia");
         Marca expectedMarca = new Marca(1L, "Sadia", null);
 
-        when(marcaRepository.existsByNome("Sadia")).thenReturn(false);
+        when(marcaRepository.findAll()).thenReturn(new ArrayList<>());
         when(marcaRepository.save(any(Marca.class))).thenReturn(expectedMarca);
 
         // Act
@@ -189,7 +189,7 @@ class CatalogoServiceTest {
         assertNotNull(result);
         assertEquals("Sadia", result.getNome());
 
-        verify(marcaRepository).existsByNome("Sadia");
+        verify(marcaRepository).findAll();
         verify(marcaRepository).save(any(Marca.class));
     }
 
@@ -198,14 +198,14 @@ class CatalogoServiceTest {
         // Arrange
         MarcaCreateDTO marcaDTO = new MarcaCreateDTO("Friboi");
 
-        when(marcaRepository.existsByNome("Friboi")).thenReturn(true);
+        when(marcaRepository.findAll()).thenReturn(List.of(new Marca(1L, "Friboi", null)));
 
         // Act & Assert
         ResourceAlreadyExistsException exception = assertThrows(ResourceAlreadyExistsException.class,
                 () -> catalogService.createBrand(marcaDTO));
 
         assertEquals("Brand name already exists", exception.getMessage());
-        verify(marcaRepository).existsByNome("Friboi");
+        verify(marcaRepository).findAll();
         verify(marcaRepository, never()).save(any());
     }
 
