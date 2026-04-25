@@ -22,8 +22,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.example.SpringBootApp.models.Movimentacao;
+import com.example.SpringBootApp.exceptions.BusinessException;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -168,6 +172,37 @@ class CompraControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidJson))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateCompraItem_ShouldReturn200_WhenValidInput() throws Exception {
+        setup();
+
+        String json = "{\"quantity\":1.0}";
+
+        Movimentacao updated = new Movimentacao();
+        updated.setId(10L);
+
+        when(inventarioService.updatePurchaseItem(eq(1L), eq(1L), any(BigDecimal.class))).thenReturn(updated);
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/purchases/1/items/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void updateCompraItem_ShouldReturn422_WhenStockNegative() throws Exception {
+        setup();
+
+        String json = "{\"quantity\":1.0}";
+
+        doThrow(new BusinessException("Stock would become negative")).when(inventarioService).updatePurchaseItem(eq(1L), eq(1L), any(BigDecimal.class));
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/purchases/1/items/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isUnprocessableEntity());
     }
 }
 

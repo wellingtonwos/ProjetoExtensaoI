@@ -31,5 +31,11 @@ public class CompraController {
         Compra Compra = InventarioService.createPurchase(purchaseDTO);
         return ResponseEntity.created(URI.create("/purchases/" + Compra.getId())).build();
     }
+
+    @PutMapping("/{purchaseId}/items/{productId}")
+    public ResponseEntity<?> updatePurchaseItem(@PathVariable Long purchaseId, @PathVariable Long productId, @Valid @RequestBody com.example.SpringBootApp.DTOs.CompraItemUpdateDTO updateDTO) {
+        InventarioService.updatePurchaseItem(purchaseId, productId, updateDTO.getQuantity());
+        return ResponseEntity.ok().build();
+    }
 }
 

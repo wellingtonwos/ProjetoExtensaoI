@@ -136,6 +136,37 @@ public class InventarioService {
                 .toList();
     }
 
+    public Movimentacao updatePurchaseItem(Long purchaseId, Long productId, BigDecimal newQuantity) {
+        if (newQuantity == null || newQuantity.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessException("Quantity must be positive");
+        }
+
+        Movimentacao purchaseMov = movimentacaoRepository.findFirstByCompraIdAndProdutoIdAndVendaIsNull(purchaseId, productId);
+        if (purchaseMov == null) {
+            throw new ResourceNotFoundException("Purchase item not found");
+        }
+
+        BigDecimal oldQuantity = purchaseMov.getQuantidade() != null ? purchaseMov.getQuantidade() : BigDecimal.ZERO;
+
+        List<Movimentacao> group = movimentacaoRepository.findByCompraIdAndProdutoId(purchaseId, productId);
+        BigDecimal groupSum = group.stream().map(m -> m.getQuantidade() != null ? m.getQuantidade() : BigDecimal.ZERO).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal groupAfter = groupSum.add(newQuantity.subtract(oldQuantity));
+        if (groupAfter.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessException("Cannot reduce purchase quantity below already sold quantity for this lot");
+        }
+
+        BigDecimal totalSum = movimentacaoRepository.sumQuantityByProdutoId(productId);
+        if (totalSum == null) totalSum = BigDecimal.ZERO;
+        BigDecimal totalAfter = totalSum.add(newQuantity.subtract(oldQuantity));
+        if (totalAfter.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessException("Stock would become negative");
+        }
+
+        purchaseMov.setQuantidade(newQuantity);
+        return movimentacaoRepository.save(purchaseMov);
+    }
+
 }
 
 

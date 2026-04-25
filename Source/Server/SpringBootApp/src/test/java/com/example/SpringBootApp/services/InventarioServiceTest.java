@@ -3,6 +3,7 @@ package com.example.SpringBootApp.services;
 import com.example.SpringBootApp.DTOs.CompraCreateDTO;
 import com.example.SpringBootApp.DTOs.CompraItemDTO;
 import com.example.SpringBootApp.exceptions.ResourceNotFoundException;
+import com.example.SpringBootApp.exceptions.BusinessException;
 import com.example.SpringBootApp.models.*;
 import com.example.SpringBootApp.repositories.CompraRepository;
 import com.example.SpringBootApp.repositories.MovimentacaoRepository;
@@ -206,6 +207,75 @@ class InventarioServiceTest {
         // Assert
         assertNotNull(result);
         verify(movimentacaoRepository).save(any(Movimentacao.class));
+    }
+
+    @Test
+    void updatePurchaseItem_ShouldUpdate_WhenStockOk() {
+        // Arrange
+        Produto produto = new Produto();
+        produto.setId(1L);
+
+        Movimentacao purchaseMov = new Movimentacao();
+        purchaseMov.setId(10L);
+        purchaseMov.setQuantidade(new BigDecimal("10"));
+        purchaseMov.setProduto(produto);
+
+        when(movimentacaoRepository.findFirstByCompraIdAndProdutoIdAndVendaIsNull(1L, 1L)).thenReturn(purchaseMov);
+        when(movimentacaoRepository.findByCompraIdAndProdutoId(1L, 1L)).thenReturn(List.of(purchaseMov));
+        when(movimentacaoRepository.sumQuantityByProdutoId(1L)).thenReturn(new BigDecimal("10"));
+        when(movimentacaoRepository.save(any(Movimentacao.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        Movimentacao result = inventarioService.updatePurchaseItem(1L, 1L, new BigDecimal("5"));
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(new BigDecimal("5"), result.getQuantidade());
+        verify(movimentacaoRepository).save(any(Movimentacao.class));
+    }
+
+    @Test
+    void updatePurchaseItem_ShouldThrow_WhenGlobalStockNegative() {
+        // Arrange
+        Produto produto = new Produto();
+        produto.setId(1L);
+
+        Movimentacao purchaseMov = new Movimentacao();
+        purchaseMov.setId(11L);
+        purchaseMov.setQuantidade(new BigDecimal("5"));
+        purchaseMov.setProduto(produto);
+
+        when(movimentacaoRepository.findFirstByCompraIdAndProdutoIdAndVendaIsNull(1L, 1L)).thenReturn(purchaseMov);
+        when(movimentacaoRepository.findByCompraIdAndProdutoId(1L, 1L)).thenReturn(List.of(purchaseMov));
+        when(movimentacaoRepository.sumQuantityByProdutoId(1L)).thenReturn(new BigDecimal("3"));
+
+        // Act & Assert
+        assertThrows(BusinessException.class, () -> inventarioService.updatePurchaseItem(1L, 1L, new BigDecimal("1")));
+    }
+
+    @Test
+    void updatePurchaseItem_ShouldThrow_WhenLotSalesExceedNewQuantity() {
+        // Arrange
+        Produto produto = new Produto();
+        produto.setId(1L);
+
+        Movimentacao purchaseMov = new Movimentacao();
+        purchaseMov.setId(12L);
+        purchaseMov.setQuantidade(new BigDecimal("10"));
+        purchaseMov.setProduto(produto);
+
+        Movimentacao saleMov = new Movimentacao();
+        saleMov.setId(13L);
+        saleMov.setQuantidade(new BigDecimal("-8"));
+        saleMov.setVenda(new Venda());
+        saleMov.setProduto(produto);
+
+        lenient().when(movimentacaoRepository.findFirstByCompraIdAndProdutoIdAndVendaIsNull(1L, 1L)).thenReturn(purchaseMov);
+        lenient().when(movimentacaoRepository.findByCompraIdAndProdutoId(1L, 1L)).thenReturn(List.of(purchaseMov, saleMov));
+        lenient().when(movimentacaoRepository.sumQuantityByProdutoId(1L)).thenReturn(new BigDecimal("2"));
+
+        // Act & Assert
+        assertThrows(BusinessException.class, () -> inventarioService.updatePurchaseItem(1L, 1L, new BigDecimal("5")));
     }
 }
 
