@@ -9,6 +9,10 @@ import com.example.SpringBootApp.models.Produto;
 import com.example.SpringBootApp.repositories.MarcaRepository;
 import com.example.SpringBootApp.repositories.CategoriaRepository;
 import com.example.SpringBootApp.repositories.ProdutoRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -109,6 +113,17 @@ public class CatalogoService {
 			dto.setUnitMeasurement(Produto.getUnidadeMedida() != null ? Produto.getUnidadeMedida().name() : null);
 			return dto;
 		}).collect(Collectors.toList());
+	}
+
+	public Page<ProdutoQuantidadeEstoqueDTO> searchProductsWithStock(String query, int page) {
+		String termo = (query == null) ? "" : query.trim();
+		Pageable pageable = PageRequest.of(page, 10, Sort.by("nome").ascending());
+
+		if (termo.length() < 2) {
+			return Page.empty(pageable);
+		}
+
+		return ProdutoRepository.searchProductsWithStock(termo, pageable);
 	}
 }
 

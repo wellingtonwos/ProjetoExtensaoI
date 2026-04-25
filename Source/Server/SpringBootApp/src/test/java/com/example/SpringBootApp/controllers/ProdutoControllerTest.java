@@ -3,6 +3,7 @@ package com.example.SpringBootApp.controllers;
 import com.example.SpringBootApp.DTOs.ProdutoCreateDTO;
 import com.example.SpringBootApp.DTOs.ProdutoResponseDTO;
 import com.example.SpringBootApp.DTOs.ProdutoComCompraEmEstoqueDTO;
+import com.example.SpringBootApp.DTOs.ProdutoQuantidadeEstoqueDTO;
 import com.example.SpringBootApp.models.Produto;
 import com.example.SpringBootApp.models.UnitMeasurement;
 import com.example.SpringBootApp.exceptions.ResourceAlreadyExistsException;
@@ -16,14 +17,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -275,6 +282,59 @@ class ProdutoControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void searchProductsWithStock_ShouldReturn200_WithPaginatedProducts() throws Exception {
+        setup();
+
+        // Arrange
+        ProdutoQuantidadeEstoqueDTO produto = new ProdutoQuantidadeEstoqueDTO(
+                1L,
+                "Picanha",
+                "001001",
+                "Friboi",
+                new BigDecimal("15.5")
+        );
+
+        Page<ProdutoQuantidadeEstoqueDTO> resultPage = new PageImpl<>(
+                List.of(produto),
+                PageRequest.of(0, 10),
+                1
+        );
+
+        when(catalogService.searchProductsWithStock("pi", 0)).thenReturn(resultPage);
+
+        // Act & Assert
+        mockMvc.perform(get("/products/search")
+                        .param("q", "pi")
+                        .param("page", "0"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(1))
+                .andExpect(jsonPath("$.content[0].name").value("Picanha"))
+                .andExpect(jsonPath("$.content[0].code").value("001001"))
+                .andExpect(jsonPath("$.content[0].brandName").value("Friboi"))
+                .andExpect(jsonPath("$.content[0].stockQuantity").value(15.5))
+                .andExpect(jsonPath("$.number").value(0))
+                .andExpect(jsonPath("$.size").value(10));
+
+        verify(catalogService).searchProductsWithStock(eq("pi"), eq(0));
+    }
+
+    @Test
+    void searchProductsWithStock_ShouldReturn200_WithEmptyPage_WhenQueryIsMissing() throws Exception {
+        setup();
+
+        // Arrange
+        when(catalogService.searchProductsWithStock(null, 0)).thenReturn(Page.empty(PageRequest.of(0, 10)));
+
+        // Act & Assert
+        mockMvc.perform(get("/products/search"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content").isEmpty());
+
+        verify(catalogService).searchProductsWithStock(null, 0);
     }
 }
 

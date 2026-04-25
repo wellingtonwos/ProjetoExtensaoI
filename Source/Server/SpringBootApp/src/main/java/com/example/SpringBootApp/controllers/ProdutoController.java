@@ -2,6 +2,7 @@ package com.example.SpringBootApp.controllers;
 
 import com.example.SpringBootApp.DTOs.ProdutoCreateDTO;
 import com.example.SpringBootApp.DTOs.ProdutoComCompraEmEstoqueDTO;
+import com.example.SpringBootApp.DTOs.ProdutoQuantidadeEstoqueDTO;
 import com.example.SpringBootApp.models.Produto;
 import com.example.SpringBootApp.services.CatalogoService;
 import com.example.SpringBootApp.services.InventarioService;
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,6 +50,14 @@ public class ProdutoController {
     @GetMapping
     public ResponseEntity<List<ProdutoResponseDTO>> getAllProducts() {
         List<ProdutoResponseDTO> products = CatalogoService.getAllProducts();
+        return ResponseEntity.ok(products);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<ProdutoQuantidadeEstoqueDTO>> searchProductsWithStock(
+            @RequestParam(value = "q", required = false) String q,
+            @RequestParam(value = "page", defaultValue = "0") int page) {
+        Page<ProdutoQuantidadeEstoqueDTO> products = CatalogoService.searchProductsWithStock(q, page);
         return ResponseEntity.ok(products);
     }
 }

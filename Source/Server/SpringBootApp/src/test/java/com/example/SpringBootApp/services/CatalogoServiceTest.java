@@ -3,6 +3,7 @@ package com.example.SpringBootApp.services;
 import com.example.SpringBootApp.DTOs.MarcaCreateDTO;
 import com.example.SpringBootApp.DTOs.CategoriaCreateDTO;
 import com.example.SpringBootApp.DTOs.ProdutoCreateDTO;
+import com.example.SpringBootApp.DTOs.ProdutoQuantidadeEstoqueDTO;
 import com.example.SpringBootApp.exceptions.ResourceAlreadyExistsException;
 import com.example.SpringBootApp.exceptions.ResourceNotFoundException;
 import com.example.SpringBootApp.models.Marca;
@@ -17,10 +18,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.mockito.ArgumentCaptor;
 
 import java.util.Optional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -200,6 +207,46 @@ class CatalogoServiceTest {
         assertEquals("Brand name already exists", exception.getMessage());
         verify(marcaRepository).existsByNome("Friboi");
         verify(marcaRepository, never()).save(any());
+    }
+
+    @Test
+    void searchProductsWithStock_ShouldReturnEmptyPage_WhenQueryHasLessThanTwoCharacters() {
+        // Act
+        Page<ProdutoQuantidadeEstoqueDTO> result = catalogService.searchProductsWithStock("a", 0);
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(produtoRepository, never()).searchProductsWithStock(anyString(), any(Pageable.class));
+    }
+
+    @Test
+    void searchProductsWithStock_ShouldUseTrimmedQueryAndPagination_WhenQueryIsValid() {
+        // Arrange
+        ProdutoQuantidadeEstoqueDTO dto = new ProdutoQuantidadeEstoqueDTO(
+                1L,
+                "Picanha",
+                "001001",
+                "Friboi",
+                new BigDecimal("10.50")
+        );
+        Page<ProdutoQuantidadeEstoqueDTO> expectedPage = new PageImpl<>(List.of(dto));
+
+        when(produtoRepository.searchProductsWithStock(eq("pi"), any(Pageable.class))).thenReturn(expectedPage);
+
+        // Act
+        Page<ProdutoQuantidadeEstoqueDTO> result = catalogService.searchProductsWithStock("  pi  ", 1);
+
+        // Assert
+        assertEquals(expectedPage, result);
+
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        verify(produtoRepository).searchProductsWithStock(eq("pi"), pageableCaptor.capture());
+
+        Pageable pageable = pageableCaptor.getValue();
+        assertEquals(1, pageable.getPageNumber());
+        assertEquals(10, pageable.getPageSize());
+        assertEquals(Sort.by("nome").ascending(), pageable.getSort());
     }
 }
 
