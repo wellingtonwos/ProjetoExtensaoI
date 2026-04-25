@@ -2,8 +2,7 @@ package com.example.SpringBootApp.DTOs;
 
 import com.example.SpringBootApp.models.UnitMeasurement;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,7 +22,17 @@ public class ProdutoCreateDTO {
 
     @Schema(description = "Unique Produto code", example = "000001")
     @NotNull(message = "Code is required")
+    @Pattern(regexp = "^[A-Za-z0-9]{6}$", message = "Code must be exactly 6 alphanumeric characters")
     private String code;
+
+    @Schema(description = "Is perishable", example = "false")
+    @NotNull(message = "Perecivel is required")
+    private Boolean perecivel;
+
+    @Schema(description = "Sale price", example = "50.00")
+    @NotNull(message = "PrecoVenda is required")
+    @DecimalMin(value = "0.0", inclusive = true, message = "PrecoVenda must be >= 0")
+    private java.math.BigDecimal precoVenda;
 
     @Schema(description = "Categoria ID", example = "1")
     @NotNull(message = "Categoria ID is required")

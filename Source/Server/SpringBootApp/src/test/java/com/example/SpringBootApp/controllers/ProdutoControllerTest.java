@@ -63,7 +63,7 @@ class ProdutoControllerTest {
         setup();
 
         // Arrange
-        ProdutoCreateDTO request = new ProdutoCreateDTO("Picanha", UnitMeasurement.KG, "001001", 1L, 1L);
+        ProdutoCreateDTO request = new ProdutoCreateDTO("Picanha", UnitMeasurement.KG, "001001", false, new java.math.BigDecimal("10.00"), 1L, 1L);
         Produto savedProduto = new Produto();
         savedProduto.setId(1L);
         savedProduto.setNome("Picanha");
@@ -86,7 +86,7 @@ class ProdutoControllerTest {
         setup();
 
         // Arrange
-        ProdutoCreateDTO request = new ProdutoCreateDTO("Picanha", UnitMeasurement.KG, "001001", 1L, 1L);
+        ProdutoCreateDTO request = new ProdutoCreateDTO("Picanha", UnitMeasurement.KG, "001001", false, new java.math.BigDecimal("10.00"), 1L, 1L);
 
         when(catalogService.createProducts(any(ProdutoCreateDTO.class)))
                 .thenThrow(new ResourceAlreadyExistsException("Product code already exists"));
@@ -105,7 +105,7 @@ class ProdutoControllerTest {
         setup();
 
         // Arrange
-        ProdutoCreateDTO request = new ProdutoCreateDTO("Picanha", UnitMeasurement.KG, "001001", 999L, 1L);
+        ProdutoCreateDTO request = new ProdutoCreateDTO("Picanha", UnitMeasurement.KG, "001001", false, new java.math.BigDecimal("10.00"), 999L, 1L);
 
         when(catalogService.createProducts(any(ProdutoCreateDTO.class)))
                 .thenThrow(new ResourceNotFoundException("Category not found"));
@@ -124,7 +124,7 @@ class ProdutoControllerTest {
         setup();
 
         // Arrange
-        ProdutoCreateDTO request = new ProdutoCreateDTO("Picanha", UnitMeasurement.KG, "001001", 1L, 999L);
+        ProdutoCreateDTO request = new ProdutoCreateDTO("Picanha", UnitMeasurement.KG, "001001", false, new java.math.BigDecimal("10.00"), 1L, 999L);
 
         when(catalogService.createProducts(any(ProdutoCreateDTO.class)))
                 .thenThrow(new ResourceNotFoundException("Brand not found"));

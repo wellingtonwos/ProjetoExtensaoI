@@ -60,7 +60,20 @@ public class ProdutoController {
         Page<ProdutoQuantidadeEstoqueDTO> products = CatalogoService.searchProductsWithStock(q, page);
         return ResponseEntity.ok(products);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateProduct(@PathVariable Long id, @Valid @RequestBody ProdutoCreateDTO productDTO) {
+        Produto updated = CatalogoService.updateProduct(id, productDTO);
+        return ResponseEntity.ok().location(URI.create("/products/" + updated.getId())).build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
+        CatalogoService.deleteProduct(id);
+        return ResponseEntity.noContent().build();
+    }
 }
+
 
 
 

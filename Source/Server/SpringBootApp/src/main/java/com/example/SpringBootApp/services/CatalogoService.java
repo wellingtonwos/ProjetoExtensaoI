@@ -10,6 +10,7 @@ import com.example.SpringBootApp.models.Produto;
 import com.example.SpringBootApp.repositories.MarcaRepository;
 import com.example.SpringBootApp.repositories.CategoriaRepository;
 import com.example.SpringBootApp.repositories.ProdutoRepository;
+import com.example.SpringBootApp.repositories.MovimentacaoRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,21 +34,30 @@ public class CatalogoService {
 
 	private final MarcaRepository MarcaRepository;
 
+	private final MovimentacaoRepository MovimentacaoRepository;
+
 	public Produto createProducts(ProdutoCreateDTO productDTO) {
+		String code = productDTO.getCode();
+		if (code == null || !code.matches("^[A-Za-z0-9]{6}$")) {
+			throw new BusinessException("Product code must be exactly 6 alphanumeric characters");
+		}
+
 		Categoria Categoria = CategoriaRepository.findById(productDTO.getCategoryId())
 				.orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
 		Marca Marca = MarcaRepository.findById(productDTO.getBrandId())
 				.orElseThrow(() -> new ResourceNotFoundException("Brand not found"));
 
-		if (ProdutoRepository.existsByCodigo(productDTO.getCode())) {
+		if (ProdutoRepository.existsByCodigo(code)) {
 			throw new ResourceAlreadyExistsException("Product code already exists");
 		}
 
 		Produto Produto = new Produto();
 		Produto.setNome(productDTO.getName());
 		Produto.setUnidadeMedida(productDTO.getUnitMeasurement());
-		Produto.setCodigo(productDTO.getCode());
+		Produto.setCodigo(code);
+		Produto.setPerecivel(productDTO.getPerecivel());
+		Produto.setPrecoVenda(productDTO.getPrecoVenda());
 		Produto.setCategoria(Categoria);
 		Produto.setMarca(Marca);
 
@@ -133,6 +143,48 @@ public class CatalogoService {
 		}
 
 		return ProdutoRepository.searchProductsWithStock(termo, pageable);
+	}
+
+	public Produto updateProduct(Long id, ProdutoCreateDTO productDTO) {
+		Produto produto = ProdutoRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+		String code = productDTO.getCode();
+		if (code == null || !code.matches("^[A-Za-z0-9]{6}$")) {
+			throw new BusinessException("Product code must be exactly 6 alphanumeric characters");
+		}
+
+		if (!code.equals(produto.getCodigo()) && ProdutoRepository.existsByCodigo(code)) {
+			throw new ResourceAlreadyExistsException("Product code already exists");
+		}
+
+		Categoria categoria = CategoriaRepository.findById(productDTO.getCategoryId())
+				.orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+
+		Marca marca = MarcaRepository.findById(productDTO.getBrandId())
+				.orElseThrow(() -> new ResourceNotFoundException("Brand not found"));
+
+		produto.setNome(productDTO.getName());
+		produto.setUnidadeMedida(productDTO.getUnitMeasurement());
+		produto.setCodigo(code);
+		produto.setPerecivel(productDTO.getPerecivel());
+		produto.setPrecoVenda(productDTO.getPrecoVenda());
+		produto.setCategoria(categoria);
+		produto.setMarca(marca);
+
+		return ProdutoRepository.save(produto);
+	}
+
+	public void deleteProduct(Long id) {
+		Produto produto = ProdutoRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+		boolean used = MovimentacaoRepository.existsByProdutoId(id);
+		if (used) {
+			throw new BusinessException("Product is linked to movimentacoes and cannot be deleted");
+		}
+
+		ProdutoRepository.delete(produto);
 	}
 
 	public Categoria updateCategory(Long id, CategoriaCreateDTO CategoriaDTO) {

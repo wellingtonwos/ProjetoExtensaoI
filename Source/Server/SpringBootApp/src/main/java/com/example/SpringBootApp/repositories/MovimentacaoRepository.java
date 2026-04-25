@@ -17,5 +17,7 @@ public interface MovimentacaoRepository extends JpaRepository<Movimentacao, Long
     List<Movimentacao> findByCompraIdAndProdutoId(Long purchaseId, Long productId);
 
     Movimentacao findFirstByCompraIdAndProdutoIdAndVendaIsNull(Long purchaseId, Long productId);
+
+    boolean existsByProdutoId(Long produtoId);
 }
 

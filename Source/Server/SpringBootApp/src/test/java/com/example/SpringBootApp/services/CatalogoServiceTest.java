@@ -50,7 +50,7 @@ class CatalogoServiceTest {
     @Test
     void createProduto_ShouldReturnProduto_WhenValidInput() {
         // Arrange
-        ProdutoCreateDTO produtoDTO = new ProdutoCreateDTO("Picanha", UnitMeasurement.KG, "000001", 1L, 1L);
+        ProdutoCreateDTO produtoDTO = new ProdutoCreateDTO("Picanha", UnitMeasurement.KG, "000001", false, new java.math.BigDecimal("50.00"), 1L, 1L);
         Categoria categoria = new Categoria(1L, "Bovino", null);
         Marca marca = new Marca(1L, "Friboi", null);
         Produto expectedProduto = new Produto(1L, "Picanha", UnitMeasurement.KG, "000001", false, new BigDecimal("50.00"), categoria, marca, new ArrayList<>());
@@ -80,7 +80,7 @@ class CatalogoServiceTest {
     @Test
     void createProduto_ShouldThrowException_WhenCategoryNotFound() {
         // Arrange
-        ProdutoCreateDTO produtoDTO = new ProdutoCreateDTO("Picanha", UnitMeasurement.KG, "000001", 999L, 1L);
+        ProdutoCreateDTO produtoDTO = new ProdutoCreateDTO("Picanha", UnitMeasurement.KG, "000001", false, new java.math.BigDecimal("50.00"), 999L, 1L);
 
         when(categoriaRepository.findById(999L)).thenReturn(Optional.empty());
 
@@ -98,7 +98,7 @@ class CatalogoServiceTest {
     @Test
     void createProduto_ShouldThrowException_WhenBrandNotFound() {
         // Arrange
-        ProdutoCreateDTO produtoDTO = new ProdutoCreateDTO("Picanha", UnitMeasurement.KG, "000001", 1L, 999L);
+        ProdutoCreateDTO produtoDTO = new ProdutoCreateDTO("Picanha", UnitMeasurement.KG, "000001", false, new java.math.BigDecimal("50.00"), 1L, 999L);
         Categoria categoria = new Categoria(1L, "Bovino", null);
 
         when(categoriaRepository.findById(1L)).thenReturn(Optional.of(categoria));
@@ -118,7 +118,7 @@ class CatalogoServiceTest {
     @Test
     void createProduto_ShouldThrowException_WhenCodeAlreadyExists() {
         // Arrange
-        ProdutoCreateDTO produtoDTO = new ProdutoCreateDTO("Picanha", UnitMeasurement.KG, "000001", 1L, 1L);
+        ProdutoCreateDTO produtoDTO = new ProdutoCreateDTO("Picanha", UnitMeasurement.KG, "000001", false, new java.math.BigDecimal("50.00"), 1L, 1L);
         Categoria categoria = new Categoria(1L, "Bovino", null);
         Marca marca = new Marca(1L, "Friboi", null);
 
