@@ -5,6 +5,7 @@ import com.example.SpringBootApp.DTOs.LoginDTO;
 import com.example.SpringBootApp.DTOs.MessageResponseDTO;
 import com.example.SpringBootApp.DTOs.PasswordRecoveryRequestDTO;
 import com.example.SpringBootApp.DTOs.ResetPasswordDTO;
+import com.example.SpringBootApp.DTOs.ValidateRecoveryCodeDTO;
 import com.example.SpringBootApp.exceptions.ResourceNotFoundException;
 import com.example.SpringBootApp.infra.JwtTokenProvider;
 import com.example.SpringBootApp.models.RecuperacaoSenhaToken;
@@ -145,6 +146,21 @@ public class AuthService {
         log.info("Password reset successful for user: {} ({})", usuario.getNome(), usuario.getEmail());
 
         return new MessageResponseDTO("Password reset successful");
+    }
+
+    public MessageResponseDTO validateRecoveryCode(ValidateRecoveryCodeDTO request) {
+        RecuperacaoSenhaToken recuperacaoToken = recuperacaoSenhaTokenRepository.findByToken(request.getToken())
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid or expired token"));
+
+        if (Boolean.TRUE.equals(recuperacaoToken.getUtilizado())) {
+            throw new RuntimeException("Token has already been used");
+        }
+
+        if (LocalDateTime.now().isAfter(recuperacaoToken.getExpiracao())) {
+            throw new RuntimeException("Token has expired");
+        }
+
+        return new MessageResponseDTO("Valid token");
     }
 
     private String generateToken() {

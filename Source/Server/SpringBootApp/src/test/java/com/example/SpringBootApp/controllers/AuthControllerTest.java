@@ -5,6 +5,7 @@ import com.example.SpringBootApp.DTOs.LoginDTO;
 import com.example.SpringBootApp.DTOs.MessageResponseDTO;
 import com.example.SpringBootApp.DTOs.PasswordRecoveryRequestDTO;
 import com.example.SpringBootApp.DTOs.ResetPasswordDTO;
+import com.example.SpringBootApp.DTOs.ValidateRecoveryCodeDTO;
 import com.example.SpringBootApp.exceptions.ResourceNotFoundException;
 import com.example.SpringBootApp.exceptions.GlobalExceptionHandler;
 import com.example.SpringBootApp.services.AuthService;
@@ -327,5 +328,35 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidJson))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void validateRecoveryCode_ShouldReturn200_WhenValidCode() throws Exception {
+        ValidateRecoveryCodeDTO request = new ValidateRecoveryCodeDTO();
+        request.setToken("ABC123");
+
+        MessageResponseDTO response = new MessageResponseDTO("Valid token");
+        when(authService.validateRecoveryCode(any(ValidateRecoveryCodeDTO.class))).thenReturn(response);
+
+        mockMvc.perform(post("/sessions/validate-recovery-code")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Valid token"));
+    }
+
+    @Test
+    void validateRecoveryCode_ShouldReturn404_WhenInvalidCode() throws Exception {
+        ValidateRecoveryCodeDTO request = new ValidateRecoveryCodeDTO();
+        request.setToken("WRONG1");
+
+        when(authService.validateRecoveryCode(any(ValidateRecoveryCodeDTO.class)))
+                .thenThrow(new ResourceNotFoundException("Invalid or expired token"));
+
+        mockMvc.perform(post("/sessions/validate-recovery-code")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Invalid or expired token"));
     }
 }

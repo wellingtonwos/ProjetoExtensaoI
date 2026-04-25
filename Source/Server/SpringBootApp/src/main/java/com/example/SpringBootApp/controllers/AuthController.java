@@ -5,6 +5,7 @@ import com.example.SpringBootApp.DTOs.LoginDTO;
 import com.example.SpringBootApp.DTOs.MessageResponseDTO;
 import com.example.SpringBootApp.DTOs.PasswordRecoveryRequestDTO;
 import com.example.SpringBootApp.DTOs.ResetPasswordDTO;
+import com.example.SpringBootApp.DTOs.ValidateRecoveryCodeDTO;
 import com.example.SpringBootApp.services.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,12 @@ public class AuthController {
     @PostMapping("/reset-password")
     public ResponseEntity<MessageResponseDTO> resetPassword(@Valid @RequestBody ResetPasswordDTO request) {
         MessageResponseDTO response = authService.resetPassword(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/validate-recovery-code")
+    public ResponseEntity<MessageResponseDTO> validateRecoveryCode(@Valid @RequestBody ValidateRecoveryCodeDTO request) {
+        MessageResponseDTO response = authService.validateRecoveryCode(request);
         return ResponseEntity.ok(response);
     }
 }

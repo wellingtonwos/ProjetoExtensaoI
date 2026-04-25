@@ -15,8 +15,14 @@ const StyledButton = styled.button`
 	font-size: 24px;
 	font-weight: 800;
 	cursor: pointer;
+	opacity: ${(props) => (props.disabled ? 0.6 : 1)};
+	pointer-events: ${(props) => (props.disabled ? 'none' : 'auto')};
 `
 
-export const Button = ({ children, onClick }) => {
-	return <StyledButton onClick={onClick}>{children}</StyledButton>
+export const Button = ({ children, onClick, disabled = false }) => {
+	return (
+		<StyledButton onClick={onClick} disabled={disabled}>
+			{children}
+		</StyledButton>
+	)
 }

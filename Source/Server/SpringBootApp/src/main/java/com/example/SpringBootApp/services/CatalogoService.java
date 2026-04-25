@@ -75,10 +75,10 @@ public class CatalogoService {
 		List<Marca> brands = MarcaRepository.findAll();
 		List<MarcaDTO> brandsDTO = new ArrayList<>();
 
-		for (Marca Marca : brands) {
+		for (Marca marca : brands) {
 			MarcaDTO currentBrand = new MarcaDTO();
-			currentBrand.setId(Marca.getId());
-			currentBrand.setBrandName(Marca.getNome());
+			currentBrand.setId(marca.getId());
+			currentBrand.setBrandName(marca.getNome());
 			brandsDTO.add(currentBrand);
 		}
 		return brandsDTO;
@@ -88,10 +88,10 @@ public class CatalogoService {
 		List<Categoria> categories = CategoriaRepository.findAll();
 		List<CategoriaDTO> categoriesDTO = new ArrayList<>();
 
-		for (Categoria Categoria : categories) {
+		for (Categoria categoria : categories) {
 			CategoriaDTO currentCategory = new CategoriaDTO();
-			currentCategory.setId(Categoria.getId());
-			currentCategory.setCategoryName(Categoria.getNome());
+			currentCategory.setId(categoria.getId());
+			currentCategory.setCategoryName(categoria.getNome());
 			categoriesDTO.add(currentCategory);
 		}
 		return categoriesDTO;
