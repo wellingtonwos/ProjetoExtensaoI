@@ -101,7 +101,7 @@ curl -X POST "http://localhost:8080/products" ^
 curl -X POST "http://localhost:8080/purchases" ^
   -H "Authorization: Bearer <TOKEN>" ^
   -H "Content-Type: application/json" ^
-  -d "{\"date\":\"2026-04-25\",\"items\":[{\"productId\":1,\"quantity\":10.0,\"unitPurchasePrice\":45.90,\"unitSalePrice\":69.90,\"expiringDate\":\"2026-06-10\"}]}"
+  -d "{\"date\":\"2026-04-25\",\"items\":[{\"productId\":1,\"quantity\":10.0,\"unitPurchasePrice\":45.90,\"expiringDate\":\"2026-06-10\"}]}"
 ```
 
 Resposta observada:

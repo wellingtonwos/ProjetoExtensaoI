@@ -57,7 +57,6 @@ class CompraControllerTest {
                 1L,
                 new BigDecimal("10.5"),
                 new BigDecimal("45.90"),
-                new BigDecimal("69.90"),
                 LocalDate.of(2024, 2, 15)
         );
 
@@ -65,7 +64,6 @@ class CompraControllerTest {
                 2L,
                 new BigDecimal("5.0"),
                 new BigDecimal("32.50"),
-                new BigDecimal("49.90"),
                 LocalDate.of(2024, 3, 1)
         );
 
@@ -92,7 +90,6 @@ class CompraControllerTest {
                 999L,
                 new BigDecimal("10.5"),
                 new BigDecimal("45.90"),
-                new BigDecimal("69.90"),
                 null
         );
 
@@ -160,8 +157,7 @@ class CompraControllerTest {
                 {
                     "productId": 1,
                     "quantity": 10.5,
-                    "unitPurchasePrice": -45.90,
-                    "unitSalePrice": 69.90
+                    "unitPurchasePrice": -45.90
                 }
             ]
         }

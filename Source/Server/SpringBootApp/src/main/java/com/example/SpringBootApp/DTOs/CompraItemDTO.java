@@ -26,9 +26,7 @@ public class CompraItemDTO {
     @Positive(message = "Unit Compra price must be positive")
     private BigDecimal unitPurchasePrice;
 
-    @NotNull(message = "Unit Venda price is required")
-    @Positive(message = "Unit Venda price must be positive")
-    private BigDecimal unitSalePrice;
+    // unitSalePrice should not be provided for purchase items; backend will set it to null
 
     private LocalDate expiringDate;
 }

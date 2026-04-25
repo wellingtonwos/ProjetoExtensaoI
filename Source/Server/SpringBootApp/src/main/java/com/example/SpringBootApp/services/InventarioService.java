@@ -4,6 +4,7 @@ import com.example.SpringBootApp.DTOs.ProdutoComCompraEmEstoqueDTO;
 import com.example.SpringBootApp.DTOs.CompraCreateDTO;
 import com.example.SpringBootApp.DTOs.CompraEmEstoqueDTO;
 import com.example.SpringBootApp.DTOs.CompraItemDTO;
+import com.example.SpringBootApp.exceptions.BusinessException;
 import com.example.SpringBootApp.exceptions.ResourceNotFoundException;
 import com.example.SpringBootApp.models.*;
 import com.example.SpringBootApp.repositories.CompraRepository;
@@ -42,10 +43,22 @@ public class InventarioService {
         for (CompraItemDTO itemDTO : purchaseDTO.getItems()) {
             Produto Produto = ProdutoRepository.findById(itemDTO.getProductId()).get();
 
+            // validate expiring date according to product perishability
+            if (Boolean.TRUE.equals(Produto.getPerecivel())) {
+                if (itemDTO.getExpiringDate() == null) {
+                    throw new BusinessException("Expiring date is required for perishable product with id: " + Produto.getId());
+                }
+            } else {
+                if (itemDTO.getExpiringDate() != null) {
+                    throw new BusinessException("Expiring date must not be provided for non-perishable product with id: " + Produto.getId());
+                }
+            }
+
             Movimentacao Movimentacao = new Movimentacao();
             Movimentacao.setQuantidade(itemDTO.getQuantity());
             Movimentacao.setPrecoUnitarioCompra(itemDTO.getUnitPurchasePrice());
-            Movimentacao.setPrecoUnitarioVenda(itemDTO.getUnitSalePrice());
+            // For purchase movements, sale price must be null
+            Movimentacao.setPrecoUnitarioVenda(null);
             Movimentacao.setDataValidade(itemDTO.getExpiringDate());
             Movimentacao.setProduto(Produto);
             Movimentacao.setCompra(savedPurchase);
