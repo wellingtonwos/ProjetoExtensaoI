@@ -1,177 +1,21 @@
 import styled from 'styled-components'
 import { useState } from 'react'
+import { Sidebar } from '../components/Sidebar'
+import { Topbar } from '../components/Topbar'
 
 // ==========================================
 // ESTILOS
 // ==========================================
 
 const Wrapper = styled.div`
-	background-color: #fafaf9; /* stone-50 */
-	color: #1c1917; /* stone-900 */
+	background-color: #f9f9f9;
+	color: #1c1917;
 	display: flex;
 	height: 100vh;
 	overflow: hidden;
 	font-family: 'Work Sans', sans-serif;
 `
 
-const Sidebar = styled.aside`
-	display: flex;
-	flex-direction: column;
-	height: 100%;
-	background-color: #f5f5f4; /* stone-100 */
-	width: 80px;
-	border-right: 1px solid #e7e5e4;
-	transition: width 0.3s;
-	flex-shrink: 0;
-
-	@media (min-width: 1024px) {
-		width: 256px;
-	}
-`
-
-const SidebarHeader = styled.div`
-	padding: 16px;
-	text-align: center;
-	flex-shrink: 0;
-
-	@media (min-width: 1024px) {
-		padding: 24px;
-		text-align: left;
-	}
-
-	h1 {
-		font-size: 20px;
-		font-weight: 900;
-		color: #7f1d1d;
-		font-family: 'Epilogue', sans-serif;
-		letter-spacing: -0.05em;
-		@media (min-width: 1024px) {
-			font-size: 24px;
-		}
-	}
-
-	p {
-		display: none;
-		font-size: 10px;
-		text-transform: uppercase;
-		letter-spacing: 0.1em;
-		color: #78716c;
-		font-family: 'Epilogue', sans-serif;
-		margin-top: 4px;
-		@media (min-width: 1024px) {
-			display: block;
-		}
-	}
-`
-
-const Nav = styled.nav`
-	flex: 1;
-	margin-top: 16px;
-	padding: 0 8px;
-	overflow-y: auto;
-	min-height: 0;
-
-	@media (min-width: 1024px) {
-		padding: 0 12px;
-	}
-
-	&::-webkit-scrollbar {
-		width: 0px;
-	} /* Oculta a barra na sidebar */
-`
-
-const NavItem = styled.a`
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 4px;
-	padding: 12px 8px;
-	margin-bottom: 8px;
-	border-radius: 4px;
-	text-decoration: none;
-	transition: all 0.2s;
-
-	background-color: ${(props) => (props.$active ? '#ffffff' : 'transparent')};
-	color: ${(props) => (props.$active ? '#b91c1c' : '#57534e')};
-	box-shadow: ${(props) =>
-		props.$active ? '0 1px 2px rgba(0,0,0,0.05)' : 'none'};
-
-	@media (min-width: 1024px) {
-		flex-direction: row;
-		gap: 12px;
-	}
-
-	&:hover {
-		background-color: ${(props) => (props.$active ? '#ffffff' : '#e7e5e4')};
-	}
-
-	span.icon {
-		font-size: 24px;
-	}
-	span.text {
-		font-size: 10px;
-		font-weight: 700;
-		font-family: 'Epilogue', sans-serif;
-		text-transform: uppercase;
-		@media (min-width: 1024px) {
-			font-size: 14px;
-		}
-	}
-`
-
-const SidebarFooter = styled.div`
-	padding: 8px;
-	margin-top: auto;
-	flex-shrink: 0;
-	@media (min-width: 1024px) {
-		padding: 16px;
-	}
-
-	.profile-box {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 12px;
-		padding: 8px;
-		background-color: #e7e5e4;
-		border-radius: 8px;
-
-		@media (min-width: 1024px) {
-			flex-direction: row;
-		}
-
-		img {
-			width: 32px;
-			height: 32px;
-			border-radius: 50%;
-			filter: grayscale(100%);
-			object-fit: cover;
-		}
-
-		.info {
-			display: none;
-			overflow: hidden;
-			@media (min-width: 1024px) {
-				display: block;
-			}
-			p.name {
-				font-size: 12px;
-				font-weight: 700;
-				color: #7f1d1d;
-				white-space: nowrap;
-				overflow: hidden;
-				text-overflow: ellipsis;
-			}
-			p.role {
-				font-size: 9px;
-				text-transform: uppercase;
-				opacity: 0.6;
-			}
-		}
-	}
-`
-
-// --- ÁREA CENTRAL ---
 const MainArea = styled.div`
 	flex: 1;
 	display: flex;
@@ -188,6 +32,9 @@ const Header = styled.header`
 	justify-content: space-between;
 	padding: 0 24px;
 	flex-shrink: 0;
+	position: sticky;
+	top: 0;
+	z-index: 30;
 
 	.search-container {
 		display: flex;
@@ -681,68 +528,29 @@ const PaymentButton = styled.button`
 
 export const SalesView = ({ navigate }) => {
 	const [pagamentoSelecionado, setPagamentoSelecionado] = useState('dinheiro')
+	const [searchQuery, setSearchQuery] = useState('')
 
 	return (
 		<Wrapper>
-			<Sidebar>
-				<SidebarHeader>
-					<h1>CarneUp</h1>
-					<p>Master Butcher</p>
-				</SidebarHeader>
-				<Nav>
-					<NavItem href='#' onClick={() => navigate('sales')}>
-						<span className='material-symbols-outlined icon'>dashboard</span>
-						<span className='text'>Início</span>
-					</NavItem>
-					<NavItem href='#' $active>
-						<span className='material-symbols-outlined icon'>
-							point_of_sale
-						</span>
-						<span className='text'>Vendas</span>
-					</NavItem>
-				</Nav>
-				<SidebarFooter>
-					<div className='profile-box'>
-						<img
-							src='https://lh3.googleusercontent.com/aida-public/AB6AXuAfpZm9ef8_i11nasHAZDfJfV1PBVhNqwd3Cv0nxAfweHZbOtixrQnTQ_2GATUQGn9pnCduYVCTJj0wi6dhzmzj0q0qiUJGQifJCTNTtZBPZWjxshQ2BKoyr7YXe2_7WRjMt-1TvFQGFUi_DFL5Eue2BQu9Gg55yNB8V9dotM-ebWymTDIJIXp8gmwIw9ifH0u4iYG8N-79KGfpOmmUU17dwGQkJ7mQKA4QKwq5nxOmekLt5KFQRedtykVZRUiwHtjjc3pUigwEoLg'
-							alt='Operador'
-						/>
-						<div className='info'>
-							<p className='name'>Matheus S.</p>
-							<p className='role'>Operador</p>
-						</div>
-					</div>
-				</SidebarFooter>
-			</Sidebar>
+			<Sidebar navigate={navigate} activeView='vendas' />
 
 			<MainArea>
-				<Header>
-					<div className='search-container'>
+				<Topbar searchQuery={searchQuery} onSearchChange={setSearchQuery}>
+					<button className='caixa-btn'>
 						<span
 							className='material-symbols-outlined'
-							style={{ color: '#a8a29e' }}
+							style={{ fontSize: '18px' }}
 						>
-							search
+							account_balance
 						</span>
-						<input type='text' placeholder='PESQUISAR PRODUTO...' />
-					</div>
-					<div className='actions'>
-						<button className='caixa-btn'>
-							<span
-								className='material-symbols-outlined'
-								style={{ fontSize: '18px' }}
-							>
-								account_balance
-							</span>
-							Caixa
-						</button>
-						<div className='divider' />
-						<img
-							src='https://lh3.googleusercontent.com/aida-public/AB6AXuAbN4N9JVG2kPOiW0XGm82oEJ_M1ylsBPLvW4OnB_umj11o1FIThDhEP_2XNgGbM0X1Q6_ADrv7WkPvOM1ed5BfwfieqtqfBs124qHrV5mW9oayirHYRXTnpVysYDSBASL6jFjZiIjpiBj8YUN0owMk8D_3yUH1igJY4-ByxzSxJdszM6BzdBJAI8bbc3lH5yfaJLV8Ur7skT1vVHBbJWa1Ds2tzQjYhyFTHMP76pc4uOqB8SM2V8l9sB5Q1UqDeDbRD3jypmT8f5w'
-							alt='Avatar'
-						/>
-					</div>
-				</Header>
+						Caixa
+					</button>
+					<div className='divider' />
+					<img
+						src='https://lh3.googleusercontent.com/aida-public/AB6AXuAbN4N9JVG2kPOiW0XGm82oEJ_M1ylsBPLvW4OnB_umj11o1FIThDhEP_2XNgGbM0X1Q6_ADrv7WkPvOM1ed5BfwfieqtqfBs124qHrV5mW9oayirHYRXTnpVysYDSBASL6jFjZiIjpiBj8YUN0owMk8D_3yUH1igJY4-ByxzSxJdszM6BzdBJAI8bbc3lH5yfaJLV8Ur7skT1vVHBbJWa1Ds2tzQjYhyFTHMP76pc4uOqB8SM2V8l9sB5Q1UqDeDbRD3jypmT8f5w'
+						alt='Avatar'
+					/>
+				</Topbar>
 
 				<ContentArea>
 					<ProductSection>
