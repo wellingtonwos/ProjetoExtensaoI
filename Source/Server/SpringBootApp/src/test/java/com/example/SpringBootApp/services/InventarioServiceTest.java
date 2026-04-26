@@ -8,6 +8,7 @@ import com.example.SpringBootApp.models.*;
 import com.example.SpringBootApp.repositories.CompraRepository;
 import com.example.SpringBootApp.repositories.MovimentacaoRepository;
 import com.example.SpringBootApp.repositories.ProdutoRepository;
+import com.example.SpringBootApp.repositories.DecarteRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,6 +34,9 @@ class InventarioServiceTest {
 
     @Mock
     private ProdutoRepository produtoRepository;
+
+    @Mock
+    private DecarteRepository decarteRepository;
 
     @InjectMocks
     private InventarioService inventarioService;
@@ -276,6 +280,77 @@ class InventarioServiceTest {
 
         // Act & Assert
         assertThrows(BusinessException.class, () -> inventarioService.updatePurchaseItem(1L, 1L, new BigDecimal("5")));
+    }
+
+    @Test
+    void discardPurchaseItem_ShouldCreateDiscard_WhenStockOk() {
+        // Arrange
+        Produto produto = new Produto();
+        produto.setId(1L);
+
+        Compra compra = new Compra();
+        compra.setId(1L);
+
+        Movimentacao purchaseMov = new Movimentacao();
+        purchaseMov.setId(20L);
+        purchaseMov.setQuantidade(new BigDecimal("10"));
+        purchaseMov.setProduto(produto);
+        purchaseMov.setCompra(compra);
+
+        when(movimentacaoRepository.findFirstByCompraIdAndProdutoIdAndVendaIsNull(1L, 1L)).thenReturn(purchaseMov);
+        when(movimentacaoRepository.findByCompraIdAndProdutoId(1L, 1L)).thenReturn(List.of(purchaseMov));
+        when(movimentacaoRepository.sumQuantityByProdutoId(1L)).thenReturn(new BigDecimal("10"));
+        when(decarteRepository.save(any(Descarte.class))).thenAnswer(invocation -> {
+            Descarte d = invocation.getArgument(0);
+            d.setId(100L);
+            return d;
+        });
+        when(movimentacaoRepository.save(any(Movimentacao.class))).thenAnswer(invocation -> {
+            Movimentacao m = invocation.getArgument(0);
+            m.setId(200L);
+            return m;
+        });
+
+        // Act
+        Movimentacao result = inventarioService.discardPurchaseItem(1L, 1L, new BigDecimal("2"), DescarteType.PERDA_PESO, "weight loss");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(new BigDecimal("-2"), result.getQuantidade());
+        verify(decarteRepository).save(any(Descarte.class));
+        verify(movimentacaoRepository).save(any(Movimentacao.class));
+    }
+
+    @Test
+    void discardPurchaseItem_ShouldThrow_WhenGlobalStockNegative() {
+        // Arrange
+        Produto produto = new Produto();
+        produto.setId(1L);
+
+        Compra compra = new Compra();
+        compra.setId(1L);
+
+        Movimentacao purchaseMov = new Movimentacao();
+        purchaseMov.setId(21L);
+        purchaseMov.setQuantidade(new BigDecimal("5"));
+        purchaseMov.setProduto(produto);
+        purchaseMov.setCompra(compra);
+
+        when(movimentacaoRepository.findFirstByCompraIdAndProdutoIdAndVendaIsNull(1L, 1L)).thenReturn(purchaseMov);
+        when(movimentacaoRepository.findByCompraIdAndProdutoId(1L, 1L)).thenReturn(List.of(purchaseMov));
+        when(movimentacaoRepository.sumQuantityByProdutoId(1L)).thenReturn(new BigDecimal("1"));
+
+        // Act & Assert
+        assertThrows(BusinessException.class, () -> inventarioService.discardPurchaseItem(1L, 1L, new BigDecimal("2"), DescarteType.PERDA_PESO, null));
+    }
+
+    @Test
+    void discardPurchaseItem_ShouldThrow_WhenPurchaseItemNotFound() {
+        // Arrange
+        when(movimentacaoRepository.findFirstByCompraIdAndProdutoIdAndVendaIsNull(1L, 1L)).thenReturn(null);
+
+        // Act & Assert
+        assertThrows(ResourceNotFoundException.class, () -> inventarioService.discardPurchaseItem(1L, 1L, new BigDecimal("1"), DescarteType.DANO, "broken"));
     }
 }
 

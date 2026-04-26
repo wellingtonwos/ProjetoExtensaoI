@@ -32,6 +32,12 @@ public class CompraController {
         return ResponseEntity.created(URI.create("/purchases/" + Compra.getId())).build();
     }
 
+    @PostMapping("/{purchaseId}/items/{productId}/discard")
+    public ResponseEntity<?> discardPurchaseItem(@PathVariable Long purchaseId, @PathVariable Long productId, @Valid @RequestBody com.example.SpringBootApp.DTOs.CompraItemDiscardDTO discardDTO) {
+        InventarioService.discardPurchaseItem(purchaseId, productId, discardDTO.getQuantity(), com.example.SpringBootApp.models.DescarteType.valueOf(discardDTO.getType()), discardDTO.getDescription());
+        return ResponseEntity.status(201).build();
+    }
+
     @PutMapping("/{purchaseId}/items/{productId}")
     public ResponseEntity<?> updatePurchaseItem(@PathVariable Long purchaseId, @PathVariable Long productId, @Valid @RequestBody com.example.SpringBootApp.DTOs.CompraItemUpdateDTO updateDTO) {
         InventarioService.updatePurchaseItem(purchaseId, productId, updateDTO.getQuantity());

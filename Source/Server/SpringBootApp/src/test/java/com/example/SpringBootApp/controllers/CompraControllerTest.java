@@ -26,8 +26,10 @@ import com.example.SpringBootApp.models.Movimentacao;
 import com.example.SpringBootApp.exceptions.BusinessException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -200,6 +202,36 @@ class CompraControllerTest {
         doThrow(new BusinessException("Stock would become negative")).when(inventarioService).updatePurchaseItem(eq(1L), eq(1L), any(BigDecimal.class));
 
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/purchases/1/items/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    void discardCompraItem_ShouldReturn201_WhenValidInput() throws Exception {
+        setup();
+
+        String json = "{\"quantity\":2.0,\"type\":\"PERDA_PESO\",\"description\":\"packaging loss\"}";
+
+        Movimentacao returned = new Movimentacao();
+        returned.setId(300L);
+        when(inventarioService.discardPurchaseItem(eq(1L), eq(1L), any(BigDecimal.class), any(com.example.SpringBootApp.models.DescarteType.class), anyString())).thenReturn(returned);
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/purchases/1/items/1/discard")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void discardCompraItem_ShouldReturn422_WhenStockNegative() throws Exception {
+        setup();
+
+        String json = "{\"quantity\":2.0,\"type\":\"PERDA_PESO\"}";
+
+        doThrow(new BusinessException("Stock would become negative")).when(inventarioService).discardPurchaseItem(eq(1L), eq(1L), any(BigDecimal.class), any(com.example.SpringBootApp.models.DescarteType.class), any());
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/purchases/1/items/1/discard")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isUnprocessableEntity());

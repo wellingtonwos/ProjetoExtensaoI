@@ -186,6 +186,25 @@ PUT /purchases/{purchaseId}/items/{productId}
   - 404 Not Found se o item/lote não for encontrado
   - 422 Unprocessable Entity se a alteração causaria estoque negativo (regra de negócio)
 
+POST /purchases/{purchaseId}/items/{productId}/discard
+- Cria um descarte (movimentação negativa) ligado ao lote (compra)
+- Request body (CompraItemDiscardDTO):
+{
+  "quantity": 2.0,
+  "type": "PERDA_PESO",   // Valores aceitos: ROUBO, VENCIMENTO, CONSUMO_PESSOAL, DANO, OUTRO, PERDA_PESO
+  "description": "opcional, texto explicando o descarte (até 255 chars)"
+}
+- Regras:
+  - quantity obrigatória e positiva (>0)
+  - Cria um registro de Descarte (tabela legacy) com motivo igual ao nome do enum e descrição opcional
+  - Validações:
+    - A quantidade a descartar não pode exceder a quantidade disponível no lote (compra)
+    - O estoque global do produto não pode ficar negativo após o descarte
+- Responses:
+  - 201 Created no sucesso
+  - 404 Not Found se o item/lote não for encontrado
+  - 422 Unprocessable Entity se o descarte levaria o estoque a ficar negativo
+
 Exemplo de curl (criar + ajustar):
 # Criar compra
 curl -X POST http://localhost:8080/purchases \

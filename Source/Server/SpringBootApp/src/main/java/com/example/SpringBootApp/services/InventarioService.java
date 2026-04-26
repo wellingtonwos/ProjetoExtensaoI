@@ -10,6 +10,7 @@ import com.example.SpringBootApp.models.*;
 import com.example.SpringBootApp.repositories.CompraRepository;
 import com.example.SpringBootApp.repositories.MovimentacaoRepository;
 import com.example.SpringBootApp.repositories.ProdutoRepository;
+import com.example.SpringBootApp.repositories.DecarteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,7 @@ public class InventarioService {
     private final CompraRepository CompraRepository;
     private final MovimentacaoRepository movimentacaoRepository;
     private final ProdutoRepository ProdutoRepository;
+    private final DecarteRepository decarteRepository;
 
     public Compra createPurchase(CompraCreateDTO purchaseDTO) {
         for (CompraItemDTO itemDTO : purchaseDTO.getItems()) {
@@ -165,6 +167,54 @@ public class InventarioService {
 
         purchaseMov.setQuantidade(newQuantity);
         return movimentacaoRepository.save(purchaseMov);
+    }
+
+    public Movimentacao discardPurchaseItem(Long purchaseId, Long productId, BigDecimal quantity, DescarteType type, String description) {
+        if (quantity == null || quantity.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessException("Quantity must be positive");
+        }
+
+        Movimentacao purchaseMov = movimentacaoRepository.findFirstByCompraIdAndProdutoIdAndVendaIsNull(purchaseId, productId);
+        if (purchaseMov == null) {
+            throw new ResourceNotFoundException("Purchase item not found");
+        }
+
+        List<Movimentacao> group = movimentacaoRepository.findByCompraIdAndProdutoId(purchaseId, productId);
+        BigDecimal groupSum = group.stream().map(m -> m.getQuantidade() != null ? m.getQuantidade() : BigDecimal.ZERO).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal groupAfter = groupSum.subtract(quantity);
+        if (groupAfter.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessException("Cannot discard more than available in this lot");
+        }
+
+        BigDecimal totalSum = movimentacaoRepository.sumQuantityByProdutoId(productId);
+        if (totalSum == null) totalSum = BigDecimal.ZERO;
+        BigDecimal totalAfter = totalSum.subtract(quantity);
+        if (totalAfter.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessException("Stock would become negative");
+        }
+
+        Descarte descarte = new Descarte();
+        descarte.setDisposalDate(LocalDate.now());
+        String reasonString = type != null ? type.name() : DescarteType.OUTRO.name();
+        if (description != null && !description.isBlank()) {
+            reasonString += " - " + description;
+        }
+        descarte.setReason(reasonString);
+        Descarte savedDescarte = decarteRepository.save(descarte);
+
+        Movimentacao discardMov = new Movimentacao();
+        discardMov.setQuantidade(quantity.negate());
+        discardMov.setPrecoUnitarioCompra(null);
+        discardMov.setPrecoUnitarioVenda(null);
+        discardMov.setDataValidade(null);
+        discardMov.setProduto(purchaseMov.getProduto());
+        discardMov.setCompra(purchaseMov.getCompra());
+        discardMov.setVenda(null);
+        discardMov.setTipoMovimentacao(MovementType.DESCARTE);
+        discardMov.setDescarte(savedDescarte);
+
+        return movimentacaoRepository.save(discardMov);
     }
 
 }
