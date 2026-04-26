@@ -1,11 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 import { GlobalStyle } from './GlobalStyle'
 
 import { LoginView } from './views/LoginView'
 import { DashboardView } from './views/DashboardView'
 import { SalesView } from './views/SalesView'
-
+import { StockView } from './views/StockView'
+import { SettingsView } from './views/SettingsView'
 import { ForgotPasswordView } from './views/ForgotPasswordView'
 import { RecoveryCodeView } from './views/RecoveryCodeView'
 import { ResetPasswordView } from './views/ResetPasswordView'
@@ -15,6 +16,14 @@ export default function App() {
 	const [currentView, setCurrentView] = useState('login')
 	const [recoveryEmail, setRecoveryEmail] = useState('')
 	const [recoveryCode, setRecoveryCode] = useState('')
+
+	useEffect(() => {
+		// Verificar se há token no localStorage ao carregar a página
+		const token = localStorage.getItem('authToken')
+		if (token) {
+			setCurrentView('dashboard')
+		}
+	}, [])
 
 	const renderView = () => {
 		switch (currentView) {
@@ -48,7 +57,13 @@ export default function App() {
 				)
 			case 'success':
 				return <SuccessView navigate={setCurrentView} />
-			default:
+			case 'stock':
+				return <StockView navigate={setCurrentView} />
+			case 'configuracoes':
+				return <SettingsView navigate={setCurrentView} />
+		case 'settings':
+				return <SettingsView navigate={setCurrentView} />
+		default:
 				return <LoginView navigate={setCurrentView} />
 		}
 	}

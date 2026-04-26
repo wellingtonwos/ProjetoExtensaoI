@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { Sidebar } from '../components/Sidebar'
 
 // ==========================================
 // ESTILOS
@@ -12,147 +13,10 @@ const Wrapper = styled.div`
 	font-family: 'Work Sans', sans-serif;
 `
 
-const Sidebar = styled.aside`
-	display: flex;
-	flex-direction: column;
-	height: 100vh;
-	position: sticky;
-	top: 0;
-	width: 256px;
-	background-color: #f5f5f4;
-	transition: background-color 0.2s;
-	flex-shrink: 0;
-`
-
-const SidebarHeader = styled.div`
-	padding: 24px;
-	flex-shrink: 0;
-
-	h1 {
-		font-size: 24px;
-		font-weight: 900;
-		color: #7f1d1d;
-		font-family: 'Epilogue', sans-serif;
-		letter-spacing: -0.025em;
-	}
-
-	p {
-		font-size: 12px;
-		font-family: 'Epilogue', sans-serif;
-		text-transform: uppercase;
-		letter-spacing: 0.1em;
-		color: #78716c;
-		margin-top: 4px;
-	}
-`
-
-const Nav = styled.nav`
-	flex: 1;
-	margin-top: 16px;
-	overflow-y: auto;
-	min-height: 0;
-
-	&::-webkit-scrollbar {
-		width: 4px;
-	}
-	&::-webkit-scrollbar-thumb {
-		background-color: #d6d3d1;
-		border-radius: 4px;
-	}
-
-	ul {
-		list-style: none;
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-	}
-`
-
-const NavItem = styled.a`
-	display: flex;
-	align-items: center;
-	gap: 12px;
-	padding: 16px 24px;
-	color: ${(props) => (props.$active ? '#b91c1c' : '#57534e')};
-	font-weight: 700;
-	text-decoration: none;
-	border-right: ${(props) => (props.$active ? '4px solid #b91c1c' : 'none')};
-	transition: all 0.1s;
-
-	span.icon {
-		font-size: 24px;
-	}
-	span.text {
-		font-family: 'Epilogue', sans-serif;
-		letter-spacing: -0.025em;
-	}
-
-	&:hover {
-		background-color: #e7e5e4;
-		color: ${(props) => (props.$active ? '#b91c1c' : '#991b1b')};
-	}
-`
-
-const SidebarFooter = styled.div`
-	padding: 24px;
-	border-top: 1px solid #e7e5e4;
-	flex-shrink: 0;
-`
-
-const NovaVendaBtn = styled.button`
-	width: 100%;
-	background-color: #8a040d;
-	color: #ffffff;
-	padding: 12px;
-	border-radius: 8px;
-	font-family: 'Epilogue', sans-serif;
-	font-weight: 700;
-	border: none;
-	cursor: pointer;
-	transition: all 0.2s;
-
-	&:hover {
-		opacity: 0.9;
-	}
-	&:active {
-		transform: scale(0.95);
-	}
-`
-
-const UserProfile = styled.div`
-	display: flex;
-	align-items: center;
-	gap: 12px;
-	margin-top: 24px;
-
-	img {
-		width: 40px;
-		height: 40px;
-		border-radius: 50%;
-		object-fit: cover;
-	}
-
-	.info {
-		p.name {
-			font-size: 14px;
-			font-weight: 700;
-			color: #7f1d1d;
-			font-family: 'Epilogue', sans-serif;
-		}
-		p.role {
-			font-size: 10px;
-			color: #78716c;
-			font-family: 'Epilogue', sans-serif;
-			text-transform: uppercase;
-		}
-	}
-`
-
 const MainContent = styled.main`
 	flex: 1;
 	display: flex;
 	flex-direction: column;
-	min-height: 100vh;
 	min-width: 0;
 `
 
@@ -621,69 +485,7 @@ const BottomFooter = styled.footer`
 export const DashboardView = ({ navigate }) => {
 	return (
 		<Wrapper>
-			<Sidebar>
-				<SidebarHeader>
-					<h1>CarneUp</h1>
-					<p>Mestre Açougueiro</p>
-				</SidebarHeader>
-
-				<Nav>
-					<ul>
-						<li>
-							<NavItem href='#' $active>
-								<span className='material-symbols-outlined icon'>
-									dashboard
-								</span>
-								<span className='text'>Tela Inicial</span>
-							</NavItem>
-						</li>
-						<li>
-							<NavItem href='#'>
-								<span className='material-symbols-outlined icon'>
-									inventory_2
-								</span>
-								<span className='text'>Gerenciamento de Estoque</span>
-							</NavItem>
-						</li>
-						<li>
-							<NavItem href='#'>
-								<span className='material-symbols-outlined icon'>
-									point_of_sale
-								</span>
-								<span className='text'>Vendas</span>
-							</NavItem>
-						</li>
-						<li>
-							<NavItem href='#'>
-								<span className='material-symbols-outlined icon'>
-									analytics
-								</span>
-								<span className='text'>Relatórios</span>
-							</NavItem>
-						</li>
-						<li>
-							<NavItem href='#'>
-								<span className='material-symbols-outlined icon'>settings</span>
-								<span className='text'>Configurações</span>
-							</NavItem>
-						</li>
-					</ul>
-				</Nav>
-
-				<SidebarFooter>
-					<NovaVendaBtn onClick={() => navigate('sales')}>Nova Venda</NovaVendaBtn>
-					<UserProfile>
-						<img
-							src='https://lh3.googleusercontent.com/aida-public/AB6AXuA5VgXi1wbpjE8KAklFI9S7PH4-zOdOwyty8vIE8CukR8J06_oAYGqlx_F97T93mlCzAfsCs-ek9omgmFIItVCNVVmT9_H9xdkVmmCjlnYK-64bRQA1Qibx459vqUCYXOEui3IDScurxBZAcBzTK-wWgMC2T_Z62AWTruk-v-kAmTpb1lS4ggOMVm5INqrKwaZSRpSRP-RSq-1TT22vsNfwOv4AMFqu2HiZTWAKM6orM1JS8A7DTGog5DAvXXqJW1Zq0IG27PKpuCQ'
-							alt='Profile'
-						/>
-						<div className='info'>
-							<p className='name'>Ricardo M.</p>
-							<p className='role'>Admin Access</p>
-						</div>
-					</UserProfile>
-				</SidebarFooter>
-			</Sidebar>
+			<Sidebar navigate={navigate} activeView='dashboard' />
 
 			<MainContent>
 				<TopBar>
