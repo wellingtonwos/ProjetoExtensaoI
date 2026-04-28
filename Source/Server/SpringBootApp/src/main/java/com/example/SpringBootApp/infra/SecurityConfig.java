@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/sessions", "/sessions/**").permitAll() // ✅ Login liberado
+                        .requestMatchers("/sessions", "/sessions/**", "/actuator/health", "/actuator/health/**").permitAll()
                         .anyRequest().authenticated() // 🔒 Todos os outros endpoints precisam de auth
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

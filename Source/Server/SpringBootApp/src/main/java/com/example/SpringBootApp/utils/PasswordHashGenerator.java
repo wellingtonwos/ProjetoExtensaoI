@@ -26,7 +26,7 @@ public class PasswordHashGenerator {
         System.out.println("VALUES (");
         System.out.println("  'Gustavo',");
         System.out.println("  '" + hashedPassword + "',");
-        System.out.println("  'ADMIN',");
+        System.out.println("  'ADM',");
         System.out.println("  'gustavo.135.andrade@gmail.com',");
         System.out.println("  CURRENT_TIMESTAMP");
         System.out.println(");\n");
