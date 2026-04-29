@@ -30,7 +30,6 @@ export const PurchaseView = ({ navigate }) => {
   const [expiry, setExpiry] = useState('')
 
   const [cart, setCart] = useState([])
-  const [editing, setEditing] = useState(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [pendingEdit, setPendingEdit] = useState(null)
 
@@ -55,13 +54,12 @@ export const PurchaseView = ({ navigate }) => {
       setConfirmOpen(true)
       return
     }
-    setEditing(item)
     setSelectedProductId('')
   }
 
   const confirmEdit = () => {
     setConfirmOpen(false)
-    if (pendingEdit) setEditing(pendingEdit)
+    if (pendingEdit) setSelectedProductId(String(pendingEdit.id))
     setPendingEdit(null)
   }
 

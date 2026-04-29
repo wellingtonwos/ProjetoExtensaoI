@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 import { GlobalStyle } from './GlobalStyle'
 
@@ -16,17 +16,11 @@ import { PurchaseView } from './views/PurchaseView'
 import AttributesView from './views/AttributesView'
 
 export default function App() {
-	const [currentView, setCurrentView] = useState('login')
+	const [currentView, setCurrentView] = useState(() =>
+		localStorage.getItem('authToken') ? 'dashboard' : 'login',
+	)
 	const [recoveryEmail, setRecoveryEmail] = useState('')
 	const [recoveryCode, setRecoveryCode] = useState('')
-
-	useEffect(() => {
-		// Verificar se há token no localStorage ao carregar a página
-		const token = localStorage.getItem('authToken')
-		if (token) {
-			setCurrentView('dashboard')
-		}
-	}, [])
 
 	const renderView = () => {
 		switch (currentView) {
@@ -70,9 +64,9 @@ export default function App() {
 				return <AttributesView navigate={setCurrentView} />
 			case 'configuracoes':
 				return <SettingsView navigate={setCurrentView} />
-		case 'settings':
+			case 'settings':
 				return <SettingsView navigate={setCurrentView} />
-		default:
+			default:
 				return <LoginView navigate={setCurrentView} />
 		}
 	}

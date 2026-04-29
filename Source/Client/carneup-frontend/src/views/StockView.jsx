@@ -9,6 +9,42 @@ import { StockForm } from '../components/StockForm'
 import { Footer } from '../components/Footer'
 import { Button } from '../components/Button'
 
+const MOCK_DATA = [
+	{
+		id: 1,
+		name: 'Ribeye Prime Cut',
+		subtitle: 'Premium Aged',
+		code: '#B-0922',
+		brand: 'Angus Gold',
+		category: 'Bovine',
+		unit: 'Kg',
+		stockQuantity: 124.5,
+		stockStatus: 'normal',
+	},
+	{
+		id: 2,
+		name: 'Pork Belly Slab',
+		subtitle: 'Skin-on',
+		code: '#P-1288',
+		brand: 'Duroc Heritage',
+		category: 'Porcine',
+		unit: 'Kg',
+		stockQuantity: 12.2,
+		stockStatus: 'low',
+	},
+	{
+		id: 3,
+		name: 'Chorizo Sausages',
+		subtitle: 'Spicy Artisan',
+		code: '#C-5541',
+		brand: 'CarneUp Kitchen',
+		category: 'Processed',
+		unit: 'Un',
+		stockQuantity: 450.0,
+		stockStatus: 'normal',
+	},
+]
+
 // ==========================================
 // STYLED COMPONENTS
 // ==========================================
@@ -94,50 +130,13 @@ export const StockView = ({ navigate }) => {
 	const [selectedCategory, setSelectedCategory] = useState('')
 	const [currentPage, setCurrentPage] = useState(1)
 
-	// Mock data - replace with API call
-	const mockData = [
-		{
-			id: 1,
-			name: 'Ribeye Prime Cut',
-			subtitle: 'Premium Aged',
-			code: '#B-0922',
-			brand: 'Angus Gold',
-			category: 'Bovine',
-			unit: 'Kg',
-			stockQuantity: 124.5,
-			stockStatus: 'normal',
-		},
-		{
-			id: 2,
-			name: 'Pork Belly Slab',
-			subtitle: 'Skin-on',
-			code: '#P-1288',
-			brand: 'Duroc Heritage',
-			category: 'Porcine',
-			unit: 'Kg',
-			stockQuantity: 12.2,
-			stockStatus: 'low',
-		},
-		{
-			id: 3,
-			name: 'Chorizo Sausages',
-			subtitle: 'Spicy Artisan',
-			code: '#C-5541',
-			brand: 'CarneUp Kitchen',
-			category: 'Processed',
-			unit: 'Un',
-			stockQuantity: 450.0,
-			stockStatus: 'normal',
-		},
-	]
-
 	useEffect(() => {
 		const fetchStockData = async () => {
 			setIsLoading(true)
 			try {
 				// TODO: Replace with actual API call
 				setTimeout(() => {
-					setStockItems(mockData)
+					setStockItems(MOCK_DATA)
 					setIsLoading(false)
 				}, 1000)
 			} catch (error) {
