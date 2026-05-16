@@ -69,7 +69,7 @@ class InventarioServiceExtraTest {
         m.setQuantidade(new BigDecimal("-3"));
         m.setTipoMovimentacao(MovementType.DESCARTE);
         d.setMovements(List.of(m));
-        when(decarteRepository.findAll(any())).thenReturn(List.of(d));
+        when(decarteRepository.findAll(any(org.springframework.data.domain.Sort.class))).thenReturn(List.of(d));
 
         var discs = inventarioService.getDiscards();
         assertNotNull(discs);
