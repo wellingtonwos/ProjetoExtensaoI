@@ -45,11 +45,8 @@ public class UsuarioControllerAdditionalTest {
         when(usuarioRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(passwordEncoder.encode("pwd")).thenReturn("enc");
 
-        // Create authentication mock
-        Authentication auth = mock(Authentication.class);
-        when(auth.getAuthorities()).thenReturn(List.of(new SimpleGrantedAuthority("ROLE_USER")));
         Usuario caller = new Usuario(); caller.setId(5L);
-        when(auth.getPrincipal()).thenReturn(caller);
+        Authentication auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(caller, null, java.util.List.of(new SimpleGrantedAuthority("ROLE_USER")));
 
         UsuarioController.UpdateUserDTO dto = new UsuarioController.UpdateUserDTO();
         dto.setNome("new");
@@ -64,10 +61,8 @@ public class UsuarioControllerAdditionalTest {
 
     @Test
     public void updateUser_notAdmin_differentId_forbidden() {
-        Authentication auth = mock(Authentication.class);
-        when(auth.getAuthorities()).thenReturn(List.of());
         Usuario caller = new Usuario(); caller.setId(10L);
-        when(auth.getPrincipal()).thenReturn(caller);
+        Authentication auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(caller, null, java.util.List.of());
 
         UsuarioController.UpdateUserDTO dto = new UsuarioController.UpdateUserDTO();
         ResponseEntity<?> resp = usuarioController.updateUser(5L, dto, auth);
@@ -86,9 +81,7 @@ public class UsuarioControllerAdditionalTest {
         when(usuarioRepository.findById(7L)).thenReturn(Optional.of(existing));
         when(usuarioRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        Authentication auth = mock(Authentication.class);
-        when(auth.getAuthorities()).thenReturn(List.of(new SimpleGrantedAuthority("ROLE_ADM")));
-
+        Authentication auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(null, null, java.util.List.of(new SimpleGrantedAuthority("ROLE_ADM")));
         UsuarioController.UpdateUserDTO dto = new UsuarioController.UpdateUserDTO();
         dto.setNome("n");
         dto.setEmail("e@x");
