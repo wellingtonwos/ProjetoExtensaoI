@@ -67,8 +67,8 @@ class DTOsRemainingDeepTest {
             setDefaultsOnFields(cls, b);
 
             // basic equality
-            try { assertEquals(a, b); } catch (AssertionError ignore) {}
-            try { assertEquals(a.hashCode(), b.hashCode()); } catch (AssertionError ignore) {}
+            assertEquals(a, b);
+            assertEquals(a.hashCode(), b.hashCode());
             assertNotNull(a.toString());
 
             Field[] fields = cls.getDeclaredFields();

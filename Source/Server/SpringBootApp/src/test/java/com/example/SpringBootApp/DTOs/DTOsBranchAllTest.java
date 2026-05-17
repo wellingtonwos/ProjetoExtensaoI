@@ -81,11 +81,7 @@ class DTOsBranchAllTest {
                 }
 
                 if (changed) {
-                    try {
-                        assertNotEquals(a, b, "Changing field " + f.getName() + " should make not equal for " + className);
-                    } catch (AssertionError ae) {
-                        // if inequality didn't happen, try revert and continue
-                    }
+                    assertNotEquals(a, b, "Changing field " + f.getName() + " should make not equal for " + className);
                 }
 
                 // revert
