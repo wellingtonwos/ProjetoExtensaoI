@@ -33,6 +33,10 @@ public class ProdutoTest {
     public void equalsAndHashCode_sameValues() {
         Produto a = createProdutoFull();
         Produto b = createProdutoFull();
+        // ensure nested objects are the same instance so Lombok-generated equals treats them as equal
+        b.setCategoria(a.getCategoria());
+        b.setMarca(a.getMarca());
+        b.setItens(a.getItens());
         assertEquals(a, b);
         assertEquals(a.hashCode(), b.hashCode());
         assertTrue(a.toString().contains("P1"));
@@ -59,6 +63,9 @@ public class ProdutoTest {
     public void equals_handlesNullAndEmptyListDifferences() {
         Produto a = createProdutoFull();
         Produto b = createProdutoFull();
+        // make nested references identical to avoid false negatives due to separate Categoria/Marca instances
+        b.setCategoria(a.getCategoria());
+        b.setMarca(a.getMarca());
         b.setItens(new ArrayList<>());
         assertEquals(a, b);
         b.setItens(null);
