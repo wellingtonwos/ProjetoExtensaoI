@@ -61,6 +61,28 @@ public class JwtTokenProvider {
                 .getBody();
         return claims.getSubject();
     }
+
+    public Long getUserIdFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        Object userId = claims.get("userId");
+        if (userId instanceof Integer) return ((Integer) userId).longValue();
+        if (userId instanceof Long) return (Long) userId;
+        return null;
+    }
+
+    public String getAccessLevelFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        Object level = claims.get("accessLevel");
+        return level != null ? level.toString() : null;
+    }
 }
 
 

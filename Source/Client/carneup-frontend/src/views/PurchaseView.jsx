@@ -1,178 +1,642 @@
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import styled from 'styled-components'
 import { Sidebar } from '../components/Sidebar'
 import { Topbar } from '../components/Topbar'
-import { Input } from '../components/Input'
 import { Button } from '../components/Button'
+import { ConfirmModal } from '../components/ConfirmModal'
 import DataTable from '../components/DataTable'
-import ConfirmModal from '../components/ConfirmModal'
 import productsApi from '../services/productsApi'
 import purchasesApi from '../services/purchasesApi'
+import { toast } from 'react-toastify'
+
+// ── Styles ────────────────────────────────────────────────────────────────────
 
 const Wrapper = styled.div`
-  display:flex; min-height:100vh; background:#f9f9f9;
+  display: flex;
+  min-height: 100vh;
+  background: #f9f9f9;
+  font-family: 'Work Sans', sans-serif;
 `
-const MainArea = styled.main`flex:1; display:flex; flex-direction:column;`
+const MainArea = styled.main`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+`
+const Content = styled.div`
+  padding: 24px 16px;
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  @media (min-width: 768px) { padding: 32px 24px; }
+`
+const PageTitle = styled.h2`
+  font-family: 'Epilogue', sans-serif;
+  font-weight: 900;
+  color: #610005;
+  text-transform: uppercase;
+  font-size: clamp(20px, 4vw, 28px);
+  margin: 0 0 4px;
+`
+const PageDesc = styled.p`
+  color: #5a403c;
+  margin: 0 0 24px;
+  font-size: 14px;
+`
+const Grid = styled.div`
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 1fr;
+  @media (min-width: 1024px) { grid-template-columns: 1fr 1fr; }
+  margin-bottom: 24px;
+`
+const Card = styled.div`
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+`
+const CardTitle = styled.h3`
+  font-family: 'Epilogue', sans-serif;
+  font-weight: 900;
+  color: #610005;
+  text-transform: uppercase;
+  font-size: 14px;
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`
+const Field = styled.div`
+  margin-bottom: 14px;
+`
+const Label = styled.label`
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #5a403c;
+  margin-bottom: 5px;
+`
+const LabelHint = styled.span`
+  font-weight: 400;
+  color: #78716c;
+  font-size: 10px;
+  margin-left: 4px;
+`
+const InputBase = styled.input`
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid ${p => p.$error ? '#ba1a1a' : '#e5e7eb'};
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Work Sans', sans-serif;
+  box-sizing: border-box;
+  &:focus { outline: none; border-color: #610005; }
+  background: ${p => p.disabled ? '#f9f9f9' : '#fff'};
+`
+const SelectBase = styled.select`
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid ${p => p.$error ? '#ba1a1a' : '#e5e7eb'};
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Work Sans', sans-serif;
+  background: #fff;
+`
+const ErrorHint = styled.p`
+  color: #ba1a1a;
+  font-size: 11px;
+  margin: 4px 0 0;
+`
+const Grid2 = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+`
+const AddBtn = styled.button`
+  width: 100%;
+  padding: 12px;
+  background: #610005;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Epilogue', sans-serif;
+  font-weight: 900;
+  font-size: 13px;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin-top: 4px;
+  &:hover { background: #7f1d1d; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+`
+const SearchResult = styled.div`
+  max-height: 180px;
+  overflow-y: auto;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  margin-top: 6px;
+`
+const ProductRow = styled.div`
+  padding: 10px 12px;
+  border-bottom: 1px solid #f5f5f4;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  &:hover { background: #fef2f2; }
+  &:last-child { border-bottom: none; }
+  .name { font-weight: 700; font-size: 13px; }
+  .sub { font-size: 11px; color: #78716c; }
+`
+const SelectBtn = styled.button`
+  background: #610005;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  &:hover { background: #7f1d1d; }
+`
+const SelectedBadge = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fef2f2;
+  border: 1px solid #ffdad6;
+  border-radius: 8px;
+  padding: 10px 14px;
+  .name { font-weight: 700; font-size: 14px; color: #610005; }
+  .sub { font-size: 11px; color: #78716c; }
+`
+const ClearBtn = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #78716c;
+  &:hover { color: #ba1a1a; }
+`
+const PerishableTag = styled.span`
+  display: inline-block;
+  background: #fff3cd;
+  color: #b45309;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+`
+const TableWrapper = styled.div`
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+  overflow: hidden;
+  margin-bottom: 16px;
+`
+const SubmitRow = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+`
+const InputWithSuffix = styled.div`
+  display: flex;
+  align-items: stretch;
+`
+const UnitSuffix = styled.span`
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  background: #610005;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 0 8px 8px 0;
+  border: 1px solid #610005;
+  white-space: nowrap;
+`
+const PrefixLabel = styled.span`
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  background: #f5f5f4;
+  color: #5a403c;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid #e5e7eb;
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+  white-space: nowrap;
+`
+const PaginationRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 0 2px;
+`
+const PageBtn = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  &:hover:not(:disabled) { background: #fef2f2; border-color: #610005; }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+`
 
-const Content = styled.div`padding:32px; max-width:1280px; margin:0 auto; width:100%;`
+// ── Component ─────────────────────────────────────────────────────────────────
 
-const FormRow = styled.div`display:flex; gap:12px; margin-bottom:12px; align-items:center;`
+const mapProduct = (p) => ({
+  id: p.id,
+  name: p.name || '',
+  code: p.code || '',
+  brand: p.brandName || '',
+  unit: p.unitMeasurement || 'UN',
+  perecivel: p.perecivel,
+})
 
 export const PurchaseView = ({ navigate }) => {
-  const [query, setQuery] = useState('')
+  // ── Product search ──
   const [products, setProducts] = useState([])
+  const [productPage, setProductPage] = useState(0)
+  const [productTotalPages, setProductTotalPages] = useState(0)
+  const [productLoading, setProductLoading] = useState(false)
+  const [search, setSearch] = useState('')
+  const [selected, setSelected] = useState(null)
 
-  const [selectedProductId, setSelectedProductId] = useState('')
+  // ── Form ──
   const [qty, setQty] = useState('')
+  const [costDisplay, setCostDisplay] = useState('')
   const [cost, setCost] = useState('')
   const [expiry, setExpiry] = useState('')
-  const [purchaseDate, setPurchaseDate] = useState(new Date().toISOString().slice(0,10))
+  const [purchaseDate, setPurchaseDate] = useState(new Date().toISOString().slice(0, 10))
 
+  // ── Cart ──
   const [cart, setCart] = useState([])
-  const [editing, setEditing] = useState(null)
-  const [confirmOpen, setConfirmOpen] = useState(false)
-  const [pendingEdit, setPendingEdit] = useState(null)
+  const [errors, setErrors] = useState({})
+  const [submitting, setSubmitting] = useState(false)
 
+  // ── Guard de saída ──
+  const [leaveConfirm, setLeaveConfirm] = useState({ open: false, to: null, params: null })
+
+  const safeNavigate = useCallback((to, params = {}) => {
+    if (cart.length > 0) {
+      setLeaveConfirm({ open: true, to, params })
+    } else {
+      navigate(to, params)
+    }
+  }, [cart.length, navigate])
+
+  // Avisa se fechar/recarregar a aba com itens no carrinho
   useEffect(() => {
-    const fetch = async () => {
-      try {
-        const res = await productsApi.getAllProducts(0)
-        // normalize response to expected fields (page.content)
-        const list = (res?.content || []).map(p => ({ id: p.id, name: p.name || p.product_name || p.productName, code: p.code || p.codigo, brand: p.brandName || p.brand_name || '', category: p.categoryName || '', unit: p.unitMeasurement || 'UN', perecivel: p.perecivel }))
-        setProducts(list)
-      } catch (e) {
-        console.error('Falha ao carregar produtos', e)
+    const handleBeforeUnload = (e) => {
+      if (cart.length > 0) {
+        e.preventDefault()
+        e.returnValue = ''
       }
     }
-    fetch()
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [cart.length])
+
+  // ── Load products — sempre usa /products/search (q é opcional no backend) ──
+  const loadProducts = useCallback(async (query, page) => {
+    setProductLoading(true)
+    try {
+      const data = await productsApi.searchProducts(query?.trim() ?? '', page)
+      setProducts((data.content || []).map(mapProduct))
+      setProductTotalPages(data.totalPages || 0)
+    } catch {
+      toast.error('Erro ao carregar produtos.')
+    } finally {
+      setProductLoading(false)
+    }
   }, [])
 
-  const filtered = useMemo(() => products.filter(p => {
-    const q = query.toLowerCase()
-    return !q || (p.name && p.name.toLowerCase().includes(q)) || (p.code && p.code.toLowerCase().includes(q)) || (p.brand && p.brand.toLowerCase().includes(q)) || (p.category && p.category.toLowerCase().includes(q))
-  }), [products, query])
+  const debounceRef = useRef(null)
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      setProductPage(0)
+      loadProducts(search, 0)
+    }, 400)
+    return () => clearTimeout(debounceRef.current)
+  }, [search, loadProducts])
 
-  const addToCart = () => {
-    if (!selectedProductId || !qty || !cost) return
-    const prod = products.find(p => String(p.id) === String(selectedProductId))
-    const itemData = { id: Date.now(), productId: prod.id, productName: prod.name, code: prod.code, qty: parseFloat(qty), cost: parseFloat(cost), expiry }
-
-    if (editing) {
-      setCart(prev => prev.map(it => it.id === editing.id ? { ...it, ...itemData } : it))
-      setEditing(null)
-    } else {
-      setCart(prev => [itemData, ...prev])
-    }
-
-    setSelectedProductId(''); setQty(''); setCost(''); setExpiry('')
+  const handleProductPage = (page) => {
+    setProductPage(page)
+    loadProducts(search, page)
   }
 
-  const startEdit = (item) => {
-    const ageDays = (Date.now() - (item.id || 0)) / (1000*60*60*24)
-    if (ageDays > 7) {
-      setPendingEdit(item)
-      setConfirmOpen(true)
-      return
-    }
-    setEditing(item)
-    setSelectedProductId(item.productId)
-    setQty(String(item.qty))
-    setCost(String(item.cost))
-    setExpiry(item.expiry || '')
+  // ── BRL currency mask ──
+  const handleCostChange = (e) => {
+    const digits = e.target.value.replace(/\D/g, '')
+    const cents = parseInt(digits || '0', 10)
+    setCostDisplay(cents === 0 ? '' : (cents / 100).toFixed(2).replace('.', ','))
+    setCost(cents > 0 ? String(cents / 100) : '')
   }
 
-  const confirmEdit = () => {
-    setConfirmOpen(false)
-    if (pendingEdit) startEdit(pendingEdit)
-    setPendingEdit(null)
+  // ── Validation ──
+  const validate = () => {
+    const e = {}
+    if (!selected) e.product = 'Selecione um produto.'
+    const parsedQty = parseFloat(qty)
+    if (!qty || isNaN(parsedQty) || parsedQty <= 0) e.qty = 'Informe uma quantidade maior que zero.'
+    if (selected?.unit === 'UN' && !Number.isInteger(parsedQty)) e.qty = 'Produtos UN exigem quantidade inteira.'
+    const parsedCost = parseFloat(cost)
+    if (!cost || isNaN(parsedCost) || parsedCost <= 0) e.cost = 'Informe um preço de custo maior que zero.'
+    if (selected?.perecivel === true) {
+      if (!expiry) {
+        e.expiry = 'Data de validade obrigatória para produtos perecíveis.'
+      } else {
+        const today = new Date().toISOString().slice(0, 10)
+        if (expiry < today) e.expiry = 'A validade não pode ser uma data passada.'
+      }
+    }
+    return e
   }
 
-  const cancelEdit = () => { setConfirmOpen(false); setPendingEdit(null) }
+  const handleAddToCart = () => {
+    const e = validate()
+    if (Object.keys(e).length > 0) { setErrors(e); return }
+    setErrors({})
+    setCart(prev => [...prev, {
+      key: Date.now(),
+      productId: selected.id,
+      productName: selected.name,
+      code: selected.code,
+      unit: selected.unit,
+      perecivel: selected.perecivel,
+      qty: parseFloat(qty),
+      cost: parseFloat(cost),
+      expiry: selected.perecivel ? expiry : null,
+    }])
+    setSelected(null)
+    setSearch('')
+    setQty('')
+    setCostDisplay('')
+    setCost('')
+    setExpiry('')
+  }
 
-  const columns = [
-    { header: 'Produto', key: 'product', render: i => <strong>{i.productName}</strong> },
-    { header: 'Código', key: 'code', render: i => <span>{i.code}</span> },
-    { header: 'Qtd', key: 'qty', style:{textAlign:'right'}, render: i => <span>{i.qty}</span> },
-    { header: 'Preço Custo', key: 'cost', style:{textAlign:'right'}, render: i => <span>R$ {Number(i.cost).toFixed(2)}</span> },
-    { header: 'Validade', key: 'expiry', render: i => <span>{i.expiry || '-'}</span> },
-  ]
+  const removeFromCart = (key) => setCart(prev => prev.filter(it => it.key !== key))
 
-  const actions = [
-    { icon: 'edit', onClick: startEdit },
-    { icon: 'delete', onClick: (it) => setCart(prev => prev.filter(p => p.id !== it.id)) }
-  ]
-
-  const handleSubmitPurchase = async () => {
-    if (!cart.length) return alert('Adicione ao menos um item ao carrinho')
-    const payload = {
-      date: purchaseDate,
-      items: cart.map(it => ({ productId: Number(it.productId), quantity: it.qty, unitPurchasePrice: it.cost, expiringDate: it.expiry || null }))
-    }
+  // ── Submit ──
+  const handleSubmit = async () => {
+    if (!cart.length) { toast.warning('Adicione pelo menos um produto à lista antes de registrar.'); return }
+    setSubmitting(true)
     try {
-      await purchasesApi.createPurchase(payload)
-      alert('Compra registrada com sucesso')
+      await purchasesApi.createPurchase({
+        date: purchaseDate,
+        items: cart.map(it => ({
+          productId: Number(it.productId),
+          quantity: it.qty,
+          unitPurchasePrice: it.cost,
+          expiringDate: it.expiry || null,
+        })),
+      })
+      toast.success('Entrada de estoque registrada com sucesso!')
       setCart([])
     } catch (e) {
-      console.error('Erro ao registrar compra', e)
-      alert(e?.response?.data?.message || 'Falha ao registrar compra')
+      const msg = e?.response?.data?.message || ''
+      if (msg.includes('perecivel') || msg.includes('Expiring')) {
+        toast.error('Produto perecível exige data de validade. Verifique os itens.')
+      } else if (msg.includes('positive') || msg.includes('Positive')) {
+        toast.error('Preço de custo e quantidade devem ser maiores que zero.')
+      } else {
+        toast.error(msg || 'Erro ao registrar entrada. Verifique os dados e tente novamente.')
+      }
+    } finally {
+      setSubmitting(false)
     }
   }
+
+  // ── Table ──
+  const columns = [
+    { header: 'Produto', key: 'name', render: i => (
+      <div>
+        <div style={{ fontWeight: 700 }}>{i.productName}</div>
+        <div style={{ fontSize: 11, color: '#78716c' }}>{i.code}</div>
+      </div>
+    )},
+    { header: 'Qtd', key: 'qty', style: { textAlign: 'right' },
+      render: i => <span>{i.unit === 'KG' ? `${Number(i.qty).toFixed(3)} kg` : `${i.qty} un`}</span> },
+    { header: 'Custo Unit.', key: 'cost', style: { textAlign: 'right' },
+      render: i => <span>R$ {Number(i.cost).toFixed(2).replace('.', ',')}</span> },
+    { header: 'Validade', key: 'expiry',
+      render: i => i.expiry
+        ? <span style={{ color: '#b45309', fontWeight: 600 }}>{i.expiry}</span>
+        : <span style={{ color: '#a8a29e' }}>—</span> },
+  ]
+
+  const actions = [{ icon: 'delete', onClick: (it) => removeFromCart(it.key) }]
 
   return (
     <Wrapper>
-      <Sidebar navigate={navigate} activeView='purchases' />
+      <Sidebar navigate={safeNavigate} activeView='purchases' />
       <MainArea>
-        <Topbar searchQuery={query} onSearchChange={setQuery} />
+        <Topbar title='Entrada de Estoque' />
         <Content>
-          <h2 style={{fontFamily:'Epilogue',fontWeight:900,color:'#610005'}}>Registro de Compra (Entrada)</h2>
-          <p style={{color:'#5a403c'}}>Monte a lista de produtos comprados antes de finalizar a entrada.</p>
+          <Grid>
+            {/* ── Busca de produto ── */}
+            <Card>
+              <CardTitle>
+                <span className='material-symbols-outlined' style={{ fontSize: 18 }}>search</span>
+                1. Selecione o Produto
+              </CardTitle>
 
-          <div style={{marginTop:16,marginBottom:12}}>
-            <FormRow>
-              <div style={{flex:1}}>
-                <label style={{display:'block',fontSize:10,fontWeight:700}}>Buscar produto</label>
-                <Input value={query} onChange={e=>setQuery(e.target.value)} placeholder='Pesquisar por nome, código ou marca...' />
-                <div style={{maxHeight:160,overflowY:'auto',marginTop:8}}>
-                  {filtered.map(p=> (
-                    <div key={p.id} style={{padding:8,display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px solid #f3f3f3'}}>
-                      <div>
-                        <div style={{fontWeight:800}}>{p.name}</div>
-                        <div style={{fontSize:12,color:'#78716c'}}>{p.code} • {p.brand}</div>
-                      </div>
-                      <div>
-                        <button onClick={() => setSelectedProductId(p.id)} style={{background:'#610005',color:'#fff',border:'none',padding:'8px 10px',borderRadius:8}}>Selecionar</button>
-                      </div>
+              {selected ? (
+                <SelectedBadge>
+                  <div>
+                    <div className='name'>{selected.name}</div>
+                    <div className='sub'>
+                      {selected.code} • {selected.unit}
+                      {selected.perecivel && <PerishableTag style={{ marginLeft: 6 }}>Perecível</PerishableTag>}
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
+                  <ClearBtn onClick={() => { setSelected(null); setExpiry('') }} title='Trocar produto'>
+                    <span className='material-symbols-outlined'>close</span>
+                  </ClearBtn>
+                </SelectedBadge>
+              ) : (
+                <>
+                  <Field>
+                    <Label>Buscar por nome, código ou marca</Label>
+                    <InputBase
+                      value={search}
+                      onChange={e => setSearch(e.target.value)}
+                      placeholder='Ex: Picanha, ABC123...'
+                    />
+                  </Field>
+                  <SearchResult>
+                    {productLoading && (
+                      <div style={{ padding: 16, color: '#78716c', fontSize: 13, textAlign: 'center' }}>Carregando...</div>
+                    )}
+                    {!productLoading && products.length === 0 && (
+                      <div style={{ padding: 16, color: '#78716c', fontSize: 13, textAlign: 'center' }}>
+                        Nenhum produto encontrado.
+                      </div>
+                    )}
+                    {!productLoading && products.map(p => (
+                      <ProductRow key={p.id}>
+                        <div>
+                          <div className='name'>{p.name}
+                            {p.perecivel && <PerishableTag style={{ marginLeft: 6 }}>Perecível</PerishableTag>}
+                          </div>
+                          <div className='sub'>{p.code} • {p.brand} • {p.unit}</div>
+                        </div>
+                        <SelectBtn onClick={() => { setSelected(p); setSearch('') }}>
+                          Selecionar
+                        </SelectBtn>
+                      </ProductRow>
+                    ))}
+                  </SearchResult>
+                  {productTotalPages > 1 && (
+                    <PaginationRow>
+                      <PageBtn disabled={productPage === 0} onClick={() => handleProductPage(productPage - 1)}>
+                        <span className='material-symbols-outlined' style={{ fontSize: 16 }}>chevron_left</span>
+                      </PageBtn>
+                      <span style={{ fontSize: 12, color: '#5a403c' }}>{productPage + 1} / {productTotalPages}</span>
+                      <PageBtn disabled={productPage >= productTotalPages - 1} onClick={() => handleProductPage(productPage + 1)}>
+                        <span className='material-symbols-outlined' style={{ fontSize: 16 }}>chevron_right</span>
+                      </PageBtn>
+                    </PaginationRow>
+                  )}
+                </>
+              )}
+              {errors.product && <ErrorHint>{errors.product}</ErrorHint>}
+            </Card>
 
-              <div style={{width:320}}>
-                <label style={{display:'block',fontSize:10,fontWeight:700}}>Data da Compra</label>
-                <Input type='date' value={purchaseDate} onChange={e=>setPurchaseDate(e.target.value)} style={{marginBottom:8}} />
-                <label style={{display:'block',fontSize:10,fontWeight:700,marginTop:8}}>Produto Selecionado</label>
-                <select value={selectedProductId} onChange={(e)=>setSelectedProductId(e.target.value)} style={{width:'100%',padding:12,border:'1px solid #e7e5e4',borderRadius:8,marginBottom:8}}>
-                  <option value=''>-- selecione --</option>
-                  {products.map(p=> <option key={p.id} value={p.id}>{p.name} ({p.code})</option>)}
-                </select>
-                <Input value={qty} onChange={e=>setQty(e.target.value)} placeholder='Quantidade' />
-                <Input value={cost} onChange={e=>setCost(e.target.value)} placeholder='Preço de Compra (R$)' style={{marginTop:8}} />
-                <Input type='date' value={expiry} onChange={e=>setExpiry(e.target.value)} style={{marginTop:8}} />
-                <Button onClick={addToCart} style={{marginTop:12}}>{editing ? 'Atualizar item' : 'Adicionar à lista'}</Button>
-              </div>
-            </FormRow>
-          </div>
+            {/* ── Dados da entrada ── */}
+            <Card>
+              <CardTitle>
+                <span className='material-symbols-outlined' style={{ fontSize: 18 }}>edit_note</span>
+                2. Informe os Dados
+              </CardTitle>
 
-          <DataTable data={cart} columns={columns} actions={actions} currentPage={1} totalPages={1} totalItems={cart.length} onPageChange={()=>{}} loading={false} emptyMessage='Carrinho vazio.' />
+              <Field>
+                <Label>Data da Compra</Label>
+                <InputBase type='date' value={purchaseDate} onChange={e => setPurchaseDate(e.target.value)} />
+              </Field>
 
-          <div style={{display:'flex',justifyContent:'flex-end',marginTop:12}}>
-            <Button onClick={handleSubmitPurchase} disabled={!cart.length}>Finalizar Compra</Button>
-          </div>
+              <Grid2>
+                <Field>
+                  <Label>
+                    Quantidade *
+                    {selected && <LabelHint>— {selected.unit === 'KG' ? 'kg (3 decimais)' : 'unidades inteiras'}</LabelHint>}
+                  </Label>
+                  <InputWithSuffix>
+                    <InputBase
+                      type='number'
+                      min='0'
+                      step={selected?.unit === 'UN' ? '1' : '0.001'}
+                      value={qty}
+                      onChange={e => setQty(e.target.value)}
+                      placeholder={selected?.unit === 'UN' ? '0' : '0.000'}
+                      $error={!!errors.qty}
+                      style={{ borderRadius: selected ? '8px 0 0 8px' : '8px' }}
+                    />
+                    {selected && <UnitSuffix>{selected.unit}</UnitSuffix>}
+                  </InputWithSuffix>
+                  {errors.qty && <ErrorHint>{errors.qty}</ErrorHint>}
+                </Field>
 
+                <Field>
+                  <Label>Preço de Custo *</Label>
+                  <InputWithSuffix>
+                    <PrefixLabel>R$</PrefixLabel>
+                    <InputBase
+                      type='text'
+                      inputMode='numeric'
+                      value={costDisplay}
+                      onChange={handleCostChange}
+                      placeholder='0,00'
+                      $error={!!errors.cost}
+                      style={{ borderRadius: '0 8px 8px 0', borderLeft: 'none' }}
+                    />
+                  </InputWithSuffix>
+                  {errors.cost && <ErrorHint>{errors.cost}</ErrorHint>}
+                </Field>
+              </Grid2>
+
+              {selected?.perecivel === true && (
+                <Field>
+                  <Label>
+                    Data de Validade
+                    <LabelHint>* obrigatório — produto perecível</LabelHint>
+                  </Label>
+                  <InputBase
+                    type='date'
+                    value={expiry}
+                    onChange={e => setExpiry(e.target.value)}
+                    $error={!!errors.expiry}
+                  />
+                  {errors.expiry && <ErrorHint>{errors.expiry}</ErrorHint>}
+                </Field>
+              )}
+
+              <AddBtn onClick={handleAddToCart} disabled={!selected}>
+                <span className='material-symbols-outlined' style={{ fontSize: 16, verticalAlign: 'middle', marginRight: 6 }}>add_shopping_cart</span>
+                Adicionar à Lista
+              </AddBtn>
+            </Card>
+          </Grid>
+
+          {/* ── Lista de itens ── */}
+          {cart.length > 0 && (
+            <>
+              <TableWrapper>
+                <DataTable
+                  data={cart}
+                  columns={columns}
+                  actions={actions}
+                  currentPage={1}
+                  totalPages={1}
+                  totalItems={cart.length}
+                  onPageChange={() => {}}
+                  loading={false}
+                  emptyMessage='Nenhum item adicionado.'
+                />
+              </TableWrapper>
+              <SubmitRow>
+                <Button variant='secondary' full={false} small onClick={() => setCart([])}>Limpar Lista</Button>
+                <Button full={false} onClick={handleSubmit} disabled={submitting}>
+                  {submitting ? 'Registrando...' : 'Registrar Entrada no Estoque'}
+                </Button>
+              </SubmitRow>
+            </>
+          )}
+
+          {cart.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '32px 16px', color: '#a8a29e', fontSize: 14 }}>
+              <span className='material-symbols-outlined' style={{ fontSize: 40, display: 'block', marginBottom: 8 }}>inventory_2</span>
+              Selecione produtos e adicione à lista para registrar a entrada.
+            </div>
+          )}
         </Content>
       </MainArea>
 
-      <ConfirmModal open={confirmOpen} title='Editar Compra Antiga' message='Este item parece ter sido registrado há mais de 7 dias. Deseja continuar a edição?' onConfirm={confirmEdit} onCancel={cancelEdit} />
+      <ConfirmModal
+        open={leaveConfirm.open}
+        title='Sair sem registrar?'
+        message={`Você tem ${leaveConfirm.open ? cart.length : 0} ${cart.length === 1 ? 'produto' : 'produtos'} na lista que ainda não foi registrado no estoque. Se sair agora, a lista será perdida.`}
+        confirmLabel='Sair mesmo assim'
+        onConfirm={() => {
+          const { to, params } = leaveConfirm
+          setLeaveConfirm({ open: false, to: null, params: null })
+          navigate(to, params)
+        }}
+        onCancel={() => setLeaveConfirm({ open: false, to: null, params: null })}
+      />
     </Wrapper>
   )
 }

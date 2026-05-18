@@ -5,13 +5,14 @@ on:
   push:
     branches:
       - main
-      - pipeline-only
+      - deploy
     paths:
       - 'Source/Client/carneup-frontend/**'
       - '.github/workflows/ci-frontend.yml'
   pull_request:
     branches:
       - main
+      - deploy
     paths:
       - 'Source/Client/carneup-frontend/**'
       - '.github/workflows/ci-frontend.yml'

@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { getToken, isTokenValid } from './services/cookieUtils'
+import { ToastContainer } from 'react-toastify'
 
 import { GlobalStyle } from './GlobalStyle'
 
@@ -14,66 +16,73 @@ import { SuccessView } from './views/SuccessView'
 import { DiscardView } from './views/DiscardView'
 import { PurchaseView } from './views/PurchaseView'
 import AttributesView from './views/AttributesView'
+import { ReportsView } from './views/ReportsView'
+import { ClienteHistoricoView } from './views/ClienteHistoricoView'
+import { ConfiguracaoView } from './views/ConfiguracaoView'
+
+const ADMIN_ONLY_VIEWS = new Set(['discard', 'attributes', 'reports', 'configuracoes', 'settings', 'config-loja'])
 
 export default function App() {
 	const [currentView, setCurrentView] = useState('login')
 	const [recoveryEmail, setRecoveryEmail] = useState('')
 	const [recoveryCode, setRecoveryCode] = useState('')
+	const [selectedClientId, setSelectedClientId] = useState(null)
 
 	useEffect(() => {
-		// Verificar se há token no localStorage ao carregar a página
-		const token = localStorage.getItem('authToken')
-		if (token) {
+		const token = getToken()
+		if (token && isTokenValid(token)) {
 			setCurrentView('dashboard')
 		}
 	}, [])
 
+	const isAdmin = () => localStorage.getItem('accessLevel') === 'ADM'
+
+	const navigate = (view, params = {}) => {
+		if (ADMIN_ONLY_VIEWS.has(view) && !isAdmin()) return
+		if (params.clientId) setSelectedClientId(params.clientId)
+		setCurrentView(view)
+	}
+
 	const renderView = () => {
+		// Bloqueia acesso direto a rotas admin por operadores
+		if (ADMIN_ONLY_VIEWS.has(currentView) && !isAdmin()) {
+			return <DashboardView navigate={navigate} />
+		}
+
 		switch (currentView) {
 			case 'login':
-				return <LoginView navigate={setCurrentView} />
+				return <LoginView navigate={navigate} />
 			case 'dashboard':
-				return <DashboardView navigate={setCurrentView} />
+				return <DashboardView navigate={navigate} />
 			case 'sales':
-				return <SalesView navigate={setCurrentView} />
+				return <SalesView navigate={navigate} />
 			case 'forgot':
-				return (
-					<ForgotPasswordView
-						navigate={setCurrentView}
-						setRecoveryEmail={setRecoveryEmail}
-					/>
-				)
+				return <ForgotPasswordView navigate={navigate} setRecoveryEmail={setRecoveryEmail} />
 			case 'code':
-				return (
-					<RecoveryCodeView
-						navigate={setCurrentView}
-						recoveryEmail={recoveryEmail}
-						setRecoveryCode={setRecoveryCode}
-					/>
-				)
+				return <RecoveryCodeView navigate={navigate} recoveryEmail={recoveryEmail} setRecoveryCode={setRecoveryCode} />
 			case 'reset':
-				return (
-					<ResetPasswordView
-						navigate={setCurrentView}
-						recoveryCode={recoveryCode}
-					/>
-				)
+				return <ResetPasswordView navigate={navigate} recoveryCode={recoveryCode} />
 			case 'success':
-				return <SuccessView navigate={setCurrentView} />
+				return <SuccessView navigate={navigate} />
 			case 'stock':
-				return <StockView navigate={setCurrentView} />
+				return <StockView navigate={navigate} />
 			case 'discard':
-				return <DiscardView navigate={setCurrentView} />
+				return <DiscardView navigate={navigate} />
 			case 'purchases':
-				return <PurchaseView navigate={setCurrentView} />
+				return <PurchaseView navigate={navigate} />
 			case 'attributes':
-				return <AttributesView navigate={setCurrentView} />
+				return <AttributesView navigate={navigate} />
 			case 'configuracoes':
-				return <SettingsView navigate={setCurrentView} />
-		case 'settings':
-				return <SettingsView navigate={setCurrentView} />
-		default:
-				return <LoginView navigate={setCurrentView} />
+			case 'settings':
+				return <SettingsView navigate={navigate} />
+			case 'config-loja':
+				return <ConfiguracaoView navigate={navigate} />
+			case 'reports':
+				return <ReportsView navigate={navigate} />
+			case 'cliente-historico':
+				return <ClienteHistoricoView navigate={navigate} clientId={selectedClientId} />
+			default:
+				return <LoginView navigate={navigate} />
 		}
 	}
 
@@ -81,6 +90,15 @@ export default function App() {
 		<>
 			<GlobalStyle />
 			{renderView()}
+			<ToastContainer
+				position='top-right'
+				autoClose={3000}
+				hideProgressBar={false}
+				newestOnTop
+				closeOnClick
+				pauseOnHover
+				draggable
+			/>
 		</>
 	)
 }

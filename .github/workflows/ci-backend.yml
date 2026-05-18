@@ -5,13 +5,14 @@ on:
   push:
     branches:
       - main
-      - pipeline-only
+      - deploy
     paths:
       - 'Source/Server/SpringBootApp/**'
       - '.github/workflows/ci-backend.yml'
   pull_request:
     branches:
       - main
+      - deploy
     paths:
       - 'Source/Server/SpringBootApp/**'
       - '.github/workflows/ci-backend.yml'
