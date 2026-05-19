@@ -284,6 +284,30 @@ export const StockView = ({ navigate }) => {
 		}
 	}
 
+	const [quickCreate, setQuickCreate] = useState({ open: false, type: null })
+
+	const handleQuickCreate = async (type, value) => {
+		try {
+			if (type === 'brand') {
+				const created = await addBrand(toTitleCase(value))
+				if (created?.id) {
+					setForm(f => ({ ...f, brandId: String(created.id) }))
+					setEditForm(f => ({ ...f, brandId: String(created.id) }))
+				}
+			} else {
+				const created = await addCategory(toTitleCase(value))
+				if (created?.id) {
+					setForm(f => ({ ...f, categoryId: String(created.id) }))
+					setEditForm(f => ({ ...f, categoryId: String(created.id) }))
+				}
+			}
+			setQuickCreate({ open: false, type: null })
+			toast.success(`${type === 'brand' ? 'Marca' : 'Categoria'} criada com sucesso!`)
+		} catch (e) {
+			toast.error(e?.response?.data?.message || `Erro ao criar ${type === 'brand' ? 'marca' : 'categoria'}.`)
+		}
+	}
+
 	const [rows, setRows] = useState([])
 	const [allRows, setAllRows] = useState([])
 	const [loading, setLoading] = useState(true)
