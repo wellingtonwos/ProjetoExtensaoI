@@ -5,7 +5,7 @@ import { Topbar } from '../components/Topbar'
 import DataTable from '../components/DataTable'
 import { Button } from '../components/Button'
 import { Footer } from '../components/Footer'
-import productsApi, { getProductById, updateProduct } from '../services/productsApi'
+import productsApi, { getProductById, updateProduct, getAllProductsUnpaged } from '../services/productsApi'
 import { useAttributes } from '../context/AttributesContext'
 import { toast } from 'react-toastify'
 import { toTitleCase } from '../services/textUtils'
@@ -131,7 +131,21 @@ const FormTitle = styled.h3`
 	color: #610005;
 	text-transform: uppercase;
 	font-size: 16px;
-	margin: 0 0 20px;
+	margin: 0;
+`
+const FormHeader = styled.div`
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	cursor: pointer;
+	user-select: none;
+	margin-bottom: ${p => p.$open ? '20px' : '0'};
+	span.chevron {
+		font-size: 20px;
+		color: #78716c;
+		transition: transform 0.2s ease;
+		transform: ${p => p.$open ? 'rotate(180deg)' : 'rotate(0deg)'};
+	}
 `
 const Field = styled.div`margin-bottom: 14px;`
 const Label = styled.label`
@@ -243,6 +257,8 @@ const mapDto = (p) => ({
 
 export const StockView = ({ navigate }) => {
 	const { brands, categories, addBrand, addCategory } = useAttributes()
+	const isAdmin = localStorage.getItem('accessLevel') === 'ADM'
+	const [formOpen, setFormOpen] = useState(false)
 
 	const [quickCreate, setQuickCreate] = useState({ open: false, type: null })
 
@@ -269,6 +285,7 @@ export const StockView = ({ navigate }) => {
 	}
 
 	const [rows, setRows] = useState([])
+	const [allRows, setAllRows] = useState([])
 	const [loading, setLoading] = useState(true)
 	const [searchQuery, setSearchQuery] = useState('')
 	const [selectedCategory, setSelectedCategory] = useState('')
@@ -350,6 +367,7 @@ export const StockView = ({ navigate }) => {
 			toast.success(`Produto "${editForm.name}" atualizado com sucesso!`)
 			setEditModal(null)
 			load(searchQuery, currentPage - 1)
+			loadStats()
 		} catch (err) {
 			toast.error(err.response?.data?.message || 'Erro ao atualizar produto.')
 		} finally {
@@ -382,8 +400,17 @@ export const StockView = ({ navigate }) => {
 		}
 	}, [])
 
+	// Carrega todos os produtos (sem paginação) para calcular stats globais
+	const loadStats = useCallback(async () => {
+		try {
+			const all = await getAllProductsUnpaged()
+			setAllRows(all.map(mapDto))
+		} catch {}
+	}, [])
+
 	// Initial load
 	useEffect(() => { load('', 0) }, [load])
+	useEffect(() => { loadStats() }, [loadStats])
 
 	// Debounced search
 	useEffect(() => {
@@ -408,8 +435,8 @@ export const StockView = ({ navigate }) => {
 
 	// ── Stats ──────────────────────────────────────────────────────────────────
 
-	const lowStock = rows.filter(r => r.stock < 5).length
-	const outOfStock = rows.filter(r => r.stock === 0).length
+	const lowStock = allRows.filter(r => r.stock > 0 && r.stock < 5).length
+	const outOfStock = allRows.filter(r => r.stock === 0).length
 
 	// ── Product form ───────────────────────────────────────────────────────────
 
@@ -448,6 +475,7 @@ export const StockView = ({ navigate }) => {
 			setSearchQuery('')
 			setCurrentPage(1)
 			load('', 0)
+			loadStats()
 		} catch (e) {
 			toast.error(e.response?.data?.message || 'Erro ao cadastrar produto.')
 		} finally {
@@ -491,7 +519,8 @@ export const StockView = ({ navigate }) => {
 			render: r => (
 				<div style={{ textAlign: 'right' }}>
 					<StockBadge $low={r.stock < 5}>{r.stock.toFixed(2)} {r.unit}</StockBadge>
-					{r.stock < 5 && <div style={{ fontSize: 10, color: '#ba1a1a', fontWeight: 700 }}>BAIXO</div>}
+					{r.stock > 0 && r.stock < 5 && <div style={{ fontSize: 10, color: '#ba1a1a', fontWeight: 700 }}>BAIXO</div>}
+					{r.stock === 0 && <div style={{ fontSize: 10, color: '#ba1a1a', fontWeight: 700 }}>SEM ESTOQUE</div>}
 				</div>
 			),
 		},
@@ -546,8 +575,14 @@ export const StockView = ({ navigate }) => {
 
 					{/* Cadastrar Produto */}
 					<FormCard>
-						<FormTitle>Cadastrar Novo Produto</FormTitle>
-						<form onSubmit={handleSubmit}>
+						<FormHeader $open={formOpen} onClick={() => setFormOpen(o => !o)}>
+							<FormTitle>
+								<span className='material-symbols-outlined' style={{ fontSize: 16, verticalAlign: 'middle', marginRight: 8 }}>add_circle</span>
+								Cadastrar Novo Produto
+							</FormTitle>
+							<span className='material-symbols-outlined chevron'>expand_more</span>
+						</FormHeader>
+						{formOpen && <form onSubmit={handleSubmit}>
 							<Field>
 								<Label>Nome do Produto *</Label>
 								<Input value={form.name} onChange={handleFormChange('name')} placeholder='Ex: Picanha Maturada' required />
@@ -573,7 +608,7 @@ export const StockView = ({ navigate }) => {
 											<option value=''>Selecione...</option>
 											{(categories || []).map(c => <option key={c.id} value={c.id}>{c.categoryName}</option>)}
 										</Select>
-										<QuickAddBtn type='button' onClick={() => setQuickCreate({ open: true, type: 'category' })} title='Nova categoria'>+</QuickAddBtn>
+										{isAdmin && <QuickAddBtn type='button' onClick={() => setQuickCreate({ open: true, type: 'category' })} title='Nova categoria'>+</QuickAddBtn>}
 									</div>
 								</Field>
 								<Field>
@@ -583,7 +618,7 @@ export const StockView = ({ navigate }) => {
 											<option value=''>Selecione...</option>
 											{(brands || []).map(b => <option key={b.id} value={b.id}>{b.brandName}</option>)}
 										</Select>
-										<QuickAddBtn type='button' onClick={() => setQuickCreate({ open: true, type: 'brand' })} title='Nova marca'>+</QuickAddBtn>
+										{isAdmin && <QuickAddBtn type='button' onClick={() => setQuickCreate({ open: true, type: 'brand' })} title='Nova marca'>+</QuickAddBtn>}
 									</div>
 								</Field>
 							</FormGrid2>
@@ -612,7 +647,7 @@ export const StockView = ({ navigate }) => {
 							<SubmitBtn type='submit' disabled={submitting}>
 								{submitting ? 'Cadastrando...' : 'Cadastrar Produto'}
 							</SubmitBtn>
-						</form>
+						</form>}
 					</FormCard>
 
 					{/* Filters */}

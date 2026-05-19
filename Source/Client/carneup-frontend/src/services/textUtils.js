@@ -1,7 +1,8 @@
-// Capitaliza a primeira letra de cada palavra
+// Capitaliza a primeira letra de cada palavra.
+// Usa \S em vez de \w para cobrir acentos/caracteres UTF-8 (ex: Água, Álcool).
 export const toTitleCase = (str) => {
 	if (!str) return ''
-	return str.replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+	return str.toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase())
 }
 
 // Capitaliza apenas a primeira letra da frase
