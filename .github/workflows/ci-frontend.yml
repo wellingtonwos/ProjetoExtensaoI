@@ -5,8 +5,6 @@ on:
   push:
     branches:
       - main
-      - deploy
-      - pipeline-only
     paths:
       - 'Source/Client/carneup-frontend/**'
       - '.github/workflows/ci-frontend.yml'
