@@ -52,7 +52,21 @@ const SubmitButton = styled.button`
 	opacity: ${(props) => (props.disabled ? 0.7 : 1)};
 `
 
+const BackButton = styled.button`
+	width: 100%;
+	height: 44px;
+	border-radius: 4px;
+	background: transparent;
+	color: #610005;
+	border: 1px solid #610005;
+	font-family: 'Epilogue', sans-serif;
+	font-weight: 700;
+	font-size: 14px;
+	cursor: pointer;
+`
+
 export const ForgotPasswordView = ({ navigate, setRecoveryEmail }) => {
+
 	const [email, setEmail] = useState('')
 	const [error, setError] = useState('')
 	const [loading, setLoading] = useState(false)
@@ -99,6 +113,9 @@ export const ForgotPasswordView = ({ navigate, setRecoveryEmail }) => {
 				<SubmitButton type='submit' disabled={loading}>
 					{loading ? 'Enviando...' : 'Enviar codigo'}
 				</SubmitButton>
+				<BackButton type='button' onClick={() => navigate('login')}>
+					← Voltar ao login
+				</BackButton>
 			</Form>
 		</AuthShell>
 	)

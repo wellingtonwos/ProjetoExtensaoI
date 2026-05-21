@@ -184,6 +184,9 @@ export const RecoveryCodeView = ({
 				>
 					{resending ? 'Reenviando...' : 'Reenviar codigo'}
 				</SecondaryButton>
+				<SecondaryButton type='button' onClick={() => navigate('forgot')}>
+					← Voltar
+				</SecondaryButton>
 			</Form>
 		</AuthShell>
 	)

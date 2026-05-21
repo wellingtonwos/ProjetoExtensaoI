@@ -1,0 +1,69 @@
+@startuml DiagramaImplantacao
+!theme plain
+title Diagrama de Implantação - Sistema CarneUp
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+
+skinparam node {
+  BackgroundColor #BDD7EE
+  BorderColor #2E74B5
+}
+
+skinparam component {
+  BackgroundColor #E2EFDA
+  BorderColor #375623
+}
+
+skinparam database {
+  BackgroundColor #FFEB9C
+  BorderColor #9C6500
+}
+
+skinparam artifact {
+  BackgroundColor #DEEAF1
+  BorderColor #2E74B5
+}
+
+' =====================
+' CLIENTE
+' =====================
+node "<<device>>\nDispositivo do Usuário\n(Navegador Web)" as UserDevice #EBF5FB {
+  component "React SPA\n(interface do sistema)" as BrowserApp
+}
+
+' =====================
+' AWS EC2
+' =====================
+node "<<device>>\nAmazon EC2\nt2.micro | Ubuntu 22.04\nIP: 98.89.113.235" as EC2 #E9F7EF {
+
+  node "<<executionEnvironment>>\nNginx (Servidor Web)\nPorta: 443 / 80" as NginxEnv #C8E6C9 {
+    artifact "Frontend Build\n(React / dist/)" as FrontBuild
+  }
+
+  node "<<executionEnvironment>>\nJVM Java 21\n(systemd service)\nPorta: 8080" as JVMEnv #D5E8D4 {
+    artifact "carneup-backend.jar\n(Spring Boot 3.5)" as SpringJar
+  }
+
+  node "<<executionEnvironment>>\nPostgreSQL 14\nPorta: 5432" as PGEnv #FFF9C4 {
+    database "JuniorPrimeBeef\n(Banco de Dados)" as PGDb
+  }
+}
+
+' =====================
+' SERVIÇO EXTERNO
+' =====================
+node "<<external>>\nResend\n(Serviço de E-mail)" as ResendNode #FCE4D6 {
+  component "API de E-mail\nTransacional" as ResendSvc
+}
+
+' =====================
+' COMUNICAÇÃO
+' =====================
+BrowserApp --> NginxEnv : HTTPS (:443)
+NginxEnv --> JVMEnv : HTTP Proxy Reverso\n/api/** (:8080)
+SpringJar --> PGDb : JDBC (:5432)
+SpringJar --> ResendSvc : HTTPS (REST API)
+
+@enduml

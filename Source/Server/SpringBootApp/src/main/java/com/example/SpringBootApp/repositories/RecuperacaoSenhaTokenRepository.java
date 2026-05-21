@@ -16,4 +16,6 @@ public interface RecuperacaoSenhaTokenRepository extends JpaRepository<Recuperac
     Optional<RecuperacaoSenhaToken> findFirstByUsuarioOrderByCriadoEmDesc(Usuario usuario);
     
     void deleteByExpiracaoBefore(LocalDateTime dateTime);
+
+    void deleteByUsuario(Usuario usuario);
 }

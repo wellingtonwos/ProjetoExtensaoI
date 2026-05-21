@@ -3,6 +3,7 @@ package com.example.SpringBootApp.controllers;
 import com.example.SpringBootApp.exceptions.ResourceNotFoundException;
 import com.example.SpringBootApp.models.AccessLevel;
 import com.example.SpringBootApp.models.Usuario;
+import com.example.SpringBootApp.repositories.RecuperacaoSenhaTokenRepository;
 import com.example.SpringBootApp.repositories.UsuarioRepository;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class UsuarioController {
 
     private final UsuarioRepository usuarioRepository;
+    private final RecuperacaoSenhaTokenRepository recuperacaoSenhaTokenRepository;
     private final PasswordEncoder passwordEncoder;
 
     @GetMapping
@@ -83,6 +85,7 @@ public class UsuarioController {
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         Usuario u = usuarioRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("User not found: " + id));
+        recuperacaoSenhaTokenRepository.deleteByUsuario(u);
         usuarioRepository.delete(u);
         return ResponseEntity.noContent().build();
     }
