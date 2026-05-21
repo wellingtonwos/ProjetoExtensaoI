@@ -22,7 +22,7 @@ permissions:
 
 env:
   FRONTEND_DIR: Source/Client/carneup-frontend
-  SONAR_PROJECT_KEY_FRONTEND: Gh0st4v0_ProjetoExtensaoI_frontend
+  SONAR_PROJECT_KEY_FRONTEND: Gh0st4v0_ProjetoExtensaoI_CarneUp_Frontend
   SONAR_ORGANIZATION: gh0st4v0
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
