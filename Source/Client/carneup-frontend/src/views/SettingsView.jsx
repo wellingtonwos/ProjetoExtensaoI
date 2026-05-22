@@ -342,10 +342,6 @@ export const SettingsView = ({ navigate }) => {
                   </UserCard>
                 )
               })}
-              <AddCard onClick={openCreate}>
-                <span className='material-symbols-outlined' style={{ fontSize: 32 }}>add_circle</span>
-                Novo Colaborador
-              </AddCard>
             </UsersGrid>
           )}
         </PageContent>

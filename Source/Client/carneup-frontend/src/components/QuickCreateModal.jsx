@@ -78,7 +78,15 @@ export default function QuickCreateModal({ open, type, onClose, onCreate, initia
           </div>
         ) : (
           <div style={{marginTop:12}}>
-            <Input label={isEditMode ? 'Novo nome' : label} name='quick' value={value} onChange={(e) => setValue(e.target.value)} placeholder={placeholder} />
+            <Input
+              label={isEditMode ? 'Novo nome' : label}
+              name='quick'
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handlePrimary() } }}
+              placeholder={placeholder}
+              autoFocus
+            />
             {error && <div style={{color:'#bf2b2b',fontSize:13,marginTop:6}}>{error}</div>}
             <div style={{display:'flex',gap:8,justifyContent:'flex-end',marginTop:12}}>
               <Button variant='secondary' type='button' full={false} onClick={onClose}>Cancelar</Button>

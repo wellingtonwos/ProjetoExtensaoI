@@ -268,11 +268,12 @@ const ACTIONS = [
 	{ icon: 'point_of_sale', label: 'Nova Venda', desc: 'Iniciar atendimento', view: 'sales', primary: true },
 	{ icon: 'add_shopping_cart', label: 'Entrada', desc: 'Registrar compra', view: 'purchases', primary: false },
 	{ icon: 'inventory_2', label: 'Estoque', desc: 'Gerenciar produtos', view: 'stock', primary: false },
-	{ icon: 'bar_chart', label: 'Relatórios', desc: 'Análise de vendas', view: 'reports', primary: false },
+	{ icon: 'bar_chart', label: 'Relatórios', desc: 'Análise de vendas', view: 'reports', primary: false, adminOnly: true },
 ]
 
 // ── Component ──────────────────────────────────────────────────────────────────
 export const DashboardView = ({ navigate }) => {
+	const isAdmin = localStorage.getItem('accessLevel') === 'ADM'
 	const [now, setNow] = useState(new Date())
 	const [todayTotal, setTodayTotal] = useState(null)
 	const [todayCount, setTodayCount] = useState(0)
@@ -378,7 +379,7 @@ export const DashboardView = ({ navigate }) => {
 					<div>
 						<SectionLabel>Ações Rápidas</SectionLabel>
 						<ActionsGrid>
-							{ACTIONS.map(a => (
+							{ACTIONS.filter(a => !a.adminOnly || isAdmin).map(a => (
 								<ActionBtn key={a.view} $primary={a.primary} onClick={() => navigate(a.view)}>
 									<div className='icon-box'>
 										<span className='material-symbols-outlined' style={a.primary ? { fontVariationSettings: "'FILL' 1" } : {}}>
@@ -400,7 +401,7 @@ export const DashboardView = ({ navigate }) => {
 						<SalesCard>
 							<SalesHeader>
 								<h3>Transações Recentes</h3>
-								<button onClick={() => navigate('reports')}>Ver relatório completo →</button>
+								{isAdmin && <button onClick={() => navigate('reports')}>Ver relatório completo →</button>}
 							</SalesHeader>
 
 							{loading && (

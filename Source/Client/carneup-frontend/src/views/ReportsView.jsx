@@ -130,7 +130,13 @@ const fmt  = v  => new Intl.NumberFormat('pt-BR', { style:'currency', currency:'
 const pct  = v  => `${Number(v||0).toFixed(1)}%`
 const today = () => new Date().toISOString().slice(0,10)
 const firstOfMonth = () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0,10) }
-const daysUntil = dateStr => { if(!dateStr) return 999; const diff = new Date(dateStr) - new Date(); return Math.ceil(diff/86400000) }
+const daysUntil = dateStr => {
+  if (!dateStr) return 999
+  const [y, m, d] = dateStr.split('-').map(Number)
+  const exp   = new Date(y, m - 1, d)
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  return Math.round((exp - today) / 86400000)
+}
 
 const PAY_COLORS = { PIX:{c:'#f0fdf4',t:'#15803d'}, DINHEIRO:{c:'#fffbeb',t:'#b45309'}, CREDITO:{c:'#eff6ff',t:'#1d4ed8'}, DEBITO:{c:'#faf5ff',t:'#7c3aed'} }
 

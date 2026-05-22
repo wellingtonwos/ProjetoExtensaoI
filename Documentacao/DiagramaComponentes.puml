@@ -1,0 +1,97 @@
+@startuml DiagramaComponentes
+!theme plain
+title Diagrama de Componentes - Sistema CarneUp
+
+skinparam componentStyle rectangle
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+
+skinparam package {
+  BackgroundColor #BDD7EE
+  BorderColor #2E74B5
+  FontStyle bold
+  FontSize 12
+}
+
+skinparam component {
+  BackgroundColor #DEEAF1
+  BorderColor #2E74B5
+}
+
+skinparam database {
+  BackgroundColor #FFEB9C
+  BorderColor #9C6500
+}
+
+skinparam cloud {
+  BackgroundColor #FCE4D6
+  BorderColor #C55A11
+}
+
+left to right direction
+
+' =====================
+' FRONTEND
+' =====================
+package "<<component>>\nVisualização\n(React SPA)" as Frontend {
+  component [Login /\nRecuperação de Senha] as CompLogin
+  component [Dashboard] as CompDash
+  component [PDV / Vendas] as CompVendas
+  component [Estoque /\nProdutos] as CompEstoque
+  component [Compras] as CompCompras
+  component [Descartes] as CompDescartes
+  component [Relatórios] as CompRelat
+  component [Clientes] as CompClientes
+  component [Usuários /\nAtributos] as CompAdmin
+}
+
+' =====================
+' BACKEND
+' =====================
+package "<<component>>\nNegócio\n(Spring Boot 3.5)" as Backend {
+  component [Gestão de\nAutenticação\n<<JWT / BCrypt>>] as SvcAuth
+  component [Gestão de\nVendas] as SvcVendas
+  component [Gestão de Produtos\ne Estoque] as SvcEstoque
+  component [Gestão de\nCompras] as SvcCompras
+  component [Gestão de\nDescartes] as SvcDescartes
+  component [Gestão de\nRelatórios] as SvcRelat
+  component [Gestão de\nClientes] as SvcClientes
+  component [Gestão de\nUsuários] as SvcUsuarios
+  component [Serviço de\nEmail] as SvcEmail
+}
+
+' =====================
+' PERSISTÊNCIA
+' =====================
+database "<<component>>\nPersistência de Dados\n(PostgreSQL)" as DB
+
+' =====================
+' SERVIÇO EXTERNO
+' =====================
+cloud "<<external>>\nResend API\n(E-mail Transacional)" as ResendAPI
+
+' =====================
+' INTERFACES FRONTEND -> BACKEND
+' =====================
+CompLogin -(0)- SvcAuth : Autenticar /\nRecuperar Senha
+CompVendas -(0)- SvcVendas : Gerenciar Vendas
+CompEstoque -(0)- SvcEstoque : Gerenciar Produtos
+CompCompras -(0)- SvcCompras : Gerenciar Compras
+CompDescartes -(0)- SvcDescartes : Gerenciar Descartes
+CompRelat -(0)- SvcRelat : Gerar Relatórios
+CompClientes -(0)- SvcClientes : Gerenciar Clientes
+CompAdmin -(0)- SvcUsuarios : Gerenciar Usuários
+
+' =====================
+' BACKEND -> PERSISTÊNCIA
+' =====================
+Backend -(0)- DB : Persistir Dados\n(JDBC/JPA)
+
+' =====================
+' EMAIL
+' =====================
+SvcAuth ..> SvcEmail : token de recuperação
+SvcEmail --> ResendAPI : HTTPS
+
+@enduml

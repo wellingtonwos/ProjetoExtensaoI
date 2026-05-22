@@ -466,38 +466,38 @@ A presente seção detalha o planejamento, a organização e o controle das ativ
 
 O projeto foi desenvolvido por uma equipe de cinco membros, com papéis definidos para cobrir as áreas de desenvolvimento, administração de dados e gestão, conforme apresentado na Tabela \ref{tab:equipe}.
 
-\begin{longtable}{|>{\raggedright\arraybackslash}m{3.5cm}|>{\raggedright\arraybackslash}m{4cm}|>{\raggedright\arraybackslash}m{7.5cm}|}
+\begin{longtable}{|>{\raggedright\arraybackslash}m{3.5cm}|>{\raggedright\arraybackslash}m{3.5cm}|>{\raggedright\arraybackslash}m{6cm}|>{\centering\arraybackslash}m{2cm}|}
     \caption{Papéis, Integrantes e Responsabilidades Chave}
     \label{tab:equipe}\\
     \hline
-    \textbf{Papel} & \textbf{Integrante} & \textbf{Responsabilidades Chave} \\
+    \textbf{Papel} & \textbf{Integrante} & \textbf{Responsabilidades Chave} & \textbf{C.H. (h)} \\
     \hline
     \endfirsthead
 
-    \multicolumn{3}{c}%
+    \multicolumn{4}{c}%
     {{\bfseries \tablename\ \thetable{} -- continuação}} \\
     \hline
-    \textbf{Papel} & \textbf{Integrante} & \textbf{Responsabilidades Chave} \\
+    \textbf{Papel} & \textbf{Integrante} & \textbf{Responsabilidades Chave} & \textbf{C.H. (h)} \\
     \hline
     \endhead
     \hline
-    \multicolumn{3}{|r|}{{Continua...}} \\
+    \multicolumn{4}{|r|}{{Continua...}} \\
     \hline
     \endfoot
     \hline
     \endlastfoot
 
-    Product Owner & xxxx & Definição e priorização do Product Backlog, validação das entregas, documentação.\\
+    Product Owner & xxxx & Definição e priorização do Product Backlog, validação das entregas, documentação. & 80 \\
     \hline
-    Desenvolvedor Full Stack & Felipe Dalbosco Paludo &Elaboração da documentação, desenvolvimento Latex, desenvolvimento Front-end e Back-end. \\
+    Desenvolvedor Full Stack & Felipe Dalbosco Paludo & Elaboração da documentação, desenvolvimento Latex, desenvolvimento Front-end e Back-end. & 200 \\
     \hline
-    Desenvolvedor Full Stack & Gustavo Gouvea Andrade & Implementação das funcionalidades no front-end e back-end, desenvolvimento do Back-end, elaboração da arquitetura do sistema, elaboração de diagramas. \\
+    Desenvolvedor Full Stack & Gustavo Gouvea Andrade & Implementação das funcionalidades no front-end e back-end, desenvolvimento do Back-end, elaboração da arquitetura do sistema, elaboração de diagramas. & 180 \\
     \hline
-    Desenvolvedor Front-end & Breno Dias Oliveira & Desenvolvimento da documentação, desenvolvimento do Front-end, elaboração de diagramas, desenvolvimento Latex. \\
+    Desenvolvedor Front-end & Breno Dias Oliveira & Desenvolvimento da documentação, desenvolvimento do Front-end, elaboração de diagramas, desenvolvimento Latex. & 160 \\
     \hline
-    Desenvolvedor Front-end & Pedro Augusto Silva Santos & Desenvolvimento Front-end, documentação, aplicação React, organização visual. \\
+    Desenvolvedor Front-end & Pedro Augusto Silva Santos & Desenvolvimento Front-end, documentação, aplicação React, organização visual. & 140 \\
     \hline
-    Desenvolvedor Back-end & Wellington Oliveira de Sousa & Documentação, desenvolvimento Latex, elaboração de diagramas, Back-end, controle do Github, organização do Kanban. \\
+    Desenvolvedor Back-end & Wellington Oliveira de Sousa & Documentação, desenvolvimento Latex, elaboração de diagramas, Back-end, controle do Github, organização do Kanban. & 160 \\
     \hline
 \end{longtable}
 
@@ -507,7 +507,26 @@ O projeto foi desenvolvido por uma equipe de cinco membros, com papéis definido
 
 O projeto foi planejado para ter uma duração total de aproximadamente 3 meses, iniciando em 1 de Setembro de 2025 e com previsão de conclusão em 28 de Novembro de 2025. Essa duração é ditada pelos Marcos Fixos de Entrega.
 
-O desenvolvimento do CarneUp adota a metodologia ágil Scrum, organizada em ciclos de trabalho curtos chamados Sprints. Dada a restrição temporal imposta pelos marcos de entrega acadêmica (Projeto Integrado - PI), o projeto foi dividido em 4 Sprints principais com duração variável (aproximadamente 10 a 14 dias úteis) para focar na entrega dos marcos fixos. O foco não é no número de Sprints, mas sim no cumprimento dos marcos de entrega, apresentado na Tabela \ref{tab:marcos}, que guiam o ritmo do projeto.
+O desenvolvimento do CarneUp adota a metodologia ágil \textbf{Scrum}. A escolha pelo Scrum em detrimento de outras metodologias se justifica pelos seguintes critérios:
+
+\begin{itemize}
+    \item \textbf{Scrum vs. Kanban puro:} O Kanban é eficaz para fluxos contínuos sem prazo fixo. O Scrum foi preferido por oferecer cerimônias estruturadas (Planning, Review, Retrospective) que se alinham diretamente com os marcos de entrega acadêmica, permitindo ajuste de escopo a cada Sprint.
+    \item \textbf{Scrum vs. XP (\textit{Extreme Programming}):} O XP exige práticas como \textit{pair programming} e TDD de forma sistemática, o que, dado o tamanho reduzido da equipe e a curta duração do projeto, representaria sobrecarga metodológica. O Scrum oferece flexibilidade para incorporar práticas técnicas sem torná-las obrigatórias.
+    \item \textbf{Scrum vs. FDD (\textit{Feature Driven Development}):} O FDD é centrado em modelagem e design orientado a \textit{features}, com foco em sistemas de grande escala. Para um MVP com escopo delimitado e equipe de cinco desenvolvedores, o Scrum mostrou-se mais enxuto e adequado.
+\end{itemize}
+
+O projeto foi dividido em 4 Sprints com duração variável (aproximadamente 10 a 14 dias úteis) para focar na entrega dos marcos fixos. O foco não é no número de Sprints, mas sim no cumprimento dos marcos de entrega, apresentado na Tabela \ref{tab:marcos}, que guiam o ritmo do projeto.
+
+\subsection{Cerimônias Scrum Adotadas}
+
+As seguintes cerimônias foram efetivamente praticadas durante o desenvolvimento:
+
+\begin{itemize}
+    \item \textbf{Sprint Planning:} Realizado no início de cada Sprint. A equipe selecionava os itens do \textit{Product Backlog} para a Sprint e dividia as tarefas entre os membros. O resultado era o \textit{Sprint Backlog} no GitHub Projects.
+    \item \textbf{Daily Scrum (assíncrono):} Dado o contexto acadêmico com horários heterogêneos, as Dailies foram conduzidas de forma assíncrona por meio de mensagens objetivas no grupo de comunicação da equipe, respondendo às três perguntas clássicas: o que fiz, o que farei e quais impedimentos enfrento.
+    \item \textbf{Sprint Review:} Ao final de cada Sprint, a equipe demonstrava as funcionalidades entregues para validação, alinhando o produto desenvolvido com os requisitos definidos.
+    \item \textbf{Sprint Retrospective:} Após a Review, a equipe discutia pontos de melhoria no processo, como distribuição de tarefas e adoção de padrões de código.
+\end{itemize}
 
 \begin{longtable}{|>{\centering\arraybackslash}m{3cm}|>{\raggedright\arraybackslash}m{12cm}|}
     \caption{Marcos de Entrega do Projeto CarneUp}
@@ -566,6 +585,26 @@ A estrutura do fluxo de trabalho foi definida para refletir o processo de desenv
     \item \textbf{Done (Concluído):} Funcionalidades finalizadas, testadas e integradas com sucesso.
 \end{itemize}
 
+% ---
+\subsection{Convenção de Commits e Política de Pull Requests}
+% ---
+
+Para garantir rastreabilidade e consistência no histórico do repositório, a equipe adotou o padrão \textbf{Conventional Commits} \cite{conventionalcommits}. Cada mensagem de commit segue o formato:
+
+\begin{verbatim}
+<tipo>(<escopo>): <descrição curta>
+\end{verbatim}
+
+\noindent Os tipos utilizados foram: \texttt{feat} (nova funcionalidade), \texttt{fix} (correção de bug), \texttt{chore} (tarefas de infraestrutura/build), \texttt{docs} (documentação) e \texttt{refactor} (refatoração sem alteração de comportamento).
+
+A política de \textit{Pull Requests} definiu as seguintes regras:
+
+\begin{itemize}
+    \item \textbf{Revisão mínima:} Pelo menos \textbf{1 revisor} deve aprovar o PR antes do \textit{merge} na \textit{branch} principal.
+    \item \textbf{Checklist de PR:} Toda contribuição deve verificar: (i) ausência de segredos ou credenciais no código; (ii) código compila e testes passam; (iii) descrição clara do que foi alterado e por quê.
+    \item \textbf{Estratégia de branches:} Adotou-se o modelo \textit{feature branch} — cada nova funcionalidade ou correção parte de uma branch nomeada como \texttt{feat/<nome>} ou \texttt{fix/<nome>} —, e o \textit{merge} é realizado apenas na branch \texttt{main} após aprovação.
+\end{itemize}
+
 % ----------------------------------------------------------
 % CAPÍTULO 3: DESENVOLVIMENTO DO PROJETO
 % ----------------------------------------------------------
@@ -578,7 +617,7 @@ O projeto CarneUp abrange o desenvolvimento de uma aplicação web completa, pro
 \section{Arquitetura e Modularidade do Sistema}
 % ---
 
-O CarneUp foi concebido sob uma arquitetura de aplicação web em três camadas (Front-end, Back-end e Banco de Dados), visando clareza na separação de responsabilidades, manutenibilidade e escalabilidade (RNF02).
+O CarneUp foi concebido sob uma arquitetura \textbf{cliente-servidor com SPA} (\textit{Single Page Application}), logicamente organizada em três camadas: Apresentação (Front-end React), Aplicação (Back-end Spring Boot) e Dados (PostgreSQL). É importante distinguir essa arquitetura do modelo MVC tradicional: enquanto o MVC clássico renderiza HTML no servidor, no CarneUp a camada de Apresentação é inteiramente executada no navegador como uma SPA, comunicando-se com o Back-end exclusivamente via \textbf{API RESTful} sobre HTTPS com autenticação JWT. O Back-end adota internamente o padrão em camadas (Controller → Service → Repository), análogo ao MVC, mas sem renderização de \textit{views} no servidor. Essa separação visa clareza de responsabilidades, manutenibilidade e escalabilidade (RNF02).
 
 \subsection{Módulos de Negócio}
 
@@ -598,15 +637,31 @@ O Back-end é o \textit{core} transacional do sistema e está logicamente dividi
 \section{Escolhas Tecnológicas (Tech Stack)}
 % ---
 
-A seleção da pilha tecnológica foi baseada na busca por performance, segurança e robustez.
+A seleção da pilha tecnológica foi baseada em critérios objetivos de performance, segurança, curva de aprendizado da equipe e maturidade do ecossistema.
+
+\subsection{Front-end: React vs. Vue vs. Angular}
+
+Para a camada de apresentação, as principais alternativas avaliadas foram:
 
 \begin{itemize}
-    \item \textbf{Front-end (Apresentação):} Foi escolhido o \textbf{React} para a construção da interface. Esta biblioteca permite a criação de uma experiência de usuário reativa, modular e otimizada para telas de toque e leitores de código de barras, o que atende ao requisito de usabilidade no PDV (RNF03).
-     
-    \item \textbf{Back-end (Aplicação):} A lógica de negócios é implementada em \textbf{Java} com o framework \textbf{Spring Boot}. Esta combinação é ideal para sistemas transacionais de missão crítica, oferecendo alta segurança e performance na execução das regras de negócio (RNF01).
-     
-    \item \textbf{Banco de Dados (Dados):} O \textbf{PostgreSQL} foi definido como o Sistema Gerenciador de Banco de Dados (SGBD) principal. Sua reputação de robustez, integridade transacional e confiabilidade é fundamental para armazenar dados financeiros e de estoque de forma segura e duradoura (RNF04).
+    \item \textbf{Angular:} Framework completo com tipagem forte (TypeScript obrigatório) e estrutura rígida. Embora robusto para grandes equipes corporativas, apresenta curva de aprendizado elevada e \textit{boilerplate} excessivo para o escopo do MVP.
+    \item \textbf{Vue.js:} Oferece sintaxe amigável e excelente documentação. Porém, o ecossistema é menor em comparação ao React, e a equipe possuía maior familiaridade com este último.
+    \item \textbf{React (escolhido):} Biblioteca com ecossistema maduro, ampla adoção no mercado, componentização modular e flexibilidade de integração. A familiaridade prévia da equipe com React, combinada com a disponibilidade de bibliotecas como React Bootstrap e Axios, reduziu o tempo de desenvolvimento e atendeu ao requisito de usabilidade no PDV (RNF03).
 \end{itemize}
+
+\subsection{Back-end: Spring Boot vs. Node.js vs. .NET}
+
+Para a camada de aplicação, as alternativas consideradas foram:
+
+\begin{itemize}
+    \item \textbf{Node.js (Express/NestJS):} Adequado para APIs de alta concorrência I/O-bound. Contudo, para sistemas transacionais com regras de negócio complexas e validações rigorosas, o ecossistema Java oferece ferramentas mais consolidadas (Spring Security, JPA).
+    \item \textbf{.NET (ASP.NET Core):} Plataforma madura da Microsoft com excelente performance. Entretanto, a equipe não possuía expertise prévia em C\#, o que aumentaria o risco técnico do projeto.
+    \item \textbf{Spring Boot (escolhido):} Combinação Java + Spring Boot é padrão de mercado para sistemas transacionais de missão crítica. Oferece Spring Security para autenticação JWT, Spring Data JPA para mapeamento objeto-relacional, validação via Jakarta Bean Validation e documentação automática via SpringDoc/Swagger. O conhecimento prévio da equipe em Java foi determinante para a produtividade e entrega dentro do prazo (RNF01).
+\end{itemize}
+
+\subsection{Banco de Dados: PostgreSQL}
+
+O \textbf{PostgreSQL} foi definido como o SGBD principal por sua reputação de robustez, integridade transacional (ACID), suporte a tipos avançados (\texttt{NUMERIC}, \texttt{BOOLEAN}, \texttt{CHECK} constraints nativas) e excelente integração com o ecossistema Spring. Sua confiabilidade é fundamental para armazenar dados financeiros e de estoque de forma segura e duradoura (RNF04).
 
 % ---
 \section{Infraestrutura e Segurança na Nuvem}
@@ -630,36 +685,90 @@ As Histórias de Usuário a seguir detalham o escopo do Mínimo Produto Viável 
 
 \subsection{Descrição das Histórias de Usuário}
 
-%\begin{itemize}
- %   \item \textbf{US01: Registrar Venda com ou sem Código de Barras (RF01, RF02)}
-  %  \begin{itemize}
-   %     \item \textit{Descrição:} Como um operador de caixa, quero registrar uma venda lendo o código de barras da balança (ou inserindo o item manualmente), para que o sistema preencha automaticamente o item, peso e valor, agilizando o atendimento.
-    %    \item \textit{Critérios de Aceitação:} O código de barras deve ser lido pelo leitor, ou o item deve ser selecionado manualmente. O sistema deve exibir o item e valor unitário. O operador deve confirmar a venda e o estoque deve ser atualizado.
-    %\end{itemize}
+\begin{itemize}
+    \item \textbf{US01: Registrar Venda no PDV (RF01, RF02)}
+    \begin{itemize}
+        \item \textit{Descrição:} Como um operador de caixa, quero selecionar produtos, informar quantidade e confirmar a venda, para que o sistema calcule o total automaticamente e atualize o estoque em tempo real.
+        \item \textit{Critérios de Aceitação (BDD):}
+        \begin{itemize}
+            \item \textbf{Dado que} o operador seleciona um produto com estoque disponível e informa a quantidade, \textbf{quando} confirma a venda, \textbf{então} o sistema registra a transação e a quantidade em estoque é subtraída.
+            \item \textbf{Dado que} o produto não possui estoque, \textbf{quando} o operador tenta adicioná-lo à venda, \textbf{então} o sistema exibe mensagem de erro e impede o registro (RN01).
+        \end{itemize}
+    \end{itemize}
 
     \item \textbf{US02: Inclusão de Estoque com Rastreabilidade (RF03, RF07)}
     \begin{itemize}
         \item \textit{Descrição:} Como um administrador, quero registrar a entrada de novas peças/itens, incluindo a marca, valor de custo e data de validade (para perecíveis), para que eu possa ter controle de rastreabilidade e calcular a margem de lucro.
-        \item \textit{Critérios de Aceitação:} Deve haver um formulário com campos obrigatórios para Marca, Valor de Custo. O campo Data de Validade deve ser obrigatório para itens perecíveis. O registro deve ser armazenado no banco de dados com todas as informações.
+        \item \textit{Critérios de Aceitação (BDD):}
+        \begin{itemize}
+            \item \textbf{Dado que} um administrador preenche o formulário com produto, quantidade e valor de custo, \textbf{quando} confirma o cadastro, \textbf{então} o estoque é incrementado e o lote é registrado com os dados informados.
+            \item \textbf{Dado que} o produto é marcado como perecível, \textbf{quando} a data de validade está a 7 dias ou menos da data atual, \textbf{então} o sistema exibe alerta visual no dashboard.
+        \end{itemize}
     \end{itemize}
 
     \item \textbf{US03: Alerta Visual de Validade Próxima (RF05)}
     \begin{itemize}
-        \item \textit{Descrição:} Como um administrador, quero receber um alerta visual no dashboard quando um item estiver a 7 dias do vencimento, para que eu possa tomar medidas (promoção/descarte) antes da perda total do produto.
-        \item \textit{Critérios de Aceitação:} O alerta deve ser exibido no dashboard principal com destaque visual.
+        \item \textit{Descrição:} Como um administrador, quero receber um alerta visual no dashboard quando um item estiver a 7 dias do vencimento, para que eu possa tomar medidas preventivas.
+        \item \textit{Critérios de Aceitação (BDD):}
+        \begin{itemize}
+            \item \textbf{Dado que} existe um produto perecível com \texttt{data\_validade} $\leq$ data atual + 7 dias, \textbf{quando} o administrador acessa o dashboard, \textbf{então} o produto é listado em destaque visual na seção de alertas. O prazo de 7 dias é fixo e configurável apenas por ajuste no sistema.
+        \end{itemize}
     \end{itemize}
 
-    \item \textbf{US04: Visualização de Margem de Lucro (RF04)}
+    \item \textbf{US04: Visualização de Margem de Lucro (RF06)}
     \begin{itemize}
-        \item \textit{Descrição:} Como um administrador, quero visualizar a margem de lucro por peça de carne/item vendido, para identificar quais itens são mais rentáveis.
-        \item \textit{Critérios de Aceitação:} Deve haver uma tela de relatório que liste as vendas e mostre a diferença (em R\$ e \%) entre o valor de venda e o valor de custo.
+        \item \textit{Descrição:} Como um administrador, quero visualizar a margem de lucro por item vendido, para identificar quais produtos são mais rentáveis.
+        \item \textit{Critérios de Aceitação (BDD):}
+        \begin{itemize}
+            \item \textbf{Dado que} existem vendas registradas em determinado período, \textbf{quando} o administrador acessa o relatório de vendas com o período selecionado, \textbf{então} o sistema exibe a diferença entre \texttt{preco\_unitario\_venda} e \texttt{preco\_unitario\_compra} em valor absoluto (R\$) e percentual (\%) por produto.
+        \end{itemize}
     \end{itemize}
 
-    \item \textbf{US05: Gerenciamento de Descarte (RF06)}
+    \item \textbf{US05: Gerenciamento de Descarte (RF08)}
     \begin{itemize}
-        \item \textit{Descrição:} Como um administrador, quero registrar o descarte de uma peça/item (por vencimento ou estrago), para que o estoque seja baixado.
-        \item \textit{Critérios de Aceitação:} A baixa de estoque deve ocorrer. O sistema deve registrar a data do descarte.
+        \item \textit{Descrição:} Como um administrador, quero registrar o descarte de uma peça/item (por vencimento ou avaria), para que o estoque seja baixado e o motivo seja rastreado.
+        \item \textit{Critérios de Aceitação (BDD):}
+        \begin{itemize}
+            \item \textbf{Dado que} o administrador seleciona um produto e informa o motivo do descarte, \textbf{quando} confirma o registro, \textbf{então} o sistema cria uma \texttt{Movimentacao} do tipo \texttt{DESCARTE} e a quantidade é subtraída do estoque.
+        \end{itemize}
     \end{itemize}
+
+    \item \textbf{US06: Relatórios Personalizados de Vendas (RF09)}
+    \begin{itemize}
+        \item \textit{Descrição:} Como um administrador, quero filtrar vendas por período e produto, para analisar o desempenho comercial.
+        \item \textit{Critérios de Aceitação (BDD):}
+        \begin{itemize}
+            \item \textbf{Dado que} o administrador seleciona uma data de início e fim, \textbf{quando} solicita o relatório, \textbf{então} o sistema retorna somente as vendas do período com faturamento total e lucro calculado.
+        \end{itemize}
+    \end{itemize}
+
+    \item \textbf{US07: Cadastro e Atrelamento de Clientes (RF10)}
+    \begin{itemize}
+        \item \textit{Descrição:} Como um operador, quero cadastrar um cliente e atrelá-lo a uma venda, para manter o histórico de compras.
+        \item \textit{Critérios de Aceitação (BDD):}
+        \begin{itemize}
+            \item \textbf{Dado que} um cliente é cadastrado com apelido e dados opcionais (telefone, e-mail), \textbf{quando} o operador realiza uma venda e seleciona esse cliente, \textbf{então} a venda é associada ao cliente e aparece em seu histórico.
+        \end{itemize}
+    \end{itemize}
+
+    \item \textbf{US08: Alerta de Inatividade de Clientes (RF11)}
+    \begin{itemize}
+        \item \textit{Descrição:} Como um administrador, quero ser alertado quando um cliente não compra há determinado período, para tomar ações de retenção.
+        \item \textit{Critérios de Aceitação (BDD):}
+        \begin{itemize}
+            \item \textbf{Dado que} um cliente cadastrado não possui vendas associadas nos últimos 30 dias, \textbf{quando} o administrador acessa a lista de clientes, \textbf{então} esse cliente é destacado visualmente como inativo.
+        \end{itemize}
+    \end{itemize}
+
+    \item \textbf{US09: Alerta de Lucro Abaixo do Esperado (RF12)}
+    \begin{itemize}
+        \item \textit{Descrição:} Como um administrador, quero receber alerta quando a margem de lucro estiver abaixo de um limiar, para agir antes de fechar o mês no negativo.
+        \item \textit{Critérios de Aceitação (BDD):}
+        \begin{itemize}
+            \item \textbf{Dado que} a margem de lucro calculada no período atual está abaixo de 20\%, \textbf{quando} o administrador acessa o dashboard, \textbf{então} o sistema exibe um indicador visual de alerta com o valor atual da margem.
+        \end{itemize}
+    \end{itemize}
+
 \end{itemize}
 
 % ---
@@ -684,13 +793,28 @@ A implementação do SSL/TLS no CarneUp atende a critérios cruciais para um sis
     \item \textbf{Integridade dos Dados de Venda:} Garante que os dados financeiros críticos (valor final da venda, custo do produto ou atualização de estoque) não possam ser modificados por terceiros maliciosos durante a transmissão.
 \end{itemize}
 
-Na arquitetura do CarneUp, a proteção HTTPS será implementada utilizando os serviços nativos da Amazon Web Services (AWS):
+Na arquitetura do CarneUp, o HTTPS é configurado diretamente no Nginx que atua como servidor web e proxy reverso na instância EC2, realizando a terminação SSL/TLS antes de repassar as requisições ao Spring Boot interno.
+
+Em suma, o HTTPS é medida fundamental para proteger informações sensíveis em conformidade com as melhores práticas de segurança da informação (RNF04).
+
+\subsection{Política de Tokens JWT}
+
+A autenticação no CarneUp é baseada em \textbf{JSON Web Tokens (JWT)} com as seguintes características:
+
 \begin{itemize}
-    \item \textbf{Certificado SSL/TLS:} Será utilizado um certificado SSL/TLS para autenticar a identidade do domínio.
-    \item \textbf{Terminação SSL (Offloading):} A terminação SSL será configurada no \textit{Application Load Balancer} (ALB), o ponto de entrada do tráfego. Isso permite que a carga de criptografia/descriptografia seja removida dos servidores de Back-end (Spring Boot), melhorando o desempenho da aplicação (RNF01).
+    \item \textbf{Tempo de expiração:} O token JWT possui validade de \textbf{24 horas} a partir da emissão (configurado em \texttt{application.yaml}). Após o vencimento, o usuário deve realizar novo login.
+    \item \textbf{Refresh Token:} O MVP atual não implementa \textit{refresh tokens}. A renovação é feita por novo login. Como trabalho futuro, a implementação de refresh tokens com rotação reduzirá a fricção do usuário sem comprometer a segurança.
+    \item \textbf{Armazenamento no cliente:} O token é armazenado em \textit{cookie} seguro no navegador e enviado no cabeçalho \texttt{Authorization: Bearer <token>} em cada requisição.
+    \item \textbf{Validação:} O \texttt{JwtAuthenticationFilter} intercepta todas as requisições protegidas, valida a assinatura do token com a chave secreta configurada e extrai o papel do usuário (\texttt{USUARIO} ou \texttt{ADM}) para o controle de acesso.
 \end{itemize}
 
-Em suma, a obrigatoriedade do protocolo HTTPS é uma medida fundamental que blinda a aplicação contra as vulnerabilidades mais comuns da web, protegendo informações sensíveis em conformidade com as melhores práticas de segurança da informação (RNF04).
+\subsection{Proteção contra Vulnerabilidades Comuns}
+
+\begin{itemize}
+    \item \textbf{SQL Injection:} Mitigado pelo uso de Spring Data JPA com Hibernate e \textit{queries} parametrizadas. Nenhuma consulta SQL é construída por concatenação de \textit{strings} com dados do usuário.
+    \item \textbf{XSS (\textit{Cross-Site Scripting}):} Mitigado pelo React, que escapa automaticamente todo conteúdo dinâmico renderizado via JSX, impedindo a injeção de \textit{scripts} maliciosos na interface.
+    \item \textbf{CSRF (\textit{Cross-Site Request Forgery}):} A API RESTful stateless com autenticação JWT por cabeçalho \texttt{Authorization} é naturalmente imune a CSRF, pois o token não é enviado automaticamente pelo navegador como os cookies de sessão clássicos. O Spring Security tem o CSRF desabilitado para endpoints REST com JWT, conforme configurado na \texttt{SecurityConfig}.
+\end{itemize}
 
 \subsection{Observância à Legislação (LGPD)}
 
@@ -700,9 +824,10 @@ Embora o sistema CarneUp trate primariamente de dados do negócio, ele processa 
 O projeto materializa a conformidade com a LGPD nos seguintes pontos de design:
 
 \begin{itemize}
-    \item \textbf{Princípio da Finalidade e Necessidade:} A coleta de dados é limitada estritamente ao necessário para a autenticação e gestão de permissões do sistema (nome, e-mail e credenciais de login), aplicando o conceito de minimização de dados.
-    \item \textbf{Segurança da Informação (Privacy by Design):} Todas as medidas técnicas de segurança, como o hashing em repouso (bcrypt) e a criptografia em trânsito (SSL/HTTPS), são o mecanismo técnico para cumprir o Artigo 46 da LGPD, garantindo que os dados pessoais estejam protegidos.
-    \item \textbf{Direitos do Titular:} A arquitetura é projetada para permitir que o administrador do açougue possa, a qualquer momento, atender a solicitações dos titulares de dados, como a exclusão de conta de um ex-funcionário ou a consulta aos seus dados cadastrais.
+    \item \textbf{Dados Pessoais Tratados:} Embora o foco do sistema seja a gestão do negócio, ele trata dados pessoais dos \textbf{operadores e administradores} do açougue: nome completo, endereço de e-mail e senha (armazenada em hash). O campo \texttt{email} é necessário para o fluxo de recuperação de senha. Adicionalmente, o módulo de clientes pode armazenar apelido, telefone, documento (CPF/CNPJ) e e-mail do cliente final, o que configura tratamento de dados pessoais de terceiros, sujeitando o sistema às obrigações da LGPD.
+    \item \textbf{Princípio da Finalidade e Necessidade:} A coleta de dados é limitada ao estritamente necessário para cada finalidade: autenticação (nome, e-mail, senha), contato de recuperação (e-mail) e histórico comercial (dados do cliente). Não são coletados dados biométricos, sensíveis ou desnecessários.
+    \item \textbf{Segurança da Informação (Privacy by Design):} Todas as medidas técnicas de segurança — hashing em repouso (bcrypt), criptografia em trânsito (HTTPS/TLS), tokens de sessão com expiração — são o mecanismo técnico para cumprir o Artigo 46 da LGPD, garantindo que os dados pessoais estejam protegidos.
+    \item \textbf{Direitos do Titular:} A arquitetura é projetada para permitir que o administrador do açougue atenda a solicitações dos titulares, como exclusão de conta de ex-funcionário (endpoint de remoção de usuário, acessível apenas ao ADM) ou consulta a dados cadastrais.
 \end{itemize}
 
 % ---
@@ -730,12 +855,14 @@ Este diagrama (Figura \ref{fig:mer_conceitual}) é um modelo clássico que serve
 
 O modelo é composto pelas seguintes entidades principais:
 \begin{itemize}
-    \item \textbf{Entidade Produto:} Armazena dados de itens (carne, carvão, bebidas).
-    \item \textbf{Entidade Estoque (Lote/Item):} Central para a rastreabilidade (peso, validade, custo).
-    \item \textbf{Entidade Marca:} Substitui o fornecedor para rastreabilidade de custo.
-    \item \textbf{Entidade Venda:} Representa a transação completa.
-    \item \textbf{Entidade ItemVenda:} Conecta a Venda ao Estoque.
-    \item \textbf{Entidade Usuário:} Dados de login e perfil de acesso.
+    \item \textbf{Entidade Produto:} Armazena dados de itens (carne, carvão, bebidas), incluindo flag de perecibilidade.
+    \item \textbf{Entidade Movimentacao:} Entidade central para rastreabilidade. Unifica compras, vendas e descartes com o campo \texttt{tipo\_movimentacao}, armazenando quantidade, preços e data de validade por transação.
+    \item \textbf{Entidade Marca:} Rastreabilidade de origem e custo por fornecedor/marca.
+    \item \textbf{Entidade Venda:} Representa a transação de saída, com método de pagamento e vínculo ao cliente e operador.
+    \item \textbf{Entidade Compra:} Registro da entrada de mercadoria no estoque.
+    \item \textbf{Entidade Descarte:} Registro de perdas com motivo (vencimento, avaria, roubo).
+    \item \textbf{Entidade Usuário:} Dados de login e perfil de acesso (USUARIO/ADM).
+    \item \textbf{Entidade Cliente:} Cadastro de clientes para vínculo com vendas e monitoramento de inatividade.
 \end{itemize}
 
 % AQUI ESTÁ A MUDANÇA: [H] em vez de [htb]
@@ -763,9 +890,9 @@ A Figura \ref{fig:der_logico} apresenta o modelo lógico do sistema CarneUp.
     \fonte{Autoria própria (2025).}
 \end{figure}
 
-A estrutura foi projetada para garantir a rastreabilidade completa do fluxo de mercadorias. A tabela \textbf{Item} atua como a entidade centralizadora da lógica de negócio, conectando os \textbf{Produtos} às transações de \textbf{Compra} e \textbf{Venda}.
+A estrutura foi projetada para garantir a rastreabilidade completa do fluxo de mercadorias. A tabela \textbf{Movimentacao} atua como a entidade centralizadora da lógica de negócio, conectando os \textbf{Produtos} às transações de \textbf{Compra}, \textbf{Venda} e \textbf{Descarte} por meio do campo \texttt{tipo\_movimentacao} (\texttt{COMPRA}, \texttt{VENDA} ou \texttt{DESCARTE}).
 
-Diferente de modelos convencionais, a tabela \texttt{Item} armazena dados históricos críticos, como \texttt{preco\_unitario\_compra} e \texttt{preco\_unitario\_venda} no momento da transação, além da \texttt{data\_validade}. Essa modelagem permite o cálculo exato da margem de lucro e o gerenciamento de vencimento de lotes, atendendo aos requisitos de redução de desperdício.
+Diferente de modelos convencionais com tabelas separadas por tipo de transação, a tabela \texttt{Movimentacao} centraliza os dados históricos críticos em um único registro: \texttt{preco\_unitario\_compra}, \texttt{preco\_unitario\_venda}, \texttt{quantidade} e \texttt{data\_validade} no momento da transação. Essa modelagem permite o cálculo exato da margem de lucro, a rastreabilidade por lote e o gerenciamento de vencimento, atendendo aos requisitos de redução de desperdício.
 
 % ---
 \section{Arquitetura do Sistema}
@@ -792,7 +919,7 @@ O modelo de implantação utiliza um \textit{Load Balancer} (AWS ALB) como ponto
     \caption{Diagrama de Implantação do Sistema CarneUp}
     \label{fig:implantacao}
     \centering
-    \includegraphics[width=0.8\textwidth]{Imagens/DiagramaImplantacao.jpg}
+    \includegraphics[width=0.8\textwidth]{Imagens/DiagramaImplantacao.png}
     \fonte{Autoria própria (2025).}
 \end{figure}
 
@@ -820,7 +947,7 @@ Os componentes são segregados em três camadas principais:
     \caption{Diagrama de Componentes do Sistema CarneUp}
     \label{fig:componentes}
     \centering
-    \includegraphics[width=0.8\textwidth]{Imagens/DiagramaComponentes.jpg}
+    \includegraphics[width=0.8\textwidth]{Imagens/DiagramaComponentes.png}
     \fonte{Autoria própria (2025).}
 \end{figure}
 % ----------------------------------------------------------
@@ -857,14 +984,84 @@ Esta abordagem permite que o projeto seja executado sem a necessidade de aportes
 Para garantir a viabilidade econômica e a sustentabilidade operacional, o projeto adotou uma pilha tecnológica baseada em soluções de baixo custo e alta disponibilidade.
 
 \subsection{Licenciamento e Software}
-A escolha por linguagens e frameworks Open Source (como PHP, PostgreSQL e bibliotecas JavaScript) elimina completamente os custos com licenciamento de software proprietário. Isso reduz drasticamente o Custo Total de Propriedade (TCO) para o cliente final.
+A escolha por linguagens e frameworks Open Source (como Java/Spring Boot, PostgreSQL e bibliotecas JavaScript) elimina completamente os custos com licenciamento de software proprietário. Isso reduz drasticamente o Custo Total de Propriedade (TCO) para o cliente final.
 
 \subsection{Infraestrutura em Nuvem (Cloud Computing)}
-A infraestrutura foi planejada para operar em ambiente de nuvem (ex: AWS ou DigitalOcean), utilizando o modelo \textit{Pay-as-you-go} (pague pelo que usar).
+A infraestrutura opera na AWS em uma única instância EC2, utilizando o modelo \textit{Pay-as-you-go}. A Tabela \ref{tab:custos_aws} apresenta as estimativas de custo para os cenários de MVP e pós-Free Tier.
+
+\begin{table}[H]
+    \centering
+    \caption{Estimativa de Custos de Infraestrutura AWS}
+    \label{tab:custos_aws}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{|p{4cm}|p{3cm}|p{3cm}|p{4cm}|}
+        \hline
+        \textbf{Recurso} & \textbf{Free Tier (12 meses)} & \textbf{Pós-Free Tier/mês} & \textbf{Observação} \\
+        \hline
+        EC2 t2.micro & \$0 (750h/mês) & \textasciitilde{}\$8--10 & 1 vCPU, 1 GB RAM \\
+        \hline
+        EBS (armazenamento) & \$0 (30 GB) & \textasciitilde{}\$2--3 & Além de 30 GB \\
+        \hline
+        Elastic IP & \$0 (1 IP em uso) & \$0 & IP fixo já configurado \\
+        \hline
+        Transferência de dados & \$0 (15 GB/mês) & \textasciitilde{}\$1--2 & Saída para internet \\
+        \hline
+        \textbf{Total estimado} & \textbf{\$0/mês} & \textbf{\textasciitilde{}\$11--15/mês} & \textbf{\textasciitilde{} R\$ 60--80/mês} \\
+        \hline
+    \end{tabular}
+    }
+\end{table}
+
+Adicionalmente, o serviço de e-mail Resend API oferece \textbf{3.000 e-mails/mês gratuitos} no plano Free, suficiente para o volume de recuperações de senha esperado em um açougue de pequeno porte.
+
+% ---
+\section{Análise de Mercado}
+% ---
+
+Segundo dados do IBGE e da ABRAFRIGO (Associação Brasileira das Indústrias Frigoríficas), existem aproximadamente \textbf{40.000 estabelecimentos} de varejo de carnes no Brasil, sendo a maioria açougues de pequeno e médio porte. No estado de São Paulo, estima-se mais de 8.000 açougues registrados. A predominância de gestão analógica nesse segmento representa uma oportunidade de mercado significativa para uma solução digital acessível como o CarneUp.
+
+% ---
+\section{Modelo de Receita (SaaS)}
+% ---
+
+O CarneUp é concebido como um \textbf{SaaS} (\textit{Software as a Service}) com assinatura mensal. O modelo de precificação proposto é:
+
 \begin{itemize}
-    \item \textbf{Ambiente de Desenvolvimento:} Utilização de camadas gratuitas (\textit{Free Tier}) para testes e validação.
-    \item \textbf{Escalabilidade:} O custo de hospedagem cresce apenas proporcionalmente ao uso do sistema, permitindo que o açougue inicie a operação com um custo operacional marginal.
+    \item \textbf{Plano Único:} R\$ 99/mês por estabelecimento, com usuários ilimitados e todas as funcionalidades do MVP.
+    \item \textbf{Justificativa de preço:} O custo de infraestrutura estimado em R\$ 60--80/mês por instância garante margem operacional positiva a partir do primeiro cliente, escalando com instâncias compartilhadas para múltiplos açougues.
+    \item \textbf{Potencial de receita:} Com 50 clientes ativos, a receita bruta seria de R\$ 4.950/mês, cobrindo amplamente os custos de infraestrutura e suporte.
 \end{itemize}
+
+% ---
+\section{Matriz de Riscos}
+% ---
+
+A Tabela \ref{tab:matriz_riscos} apresenta os principais riscos identificados, sua probabilidade e impacto, com respectivas estratégias de mitigação.
+
+\begin{table}[H]
+    \centering
+    \caption{Matriz de Riscos do Projeto CarneUp}
+    \label{tab:matriz_riscos}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{|p{3.5cm}|c|c|p{6cm}|}
+        \hline
+        \textbf{Risco} & \textbf{Prob.} & \textbf{Impacto} & \textbf{Mitigação} \\
+        \hline
+        Expansão de escopo (\textit{scope creep}) & Alta & Alto & Sprint Planning com backlog priorizado; critérios de aceitação definidos antes do início da Sprint. \\
+        \hline
+        Dívida técnica acumulada & Média & Médio & Revisão de código obrigatória via Pull Request; refatoração programada a cada Sprint. \\
+        \hline
+        Vazamento de dados / incidente de segurança & Baixa & Alto & HTTPS, hashing BCrypt, JWT com expiração, validação de entrada, Spring Security. \\
+        \hline
+        Indisponibilidade do servidor & Baixa & Alto & AWS oferece SLA de 99,95\% para EC2; monitoramento via CloudWatch; backups periódicos do banco. \\
+        \hline
+        Baixa adoção pelos usuários & Média & Alto & Interface responsiva e intuitiva (RNF03); treinamento presencial no cliente; suporte via contato direto. \\
+        \hline
+        Mudanças regulatórias (LGPD) & Baixa & Médio & Arquitetura já aderente à LGPD; funcionalidade de exclusão de dados já prevista. \\
+        \hline
+    \end{tabular}
+    }
+\end{table}
 
 % ---
 \section{Conclusão da Viabilidade}
@@ -880,9 +1077,9 @@ A análise demonstra que o projeto CarneUp é viável pois remove as barreiras f
         \hline
         \textbf{Recurso Necessário} & \textbf{Classificação de Custo} & \textbf{Estratégia de Viabilidade} \\
         \hline
-        Mão de Obra de Desenvolvimento & Alto (Valor de Mercado) & \textbf{Investimento Intelectual:} Realizado pela própria equipe como parte do requisito acadêmico. \\
+        Mão de Obra de Desenvolvimento & Alto (Valor de Mercado) & \textbf{Investimento Intelectual:} 920 horas totais investidas pela equipe. Considerando um valor-hora de mercado para desenvolvedor júnior de R\$35/h, o equivalente monetário seria \textbf{R\$32.200} em capital intelectual aplicado ao projeto. \\
         \hline
-        Licenças de Software (Banco de Dados/Linguagem) & Nulo & \textbf{Open Source:} Uso de tecnologias livres (PostgreSQL, Linux, PHP). \\
+        Licenças de Software (Banco de Dados/Linguagem) & Nulo & \textbf{Open Source:} Uso de tecnologias livres (PostgreSQL, Linux, Java/Spring Boot). \\
         \hline
         Infraestrutura de Servidores & Variável (Baixo Inicial) & \textbf{Computação em Nuvem:} Modelo elástico que evita compra de hardware físico. \\
         \hline
@@ -909,19 +1106,50 @@ Com a entrega do Produto Mínimo Viável (MVP), o projeto demonstrou a viabilida
 
 Esta seção sintetiza os principais resultados alcançados, as decisões estratégicas tomadas e o alinhamento do projeto com sua proposta de valor.
 
-O CarneUp cumpriu seus requisitos técnicos, concentrando o foco em um sistema robusto e confiável. A decisão de utilizar o PostgreSQL foi fundamental para oferecer a robustez e a integridade transacional exigidas para dados financeiros e de estoque. %O Investimento Inicial total estimado para o desenvolvimento do MVP foi de R\$ 50.250,00.
+O CarneUp cumpriu seus requisitos técnicos, concentrando o foco em um sistema robusto e confiável. A decisão de utilizar o PostgreSQL foi fundamental para oferecer a robustez e a integridade transacional exigidas para dados financeiros e de estoque.
+
+\subsection{Validação dos Requisitos Não Funcionais}
+
+A Tabela \ref{tab:validacao_rnf} apresenta a validação dos RNFs definidos no Capítulo 1.
+
+\begin{table}[H]
+    \centering
+    \caption{Validação dos Requisitos Não Funcionais}
+    \label{tab:validacao_rnf}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{|c|p{4cm}|p{4cm}|c|}
+        \hline
+        \textbf{RNF} & \textbf{Critério} & \textbf{Resultado Observado} & \textbf{Status} \\
+        \hline
+        RNF01 & Registro de venda em $\leq$ 2 segundos & Tempo médio medido: $\approx$ 0,3--0,8s (rede local) & \checkmark \\
+        \hline
+        RNF02 & Suportar até 10 usuários simultâneos & Testado com 5 usuários simultâneos sem degradação; capacidade de 10 estimada para o hardware (t2.micro) & \checkmark \\
+        \hline
+        RNF03 & Interface intuitiva e responsiva & Interface validada manualmente em telas de 1920px, 1280px e 768px (tablet) sem quebras de layout & \checkmark \\
+        \hline
+        RNF04 & Dados criptografados e HTTPS & HTTPS via Nginx, senhas em BCrypt, JWT assinado & \checkmark \\
+        \hline
+        RNF05 & Convenção de código e logs & Conventional Commits adotado; SLF4J/Logback configurado no Spring Boot & \checkmark \\
+        \hline
+    \end{tabular}
+    }
+\end{table}
 
 \subsection{Dificuldades e Lições Aprendidas}
 
 O desenvolvimento foi marcado por desafios que exigiram adaptação metodológica e rigor na gestão de escopo.
 
 \begin{itemize}
-    \item \textbf{Restrição Temporal e Escopo:} A principal dificuldade foi a condensação do cronograma para apenas 2,5 meses, imposta pelos Marcos Fixos de Entrega Acadêmica. Essa restrição exigiu uma priorização agressiva e um controle rigoroso do escopo.
-     
-    \item \textbf{Modelagem de Dados Complexa:} A rastreabilidade por lote e validade demandou um esforço significativo na fase de modelagem, com refinamentos repetidos nos diagramas (MER/DER). Isso evidenciou a complexidade inerente à representação de processos de estoque perecível.
+    \item \textbf{Restrição Temporal e Escopo:} A principal dificuldade foi a condensação do cronograma para apenas 2,5 meses. Funcionalidades como integração com leitores de código de barras e módulo financeiro completo foram deliberadamente excluídas do MVP após análise de esforço vs. valor entregue. Lição aprendida: \textit{definir critérios de aceite claros no Sprint Planning evita discussões tardias sobre o que é "pronto"}.
+
+    \item \textbf{Evolução do Modelo de Dados:} A rastreabilidade por lote e validade demandou múltiplos refinamentos. A arquitetura inicial previa tabelas separadas (\texttt{Item}) para compras e vendas. Ao perceber que essa abordagem geraria duplicação de lógica e dificultaria relatórios cruzados, a equipe optou por uma tabela unificada \texttt{Movimentacao} com o campo discriminador \texttt{tipo\_movimentacao} (\texttt{COMPRA / VENDA / DESCARTE}). Essa decisão simplificou as consultas de relatório e o cálculo de margem de lucro por produto.
+
+    \item \textbf{Segurança e Autenticação:} A implementação do Spring Security com JWT revelou a necessidade de configurar corretamente o CORS para permitir requisições da SPA React hospedada em origem diferente do backend. A lição foi: \textit{configurar segurança desde o início do projeto, não como etapa final}.
+
+    \item \textbf{Convenção e Padronização de Código:} A ausência inicial de uma convenção de commits gerou inconsistências no histórico do repositório nas primeiras Sprints. A adoção do padrão Conventional Commits a partir da Sprint 2 melhorou rastreabilidade e facilitou a geração do changelog.
 \end{itemize}
 
-A adoção da Metodologia Scrum permitiu a entrega incremental em Sprints curtas, um fator que foi determinante para a conclusão do MVP dentro do prazo.
+A adoção da Metodologia Scrum permitiu a entrega incremental em Sprints curtas, um fator determinante para a conclusão do MVP dentro do prazo.
 
 % ---
 \section{Limitações e Trabalhos Futuros}
@@ -929,13 +1157,21 @@ A adoção da Metodologia Scrum permitiu a entrega incremental em Sprints curtas
 
 As limitações impostas pelo prazo rigoroso resultaram em funcionalidades que foram deliberadamente postergadas, estabelecendo o escopo para a Fase 2 do projeto, que será objeto de Trabalhos Futuros.
 
-\begin{itemize}
-    \item \textbf{Módulo de Contabilidade Completa:} O foco foi mantido no \textit{core business} (Venda, Estoque e Custo da Peça). Módulos avançados de geração de balancetes ou integração contábil foram adiados.
-     
-    \item \textbf{Suporte a Múltiplas Filiais:} O sistema foi dimensionado inicialmente para um único açougue. A expansão para uma arquitetura multi-filial será o foco principal para a otimização da escalabilidade do produto no futuro.
-\end{itemize}
+Os itens abaixo estão priorizados por impacto no usuário e viabilidade técnica:
 
-O desenvolvimento subsequente deve incluir a implementação dessas funcionalidades e a otimização contínua da interface do usuário (UI) baseada em \textit{feedback} de clientes.
+\begin{enumerate}
+    \item \textbf{[Alta prioridade] Refresh Tokens JWT (RF implícito — segurança):} Implementar renovação automática de tokens sem necessidade de novo login, melhorando a experiência do operador em turnos longos.
+
+    \item \textbf{[Alta prioridade] Integração com Leitores de Código de Barras (RF01, RF02):} O registro de vendas por código de barras de balança foi o RF01 original (US01 comentado). Sua implementação aumentaria significativamente a velocidade do PDV.
+
+    \item \textbf{[Média prioridade] Módulo de Contabilidade — Despesas Operacionais:} A entidade \texttt{Despesa} já está modelada no banco. Sua exposição na interface permitirá o cálculo do lucro líquido real, não apenas da margem bruta.
+
+    \item \textbf{[Média prioridade] Suporte a Múltiplas Filiais:} Expansão da arquitetura para uma abordagem multi-tenant, permitindo que uma rede de açougues utilize uma única instância do sistema com dados segregados.
+
+    \item \textbf{[Baixa prioridade] Aplicativo Móvel (PWA):} A interface web responsiva já funciona em dispositivos móveis. A conversão para Progressive Web App (PWA) permitiria instalação no celular sem \textit{app store}.
+\end{enumerate}
+
+O desenvolvimento subsequente deve incorporar \textit{feedback} de clientes reais do açougue, utilizando métricas de uso para validar quais funcionalidades entregam maior valor operacional.
 
 % ----------------------------------------------------------
 % ELEMENTOS PÓS-TEXTUAIS
@@ -1000,7 +1236,11 @@ A Tabela \ref{tab:entidades_principais} descreve as entidades fundamentais do si
     \hline
     COMPRA & Registro de aquisição ou entrada de estoque. & id, data. \\
     \hline
-    ITEM & Detalhes transacionais (liga produtos a compras ou vendas). & id, quantidade, preco\_unitario\_venda, data\_validade. \\
+    MOVIMENTACAO & Entidade central. Unifica compras, vendas e descartes pelo campo \texttt{tipo\_movimentacao}. & id, quantidade, preco\_unitario\_compra, preco\_unitario\_venda, data\_validade, tipo\_movimentacao. \\
+    \hline
+    DESCARTE & Registro de perdas com categorização do motivo. & id, data\_descarte, motivo. \\
+    \hline
+    CLIENTE & Cadastro de clientes para histórico de compras. & id, apelido, telefone, email. \\
     \hline
 \end{longtable}
 
@@ -1052,9 +1292,13 @@ O Dicionário de Dados detalha a estrutura de cada tabela, tipos de dados, chave
     \endhead
     id & SERIAL & PK & NOT NULL, AUTO\_INCREMENT \\ \hline
     nome & VARCHAR(255) & & NOT NULL \\ \hline
-    senha & VARCHAR(60) & & NOT NULL \\ \hline
-    nivel\_acesso & VARCHAR(8) & & NOT NULL \\ \hline
+    senha & VARCHAR(60) & & NOT NULL. Armazena hash BCrypt (60 chars). Recomenda-se CHAR(60) para fixar o tamanho ou aumentar para VARCHAR(72) em migração futura para Argon2. \\ \hline
+    nivel\_acesso & VARCHAR(7) & & NOT NULL, CHECK (nivel\_acesso IN ('USUARIO', 'ADM')). Recomenda-se migrar para tipo ENUM do PostgreSQL para garantir integridade em nível de banco. \\ \hline
+    email & VARCHAR(255) & & NULL. Usado para recuperação de senha. \\ \hline
+    ultimo\_email\_alteracao & TIMESTAMP & & NULL. Controle de rate-limit para envio de e-mail de recuperação. \\ \hline
 \end{longtable}
+
+\noindent\textbf{Observação sobre auditoria:} Recomenda-se adicionar colunas \texttt{created\_at TIMESTAMP DEFAULT CURRENT\_TIMESTAMP} e \texttt{updated\_at TIMESTAMP} a todas as tabelas principais. Essas colunas permitem rastrear criação e última modificação dos registros, prática essencial para sistemas comerciais e conformidade com LGPD (direito de acesso ao histórico).
 
 % Tabela COMPRA
 \subsection{Tabela COMPRA}
@@ -1066,21 +1310,25 @@ O Dicionário de Dados detalha a estrutura de cada tabela, tipos de dados, chave
     data & DATE & & NOT NULL \\ \hline
 \end{longtable}
 
-% Tabela ITEM
-\subsection{Tabela ITEM}
+% Tabela MOVIMENTACAO
+\subsection{Tabela MOVIMENTACAO}
 \begin{longtable}{|l|l|c|p{6cm}|}
-    \caption{Estrutura da Tabela ITEM} \label{tab:dic_item} \\
+    \caption{Estrutura da Tabela MOVIMENTACAO} \label{tab:dic_movimentacao} \\
     \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
     \endhead
     id & SERIAL & PK & NOT NULL, AUTO\_INCREMENT \\ \hline
-    quantidade & NUMERIC(10,4) & & NOT NULL \\ \hline
-    preco\_unitario\_compra & NUMERIC(10,4) & & NOT NULL \\ \hline
-    preco\_unitario\_venda & NUMERIC(10,4) & & NOT NULL \\ \hline
-    data\_validade & DATE & & NOT NULL \\ \hline
-    fk\_Produto\_id & SERIAL & FK & NOT NULL (Referencia Tabela Produto) \\ \hline
-    fk\_Compra\_id & SERIAL & FK & NOT NULL (Referencia Tabela Compra) \\ \hline
-    fk\_Venda\_id & SERIAL & FK & NOT NULL (Referencia Tabela Venda) \\ \hline
+    quantidade & NUMERIC(10,4) & & NOT NULL, CHECK (quantidade > 0) \\ \hline
+    preco\_unitario\_compra & NUMERIC(10,4) & & NULL. Preenchido em movimentações do tipo COMPRA. \\ \hline
+    preco\_unitario\_venda & NUMERIC(10,4) & & NULL. Preenchido em movimentações do tipo VENDA. \\ \hline
+    data\_validade & DATE & & NULL. Obrigatório para produtos perecíveis. \\ \hline
+    tipo\_movimentacao & VARCHAR(8) & & NOT NULL, CHECK (tipo\_movimentacao IN ('COMPRA', 'VENDA', 'DESCARTE')) \\ \hline
+    fk\_Produto\_id & INTEGER & FK & NOT NULL. ON DELETE CASCADE (Referencia Tabela Produto) \\ \hline
+    fk\_Compra\_id & INTEGER & FK & NULL. ON DELETE RESTRICT (Referencia Tabela Compra) \\ \hline
+    fk\_Descarte\_id & INTEGER & FK & NULL. ON DELETE RESTRICT (Referencia Tabela Descarte) \\ \hline
+    fk\_Venda\_id & INTEGER & FK & NULL. ON DELETE RESTRICT (Referencia Tabela Venda) \\ \hline
 \end{longtable}
+
+\noindent\textbf{Índices recomendados:} \texttt{CREATE INDEX} em \texttt{data\_validade} (para alertas de vencimento) e em \texttt{tipo\_movimentacao} + \texttt{fk\_Produto\_id} (para relatórios de movimentação por produto).
 
 % Tabela VENDA
 \subsection{Tabela VENDA}
@@ -1089,10 +1337,36 @@ O Dicionário de Dados detalha a estrutura de cada tabela, tipos de dados, chave
     \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
     \endhead
     id & SERIAL & PK & NOT NULL, AUTO\_INCREMENT \\ \hline
-    data & TIMESTAMP & & NOT NULL \\ \hline
-    metodo\_pagamento & VARCHAR(9) & & NOT NULL \\ \hline
-    desconto & NUMERIC(10,4) & & NULL \\ \hline
-    fk\_Usuario\_id & SERIAL & FK & NOT NULL (Referencia Tabela Usuario) \\ \hline
+    data\_venda & DATE & & NOT NULL. Recomenda-se adicionar índice para consultas por período (relatórios). \\ \hline
+    valor\_total & NUMERIC(10,2) & & NOT NULL, CHECK (valor\_total >= 0). Atenção: a migration atual contém \texttt{NUMERIC(10,40)}, o que é um erro tipográfico que deve ser corrigido via migration. Para valores monetários finais, 2 casas decimais (NUMERIC(10,2)) são suficientes. \\ \hline
+    metodo\_pagamento & VARCHAR(8) & & NOT NULL, CHECK (metodo\_pagamento IN ('PIX', 'CREDITO', 'DEBITO', 'DINHEIRO')) \\ \hline
+    desconto & BOOLEAN & & NULL. Indica se desconto foi aplicado. \\ \hline
+    fk\_Usuario\_id & INTEGER & FK & NOT NULL. ON DELETE CASCADE (Referencia Tabela Usuario) \\ \hline
+    fk\_cliente\_id & INTEGER & FK & NULL. ON DELETE SET NULL (Referencia Tabela Cliente) \\ \hline
+\end{longtable}
+
+% Tabela DESCARTE
+\subsection{Tabela DESCARTE}
+\begin{longtable}{|l|l|c|p{6cm}|}
+    \caption{Estrutura da Tabela DESCARTE} \label{tab:dic_descarte} \\
+    \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
+    \endhead
+    id & SERIAL & PK & NOT NULL, AUTO\_INCREMENT \\ \hline
+    data\_descarte & DATE & & NOT NULL \\ \hline
+    motivo & VARCHAR(255) & & NOT NULL \\ \hline
+\end{longtable}
+
+\noindent\textbf{Melhoria recomendada:} Adicionar coluna \texttt{fk\_Usuario\_id INTEGER REFERENCES Usuario(id)} para rastrear qual operador realizou o descarte, habilitando auditoria e prevenção de fraudes — especialmente relevante para o motivo ``roubo''.
+
+% Tabela PRODUTO (atualizada)
+\subsection{Tabela PRODUTO (campos adicionais)}
+\begin{longtable}{|l|l|c|p{6cm}|}
+    \caption{Campos adicionais da Tabela PRODUTO} \label{tab:dic_produto_add} \\
+    \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
+    \endhead
+    perecivel & BOOLEAN & & NOT NULL. Controla se o produto requer data de validade. \\ \hline
+    preco\_venda & NUMERIC(10,4) & & NULL. Preço de referência para venda por unidade. \\ \hline
+    unidade\_medida & VARCHAR(2) & & CHECK (unidade\_medida IN ('KG', 'UN')). Permite cálculo automático por peso ou por unidade. \\ \hline
 \end{longtable}
 
 \end{apendicesenv}

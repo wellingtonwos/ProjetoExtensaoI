@@ -60,7 +60,21 @@ const SubmitButton = styled.button`
 	opacity: ${(props) => (props.disabled ? 0.7 : 1)};
 `
 
+const BackButton = styled.button`
+	width: 100%;
+	height: 44px;
+	border-radius: 4px;
+	background: transparent;
+	color: #610005;
+	border: 1px solid #610005;
+	font-family: 'Epilogue', sans-serif;
+	font-weight: 700;
+	font-size: 14px;
+	cursor: pointer;
+`
+
 export const ResetPasswordView = ({ navigate, recoveryCode }) => {
+
 	const [password, setPassword] = useState('')
 	const [confirmPassword, setConfirmPassword] = useState('')
 	const [error, setError] = useState('')
@@ -133,6 +147,9 @@ export const ResetPasswordView = ({ navigate, recoveryCode }) => {
 				<SubmitButton type='submit' disabled={loading}>
 					{loading ? 'Salvando...' : 'Salvar senha'}
 				</SubmitButton>
+				<BackButton type='button' onClick={() => navigate('code')}>
+					← Voltar
+				</BackButton>
 			</Form>
 		</AuthShell>
 	)

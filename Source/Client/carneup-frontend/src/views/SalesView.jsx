@@ -394,6 +394,13 @@ const RBtn = styled.button`
 // ── Helpers ────────────────────────────────────────────────────────────────────
 const fmt = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0)
 
+const fmtStock = (qty, unit) => {
+  if (unit === 'UN') return `${Math.floor(qty ?? 0)} un`
+  const g = Math.round((qty ?? 0) * 1000)
+  if (g >= 1000) return `${(g / 1000).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 3 })} kg`
+  return `${g} g`
+}
+
 const PAYMENTS = [
   { id: 'PIX',      label: 'PIX',      icon: 'qr_code' },
   { id: 'DINHEIRO', label: 'Dinheiro', icon: 'payments' },
@@ -447,6 +454,7 @@ export const SalesView = ({ navigate }) => {
         id: p.id, name: p.name || '', code: p.code || '',
         brand: p.brandName || '', category: p.categoryName || '',
         unit: p.unitMeasurement || 'UN', price: Number(p.precoVenda || 0),
+        stock: Number(p.stockQuantity ?? 0),
       }))))
       .catch(() => toast.error('Erro ao carregar produtos.'))
       .finally(() => setLoadingP(false))
@@ -496,10 +504,20 @@ export const SalesView = ({ navigate }) => {
   // Add to cart
   const addToCart = (p) => {
     const qty = parseFloat(String(inlineQty).replace(',', '.'))
-    if (!qty || qty <= 0) { toast.warning('Quantidade inválida.'); return }
+    const minQty = p.unit === 'UN' ? 1 : 0.001
+    if (!qty || qty < minQty) {
+      toast.warning(p.unit === 'UN' ? 'Quantidade mínima: 1 unidade.' : 'Quantidade mínima: 1 grama (0,001 kg).')
+      return
+    }
     if (p.unit === 'UN' && !Number.isInteger(qty)) { toast.warning('Quantidade inteira para UN.'); return }
     const price = parseFloat(String(inlinePrice).replace(',', '.'))
     if (isNaN(price) || price < 0) { toast.warning('Preço inválido.'); return }
+    const cartQty = cart.filter(it => it.productId === p.id).reduce((s, it) => s + it.qty, 0)
+    if (p.stock != null && !isNaN(p.stock) && qty + cartQty > p.stock + 0.0001) {
+      const avail = Math.max(0, p.stock - cartQty)
+      toast.warning(`Estoque insuficiente. Disponível: ${fmtStock(avail, p.unit)}`)
+      return
+    }
     setCart(prev => [...prev, { key: Date.now(), productId: p.id, name: p.name, unit: p.unit, qty, price }])
     setSelectedId(null); setInlineQty(''); setInlinePrice('')
     searchRef.current?.focus()
@@ -631,7 +649,12 @@ export const SalesView = ({ navigate }) => {
                   <PRowMain onClick={() => selectProduct(p)}>
                     <PName>
                       <div className='name'>{p.name}</div>
-                      <div className='sub'>{p.code}{p.brand ? ` · ${p.brand}` : ''}</div>
+                      <div className='sub'>
+                        {p.code}{p.brand ? ` · ${p.brand}` : ''}
+                        <span style={{ marginLeft:6, color: p.stock <= 0 ? '#dc2626' : p.stock < (p.unit==='UN' ? 2 : 0.1) ? '#f59e0b' : '#a8a29e' }}>
+                          · {fmtStock(p.stock, p.unit)}
+                        </span>
+                      </div>
                     </PName>
                     <CBadge>{p.category || '—'}</CBadge>
                     <UTag>{p.unit}</UTag>
@@ -642,12 +665,14 @@ export const SalesView = ({ navigate }) => {
                     <InlineAdd onClick={e => e.stopPropagation()}>
                       <ILabel>Qtd</ILabel>
                       <IInput ref={qtyRef} type='number' min='0'
-                        step={p.unit === 'UN' ? '1' : '0.001'}
+                        step={p.unit === 'UN' ? '1' : '0.050'}
                         value={inlineQty} onChange={e => setInlineQty(e.target.value)}
+                        onFocus={e => e.target.select()}
                         onKeyDown={e => e.key === 'Enter' && addToCart(p)} />
-                      <ILabel>R$</ILabel>
+                      <ILabel>Preço R$</ILabel>
                       <IInput type='number' min='0' step='0.01'
                         value={inlinePrice} onChange={e => setInlinePrice(e.target.value)}
+                        onFocus={e => e.target.select()}
                         onKeyDown={e => e.key === 'Enter' && addToCart(p)} />
                       <IAdd onClick={() => addToCart(p)}>
                         <span className='material-symbols-outlined' style={{ fontSize:15 }}>add_shopping_cart</span>
@@ -683,12 +708,12 @@ export const SalesView = ({ navigate }) => {
                   <CRight>
                     <CTotal>{fmt(it.qty * it.price)}</CTotal>
                     <QCtrl>
-                      <button onClick={() => updateQty(it.key, Math.max(0, it.qty - (it.unit==='UN'?1:0.1)).toFixed(it.unit==='UN'?0:3))}>
+                      <button onClick={() => updateQty(it.key, Math.max(0, it.qty - (it.unit==='UN'?1:0.05)).toFixed(it.unit==='UN'?0:3))}>
                         <span className='material-symbols-outlined'>remove</span>
                       </button>
-                      <QIn value={it.qty} type='number' min='0' step={it.unit==='UN'?'1':'0.001'}
+                      <QIn value={it.qty} type='number' min='0' step={it.unit==='UN'?'1':'0.050'}
                         onChange={e => updateQty(it.key, e.target.value)} />
-                      <button onClick={() => updateQty(it.key, it.qty + (it.unit==='UN'?1:0.1))}>
+                      <button onClick={() => updateQty(it.key, it.qty + (it.unit==='UN'?1:0.05))}>
                         <span className='material-symbols-outlined'>add</span>
                       </button>
                       <RmBtn onClick={() => removeItem(it.key)}><span className='material-symbols-outlined'>close</span></RmBtn>

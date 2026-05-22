@@ -107,7 +107,7 @@ export const ConfiguracaoView = ({ navigate }) => {
 
   return (
     <Wrapper>
-      <Sidebar navigate={navigate} activeView='configuracoes' />
+      <Sidebar navigate={navigate} activeView='config-loja' />
       <Main>
         <TopBar>
           <span className='material-symbols-outlined'>store</span>
