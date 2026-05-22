@@ -168,16 +168,14 @@ class DTOsConditionTest {
         cl1.setId(55L);
         cl1.setNickname("nick");
         cl1.setTelefone("t");
-        cl1.setDocumento("d");
-        cl1.setEmail("e");
+        cl1.setAniversario(java.time.LocalDate.of(1990,1,1));
         cl1.setDataCadastro(LocalDateTime.of(2023,2,3,4,5));
 
         ClienteResponseDTO cl2 = new ClienteResponseDTO();
         cl2.setId(55L);
         cl2.setNickname("nick");
         cl2.setTelefone("t");
-        cl2.setDocumento("d");
-        cl2.setEmail("e");
+        cl2.setAniversario(java.time.LocalDate.of(1990,1,1));
         cl2.setDataCadastro(LocalDateTime.of(2023,2,3,4,5));
 
         assertTrue(cl1.equals(cl2));

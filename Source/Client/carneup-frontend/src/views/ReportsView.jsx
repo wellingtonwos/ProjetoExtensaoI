@@ -284,13 +284,13 @@ export const ReportsView = ({ navigate }) => {
   }, [activeTab])
 
   // Client handlers
-  const openEdit = (c) => { setEditClient(c); setEditForm({ nickname: c.nickname, telefone: c.telefone||'', documento: c.documento||'', email: c.email||'' }) }
+  const openEdit = (c) => { setEditClient(c); setEditForm({ nickname: c.nickname, telefone: c.telefone||'', aniversario: c.aniversario||'' }) }
   const handleEditSave = async (e) => {
     e.preventDefault()
     if (!editForm.nickname?.trim()) return
     setEditSaving(true)
     try {
-      await updateClient(editClient.id, { nickname: editForm.nickname.trim(), telefone: editForm.telefone||null, documento: editForm.documento||null, email: editForm.email||null })
+      await updateClient(editClient.id, { nickname: editForm.nickname.trim(), telefone: editForm.telefone||null, aniversario: editForm.aniversario||null })
       toast.success('Cliente atualizado!')
       setClients(prev => prev.map(c => c.id === editClient.id ? { ...c, ...editForm, nickname: editForm.nickname.trim() } : c))
       setEditClient(null)
@@ -320,7 +320,7 @@ export const ReportsView = ({ navigate }) => {
         <FField style={{ flex: 1 }}>
           <FLabel>Buscar cliente</FLabel>
           <FInput
-            placeholder='Nome, telefone ou documento...'
+            placeholder='Nome ou telefone...'
             value={clientSearch}
             onChange={e => setClientSearch(e.target.value)}
           />
@@ -367,7 +367,7 @@ export const ReportsView = ({ navigate }) => {
     if (activeTab === 'clientes') {
       const filtered = clients.filter(c =>
         !clientSearch || c.nickname?.toLowerCase().includes(clientSearch.toLowerCase()) ||
-        c.telefone?.includes(clientSearch) || c.documento?.includes(clientSearch)
+        c.telefone?.includes(clientSearch)
       )
       return renderClientsList(filtered)
     }
@@ -654,8 +654,7 @@ export const ReportsView = ({ navigate }) => {
                   <tr>
                     <th>Cliente</th>
                     <th>Telefone</th>
-                    <th>CPF / CNPJ</th>
-                    <th>E-mail</th>
+                    <th>Aniversário</th>
                     <th>Cadastrado em</th>
                     <th style={{textAlign:'right'}}>Ações</th>
                   </tr>
@@ -675,8 +674,7 @@ export const ReportsView = ({ navigate }) => {
                           </div>
                         </td>
                         <td>{c.telefone || <span style={{color:'var(--muted)'}}>—</span>}</td>
-                        <td>{c.documento || <span style={{color:'var(--muted)'}}>—</span>}</td>
-                        <td>{c.email || <span style={{color:'var(--muted)'}}>—</span>}</td>
+                        <td>{c.aniversario ? new Date(c.aniversario).toLocaleDateString('pt-BR') : <span style={{color:'var(--muted)'}}>—</span>}</td>
                         <td style={{color:'var(--muted)'}}>{dtCad}</td>
                         <td style={{textAlign:'right'}}>
                           <div style={{display:'flex',gap:6,justifyContent:'flex-end'}}>
@@ -746,12 +744,8 @@ export const ReportsView = ({ navigate }) => {
                 <input value={editForm.telefone} onChange={e => setEditForm(f=>({...f,telefone:e.target.value}))} placeholder='(11) 99999-9999' />
               </EMField>
               <EMField>
-                <label>CPF / CNPJ</label>
-                <input value={editForm.documento} onChange={e => setEditForm(f=>({...f,documento:e.target.value}))} placeholder='000.000.000-00' />
-              </EMField>
-              <EMField>
-                <label>E-mail</label>
-                <input type='email' value={editForm.email} onChange={e => setEditForm(f=>({...f,email:e.target.value}))} placeholder='cliente@email.com' />
+                <label>Aniversário</label>
+                <input type='date' value={editForm.aniversario} onChange={e => setEditForm(f=>({...f,aniversario:e.target.value}))} />
                 <small>Todos os campos exceto o apelido são opcionais.</small>
               </EMField>
             </EMBody>

@@ -25,8 +25,7 @@ public class ClienteService {
         Cliente c = new Cliente();
         c.setNickname(dto.getNickname());
         c.setTelefone(dto.getTelefone());
-        c.setDocumento(dto.getDocumento());
-        c.setEmail(dto.getEmail());
+        c.setAniversario(dto.getAniversario());
         c.setDataCadastro(java.time.LocalDateTime.now());
         return clienteRepository.save(c);
     }
@@ -36,8 +35,7 @@ public class ClienteService {
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente not found: " + id));
         c.setNickname(dto.getNickname());
         c.setTelefone(dto.getTelefone());
-        c.setDocumento(dto.getDocumento());
-        c.setEmail(dto.getEmail());
+        c.setAniversario(dto.getAniversario());
         return clienteRepository.save(c);
     }
 
@@ -63,8 +61,7 @@ public class ClienteService {
         r.setId(c.getId());
         r.setNickname(c.getNickname());
         r.setTelefone(c.getTelefone());
-        r.setDocumento(c.getDocumento());
-        r.setEmail(c.getEmail());
+        r.setAniversario(c.getAniversario());
         r.setDataCadastro(c.getDataCadastro());
         return r;
     }

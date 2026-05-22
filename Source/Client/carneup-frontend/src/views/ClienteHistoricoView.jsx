@@ -194,17 +194,10 @@ export const ClienteHistoricoView = ({ navigate, clientId }) => {
                   </div>
                 </InfoRow>
                 <InfoRow>
-                  <span className='ic material-symbols-outlined'>badge</span>
+                  <span className='ic material-symbols-outlined'>cake</span>
                   <div>
-                    <div className='lbl'>CPF / CNPJ</div>
-                    <div className='val'>{client.documento || <EmptyInfo>Não informado</EmptyInfo>}</div>
-                  </div>
-                </InfoRow>
-                <InfoRow>
-                  <span className='ic material-symbols-outlined'>mail</span>
-                  <div>
-                    <div className='lbl'>E-mail</div>
-                    <div className='val'>{client.email || <EmptyInfo>Não informado</EmptyInfo>}</div>
+                    <div className='lbl'>Aniversário</div>
+                    <div className='val'>{fmtD(client.aniversario) || <EmptyInfo>Não informado</EmptyInfo>}</div>
                   </div>
                 </InfoRow>
               </CardBody>

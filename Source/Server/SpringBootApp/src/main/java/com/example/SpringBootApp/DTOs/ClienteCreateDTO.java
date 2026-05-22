@@ -16,6 +16,5 @@ public class ClienteCreateDTO {
     private String nickname;
 
     private String telefone;
-    private String documento;
-    private String email;
+    private java.time.LocalDate aniversario;
 }

@@ -25,11 +25,8 @@ public class Cliente {
     @Column(name = "telefone")
     private String telefone;
 
-    @Column(name = "documento")
-    private String documento;
-
-    @Column(name = "email")
-    private String email;
+    @Column(name = "aniversario")
+    private java.time.LocalDate aniversario;
 
     @Column(name = "data_cadastro")
     private java.time.LocalDateTime dataCadastro;

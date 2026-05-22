@@ -543,7 +543,7 @@ export const SalesView = ({ navigate }) => {
   }
 
   const openClientModal = () => {
-    setClientForm({ nickname: clientSearch.trim() })
+    setClientForm({ nickname: clientSearch.trim(), aniversario: '' })
     setShowClientDrop(false)
     setClientModal(true)
   }
@@ -557,8 +557,7 @@ export const SalesView = ({ navigate }) => {
       const id = await createClient({
         nickname,
         telefone: clientForm.telefone?.trim() || null,
-        documento: clientForm.documento?.trim() || null,
-        email:    clientForm.email?.trim()    || null,
+        aniversario: clientForm.aniversario || null,
       })
       setSelectedClient({ id: Number(id), nickname })
       setClientSearch(''); setClientModal(false); setAnonymous(false)
@@ -867,20 +866,11 @@ export const SalesView = ({ navigate }) => {
                   />
                 </CModalField>
                 <CModalField>
-                  <label>CPF / CNPJ</label>
+                  <label>Aniversário</label>
                   <input
-                    placeholder='Ex: 000.000.000-00 ou 00.000.000/0001-00'
-                    value={clientForm.documento || ''}
-                    onChange={e => setClientForm(f => ({ ...f, documento: e.target.value }))}
-                  />
-                </CModalField>
-                <CModalField>
-                  <label>E-mail</label>
-                  <input
-                    type='email'
-                    placeholder='Ex: cliente@email.com'
-                    value={clientForm.email || ''}
-                    onChange={e => setClientForm(f => ({ ...f, email: e.target.value }))}
+                    type='date'
+                    value={clientForm.aniversario || ''}
+                    onChange={e => setClientForm(f => ({ ...f, aniversario: e.target.value }))}
                   />
                   <small>Todos os campos acima são opcionais, exceto o apelido.</small>
                 </CModalField>

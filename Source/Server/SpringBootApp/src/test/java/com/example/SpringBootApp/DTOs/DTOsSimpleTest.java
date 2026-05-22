@@ -111,8 +111,7 @@ class DTOsSimpleTest {
         cl.setId(55L);
         cl.setNickname("nick");
         cl.setTelefone("t");
-        cl.setDocumento("d");
-        cl.setEmail("e");
+        cl.setAniversario(java.time.LocalDate.of(1990,1,1));
         cl.setDataCadastro(LocalDateTime.of(2023,2,3,4,5));
         assertEquals(55L, cl.getId().longValue());
         assertEquals("nick", cl.getNickname());
