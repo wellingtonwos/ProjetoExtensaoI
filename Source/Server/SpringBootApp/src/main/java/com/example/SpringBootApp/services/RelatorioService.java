@@ -32,7 +32,11 @@ public class RelatorioService {
 
         reportDTO.setId(venda.getId());
         reportDTO.setSaleDate(venda.getDataVenda());
-        reportDTO.setPaymentMethod(venda.getMetodoPagamento().name());
+        String pm = null;
+        if (venda.getPagamentos() != null && !venda.getPagamentos().isEmpty() && venda.getPagamentos().get(0).getMetodoPagamento() != null) {
+            pm = venda.getPagamentos().get(0).getMetodoPagamento().name();
+        }
+        reportDTO.setPaymentMethod(pm);
         reportDTO.setSalesmanName(venda.getUsuario().getNome());
         reportDTO.setHasDiscount(venda.getTemDesconto());
 

@@ -30,6 +30,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class VendaService {
 
+    private final com.example.SpringBootApp.repositories.VendaPagamentoRepository vendaPagamentoRepository;
+
     private final VendaRepository vendaRepository;
     private final MovimentacaoRepository movimentacaoRepository;
     private final UsuarioRepository usuarioRepository;
@@ -45,9 +47,9 @@ public class VendaService {
 
         Venda venda = new Venda();
         venda.setDataVenda(saleDTO.getSaleDate());
-        venda.setMetodoPagamento(saleDTO.getPaymentMethod());
         venda.setTemDesconto(saleDTO.getHasDiscount());
         venda.setUsuario(usuario);
+        
 
         Venda savedSale = vendaRepository.save(venda);
 
@@ -143,6 +145,10 @@ public class VendaService {
 
         savedSale.setValorTotal(computedTotal);
         savedSale.setItens(items);
+
+        // persist payments (supports split payments and credit surcharge)
+        persistPayments(saleDTO, savedSale, computedTotal);
+
         return savedSale;
     }
 
@@ -163,6 +169,53 @@ public class VendaService {
                 .map(com.example.SpringBootApp.mappers.VendaMapper::toResponse)
                 .toList();
     }
+
+    private void persistPayments(com.example.SpringBootApp.DTOs.VendCreateDTO saleDTO, Venda savedSale, java.math.BigDecimal computedTotal) {
+        java.util.List<com.example.SpringBootApp.DTOs.VendPaymentDTO> payments = saleDTO.getPayments();
+        java.util.List<VendaPagamento> created = new java.util.ArrayList<>();
+        if (payments == null || payments.isEmpty()) {
+            // fallback to single payment from paymentMethod
+            com.example.SpringBootApp.models.PaymentMethod pm = saleDTO.getPaymentMethod();
+            java.math.BigDecimal valor = computedTotal != null ? computedTotal : java.math.BigDecimal.ZERO;
+            java.math.BigDecimal percent = (pm == com.example.SpringBootApp.models.PaymentMethod.CREDITO) ? new java.math.BigDecimal("5.00") : java.math.BigDecimal.ZERO;
+            java.math.BigDecimal acrescimo = valor.multiply(percent).divide(new java.math.BigDecimal("100"));
+            acrescimo = acrescimo.setScale(4, java.math.RoundingMode.HALF_UP);
+            java.math.BigDecimal valorPago = valor.add(acrescimo);
+
+            VendaPagamento vp = new VendaPagamento();
+            vp.setVenda(savedSale);
+            vp.setMetodoPagamento(pm);
+            vp.setValor(valor);
+            vp.setAcrescimoPercent(percent);
+            vp.setAcrescimoValor(acrescimo);
+            vp.setValorPago(valorPago);
+            created.add(vp);
+            if (vendaPagamentoRepository != null) vendaPagamentoRepository.save(vp);
+        } else {
+            for (com.example.SpringBootApp.DTOs.VendPaymentDTO p : payments) {
+                com.example.SpringBootApp.models.PaymentMethod pm = p.getPaymentMethod();
+                java.math.BigDecimal valor = p.getValor() != null ? p.getValor() : java.math.BigDecimal.ZERO;
+                java.math.BigDecimal percent = (pm == com.example.SpringBootApp.models.PaymentMethod.CREDITO) ? new java.math.BigDecimal("5.00") : java.math.BigDecimal.ZERO;
+                java.math.BigDecimal acrescimo = valor.multiply(percent).divide(new java.math.BigDecimal("100"));
+                acrescimo = acrescimo.setScale(4, java.math.RoundingMode.HALF_UP);
+                java.math.BigDecimal valorPago = valor.add(acrescimo);
+
+                VendaPagamento vp = new VendaPagamento();
+                vp.setVenda(savedSale);
+                vp.setMetodoPagamento(pm);
+                vp.setValor(valor);
+                vp.setAcrescimoPercent(percent);
+                vp.setAcrescimoValor(acrescimo);
+                vp.setValorPago(valorPago);
+                vp.setParcelas(p.getParcelas());
+                vp.setReferencia(p.getReferencia());
+                created.add(vp);
+                if (vendaPagamentoRepository != null) vendaPagamentoRepository.save(vp);
+            }
+        }
+        if (!created.isEmpty()) savedSale.setPagamentos(created);
+    }
 }
+
 
 

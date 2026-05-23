@@ -25,7 +25,11 @@ public class VendaMapper {
             dto.setClienteId(venda.getCliente().getId());
             dto.setClienteNickname(venda.getCliente().getNickname());
         }
-        dto.setPaymentMethod(venda.getMetodoPagamento() != null ? venda.getMetodoPagamento().name() : null);
+        String paymentMethod = null;
+        if (venda.getPagamentos() != null && !venda.getPagamentos().isEmpty() && venda.getPagamentos().get(0).getMetodoPagamento() != null) {
+            paymentMethod = venda.getPagamentos().get(0).getMetodoPagamento().name();
+        }
+        dto.setPaymentMethod(paymentMethod);
         dto.setHasDiscount(venda.getTemDesconto());
         dto.setTotalValue(venda.getValorTotal());
 

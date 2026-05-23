@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -42,7 +43,10 @@ public class VendaMapperAdditionalTest {
         c.setId(3L);
         c.setNickname("cli");
         v.setCliente(c);
-        v.setMetodoPagamento(PaymentMethod.CREDITO);
+        com.example.SpringBootApp.models.VendaPagamento vp = new com.example.SpringBootApp.models.VendaPagamento();
+        vp.setMetodoPagamento(PaymentMethod.CREDITO);
+        vp.setVenda(v);
+        v.setPagamentos(List.of(vp));
         v.setTemDesconto(Boolean.TRUE);
         v.setValorTotal(BigDecimal.valueOf(100));
 
