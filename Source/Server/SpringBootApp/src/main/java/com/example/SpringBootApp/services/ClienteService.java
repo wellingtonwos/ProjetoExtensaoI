@@ -80,7 +80,7 @@ public class ClienteService {
     private List<Permissao> getPermissoesForCliente(Long clienteId) {
         if (clienteId == null || jdbcTemplate == null) return java.util.List.of();
         String sql = "SELECT tipo, aceito FROM consentimentos WHERE fk_cliente_id = ? AND capturado_em = (SELECT MAX(capturado_em) FROM consentimentos c2 WHERE c2.fk_cliente_id = ? AND c2.tipo = consentimentos.tipo)";
-        List<Map<String,Object>> rows = jdbcTemplate.queryForList(sql, clienteId, clienteId);
+        List<Map<String,Object>> rows = jdbcTemplate.queryForList(sql, new Object[]{clienteId, clienteId});
         return rows.stream()
                 .filter(m -> {
                     Object aceito = m.get("aceito");
