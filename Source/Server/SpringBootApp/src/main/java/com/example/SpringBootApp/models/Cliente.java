@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Getter
@@ -33,5 +34,8 @@ public class Cliente {
 
     @OneToMany(mappedBy = "cliente", fetch = FetchType.LAZY)
     private List<Venda> sales;
+
+    @Transient
+    private List<Permissao> permissoes = new ArrayList<>();
 }
 

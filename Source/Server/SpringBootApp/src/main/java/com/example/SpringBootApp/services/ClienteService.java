@@ -5,6 +5,11 @@ import com.example.SpringBootApp.DTOs.ClienteResponseDTO;
 import com.example.SpringBootApp.exceptions.ResourceNotFoundException;
 import com.example.SpringBootApp.models.Cliente;
 import com.example.SpringBootApp.repositories.ClienteRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
+import com.example.SpringBootApp.models.Permissao;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,6 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import com.example.SpringBootApp.models.Permissao;
+import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -20,6 +29,7 @@ import java.util.List;
 public class ClienteService {
 
     private final ClienteRepository clienteRepository;
+    private JdbcTemplate jdbcTemplate;
 
     public Cliente createClient(ClienteCreateDTO dto) {
         Cliente c = new Cliente();
@@ -63,6 +73,29 @@ public class ClienteService {
         r.setTelefone(c.getTelefone());
         r.setAniversario(c.getAniversario());
         r.setDataCadastro(c.getDataCadastro());
+        r.setPermissoes(getPermissoesForCliente(c.getId()));
         return r;
+    }
+
+    private List<Permissao> getPermissoesForCliente(Long clienteId) {
+        if (clienteId == null || jdbcTemplate == null) return java.util.List.of();
+        String sql = "SELECT tipo, aceito FROM consentimentos WHERE fk_cliente_id = ? AND capturado_em = (SELECT MAX(capturado_em) FROM consentimentos c2 WHERE c2.fk_cliente_id = ? AND c2.tipo = consentimentos.tipo)";
+        List<Map<String,Object>> rows = jdbcTemplate.queryForList(sql, clienteId, clienteId);
+        return rows.stream()
+                .filter(m -> {
+                    Object aceito = m.get("aceito");
+                    if (aceito == null) return false;
+                    if (aceito instanceof Boolean) return (Boolean) aceito;
+                    if (aceito instanceof Number) return ((Number) aceito).intValue() != 0;
+                    return Boolean.parseBoolean(aceito.toString());
+                })
+                .map(m -> {
+                    Object tipoObj = m.get("tipo");
+                    if (tipoObj == null) return null;
+                    String tipo = tipoObj.toString();
+                    try { return Permissao.valueOf(tipo); } catch (IllegalArgumentException e) { return null; }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 }
