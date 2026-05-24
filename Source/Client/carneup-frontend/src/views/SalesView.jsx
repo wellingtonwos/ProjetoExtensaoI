@@ -428,6 +428,12 @@ export const SalesView = ({ navigate }) => {
     if (isNaN(num)) return ''
     return num.toFixed(2).replace('.', ',')
   }
+  const parseBRL = (v) => {
+    if (v == null || v === '') return 0
+    const digits = String(v).replace(/\D/g, '')
+    const cents = parseInt(digits || '0', 10)
+    return cents / 100
+  }
   const handleInlinePriceChange = (e) => {
     const digits = String(e.target.value || '').replace(/\D/g, '')
     const cents = parseInt(digits || '0', 10)
@@ -457,6 +463,9 @@ export const SalesView = ({ navigate }) => {
   const [payment, setPayment] = useState('DINHEIRO')
   const [advOpen, setAdvOpen] = useState(false)
   const [hasDiscount, setHasDiscount] = useState(false)
+  // Split payments support
+  const [splitPayments, setSplitPayments] = useState(false)
+  const [paymentsList, setPaymentsList] = useState([])
 
   // Sale state
   const [submitting, setSubmitting] = useState(false)
@@ -558,6 +567,11 @@ export const SalesView = ({ navigate }) => {
   const subtotal = cart.reduce((s, it) => s + it.qty * it.price, 0)
   const total = hasDiscount ? subtotal * 0.95 : subtotal
   const discount = subtotal - total
+  // surcharge calculations: sum of 5% over credit parts (frontend-visible only)
+  const surchargeTotal = (splitPayments && paymentsList && paymentsList.length > 0)
+    ? paymentsList.reduce((s, p) => s + ((p.paymentMethod === 'CREDITO') ? (parseBRL(p.valor) * 0.05) : 0), 0)
+    : (payment === 'CREDITO' ? total * 0.05 : 0)
+  const totalWithSurcharge = total + surchargeTotal
 
   // Client ops
   const handleSelectClient = (c) => {
@@ -636,9 +650,21 @@ export const SalesView = ({ navigate }) => {
     if (!userId) { toast.error('Sessão expirada. Faça login novamente.'); return }
     setSubmitting(true)
     try {
+      // build payments payload
+      let paymentsPayload = null
+      if (splitPayments && paymentsList && paymentsList.length > 0) {
+        paymentsPayload = paymentsList.map(p => ({
+          paymentMethod: p.paymentMethod,
+          valor: parseBRL(p.valor)
+        }))
+      } else {
+        paymentsPayload = [{ paymentMethod: payment, valor: Number((total).toFixed(2)) }]
+      }
+
       const payload = {
         userId,
-        paymentMethod: payment,
+        paymentMethod: payment, // legacy field kept for compatibility
+        payments: paymentsPayload,
         hasDiscount,
         saleDate: new Date().toISOString().slice(0, 10),
         clienteId: (!anonymous && selectedClient) ? selectedClient.id : null,
@@ -857,6 +883,56 @@ export const SalesView = ({ navigate }) => {
                     </PayBtn>
                   ))}
                 </PayGrid>
+
+                <div style={{marginTop:10, display:'flex', gap:8, alignItems:'center'}}>
+                  <button type='button' style={{padding:'6px 10px',borderRadius:8,border:'1px solid #e7e5e4',background:splitPayments ? '#fff8f8':'#fff'}} onClick={() => {
+                    if (!splitPayments) {
+                      setSplitPayments(true)
+                      setPaymentsList([{ id: Date.now(), paymentMethod: payment, valor: formatPriceDisplay(total) }])
+                    } else {
+                      setSplitPayments(false)
+                      setPaymentsList([])
+                    }
+                  }}>{splitPayments ? 'Cancelar divisão' : 'Dividir pagamento'}</button>
+
+                  { (splitPayments || payment === 'CREDITO') && (
+                    <div style={{fontSize:12,color:'#78716c'}}>
+                      {splitPayments
+                        ? `Atribuído: ${fmt(paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0))} — Restante: ${fmt(Math.max(0, total - paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0)))}
+                        : payment === 'CREDITO' ? `Acréscimo no crédito: ${fmt(total * 0.05)}` : null
+                      }
+                    </div>
+                  )}
+                </div>
+
+                {splitPayments && paymentsList.map((p, idx) => (
+                  <div key={p.id} style={{marginTop:8, display:'flex', gap:8, alignItems:'center'}}>
+                    <select value={p.paymentMethod} onChange={e => {
+                      const v = e.target.value
+                      setPaymentsList(prev => prev.map(it => it.id === p.id ? {...it, paymentMethod: v} : it))
+                    }}>
+                      {PAYMENTS.map(opt => <option key={opt.id} value={opt.id}>{opt.label}</option>)}
+                    </select>
+                    <input type='text' inputMode='numeric' placeholder='0,00' value={p.valor}
+                      onChange={e => {
+                        const digits = String(e.target.value || '').replace(/\D/g, '')
+                        const cents = parseInt(digits || '0', 10)
+                        const str = cents === 0 ? '' : (cents / 100).toFixed(2).replace('.', ',')
+                        setPaymentsList(prev => prev.map(it => it.id === p.id ? {...it, valor: str} : it))
+                      }}
+                      style={{padding:'8px 10px', border:'1px solid #e7e5e4', borderRadius:6, width:120}}
+                    />
+                    {p.paymentMethod === 'CREDITO' && <span style={{fontSize:12,color:'#1d4ed8'}}>{`+${fmt(parseBRL(p.valor)*0.05)} (5%)`}</span>}
+                    <button type='button' onClick={() => setPaymentsList(prev => prev.filter(it => it.id !== p.id))} style={{border:'none',background:'none',color:'#dc2626',cursor:'pointer'}}>Remover</button>
+                  </div>
+                ))}
+
+                {splitPayments && <div style={{marginTop:8}}><button type='button' onClick={() => {
+                  const assigned = paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0)
+                  const remaining = Math.max(0, total - assigned)
+                  setPaymentsList(prev => [...prev, { id: Date.now()+Math.random(), paymentMethod: payment, valor: formatPriceDisplay(remaining) }])
+                }} style={{padding:'6px 10px', borderRadius:8, border:'1px solid #e7e5e4'}}>Adicionar forma</button></div>}
+
               </Section>
 
               {/* Opções avançadas (desconto escondido) */}
@@ -881,8 +957,10 @@ export const SalesView = ({ navigate }) => {
                 <div>
                   <p className='lbl'>Total</p>
                   {hasDiscount && <p className='disc'>Com desconto de {fmt(discount)}</p>}
+                  {surchargeTotal > 0 && <p style={{fontSize:11,color:'#1d4ed8',margin:0}}>Acréscimos no cartão: {fmt(surchargeTotal)}</p>}
                 </div>
                 <p className='val'>{fmt(total)}</p>
+                {surchargeTotal > 0 && <p style={{fontSize:11,color:'#fff',opacity:0.95,marginTop:6}}>A pagar (com acréscimos): {fmt(totalWithSurcharge)}</p>}
               </TotalBox>
 
               <FinalBtn $empty={cart.length === 0} onClick={handleFinalize}
