@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { Sidebar } from '../components/Sidebar'
 import { toast } from 'react-toastify'
+import api from '../services/apiClient'
 
 const Wrapper = styled.div`
   display: flex; min-height: 100vh; background: var(--bg);
@@ -56,6 +57,11 @@ const Preview = styled.div`
   background: #1c1917; color: #fff; border-radius: 10px; padding: 20px;
   font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.6;
   white-space: pre;
+`
+
+const TextArea = styled.textarea`
+  width: 100%; min-height: 180px; padding: 12px; font-size: 14px; border-radius: 8px;
+  border: 1px solid var(--border); font-family: 'Work Sans',sans-serif; resize: vertical;
 `
 const Divider = styled.div`
   border-top: 1px dashed #444; margin: 6px 0;
@@ -122,6 +128,48 @@ export const ConfiguracaoView = ({ navigate }) => {
     center(form.footerMsg),
   ].filter(Boolean).join('\n')
 
+  // Termos state
+  const [termoConteudo, setTermoConteudo] = useState('')
+  const [termoId, setTermoId] = useState(null)
+  const [termoCriadoEm, setTermoCriadoEm] = useState(null)
+  const [termoLoading, setTermoLoading] = useState(false)
+  const [savingTermo, setSavingTermo] = useState(false)
+
+  useEffect(() => {
+    // load latest termo
+    let mounted = true
+    setTermoLoading(true)
+    api.get('/termos/latest').then(r => {
+      if (!mounted) return
+      const data = r.data
+      if (data) {
+        setTermoConteudo(data.conteudo || '')
+        setTermoId(data.id || null)
+        setTermoCriadoEm(data.criadoEm || data.criado_em || null)
+      }
+    }).catch(() => {
+      // no latest termo
+    }).finally(() => { if (mounted) setTermoLoading(false) })
+    return () => { mounted = false }
+  }, [])
+
+  const saveTermo = async (e) => {
+    e?.preventDefault()
+    setSavingTermo(true)
+    try {
+      const resp = await api.post('/termos', { conteudo: termoConteudo })
+      const created = resp.data
+      setTermoId(created.id)
+      setTermoCriadoEm(created.criadoEm || created.criado_em || null)
+      toast.success('Termo salvo com sucesso (nova versão)')
+    } catch (err) {
+      console.error(err)
+      toast.error('Erro ao salvar termo')
+    } finally {
+      setSavingTermo(false)
+    }
+  }
+
   return (
     <Wrapper>
       <Sidebar navigate={navigate} activeView='config-loja' />
@@ -184,6 +232,27 @@ export const ConfiguracaoView = ({ navigate }) => {
             </CardHead>
             <CardBody>
               <Preview>{preview}</Preview>
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardHead>
+              <span className='material-symbols-outlined'>description</span>
+              <h2>Termos e Condições (versão atual)</h2>
+            </CardHead>
+            <CardBody>
+              {termoLoading ? <div>Carregando termos...</div> : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ fontSize: 12, color: 'var(--muted)' }}>
+                    {termoId ? `Versão ID: ${termoId}` : 'Nenhuma versão disponível'}
+                    {termoCriadoEm ? ` — Criado em: ${new Date(termoCriadoEm).toLocaleString('pt-BR')}` : ''}
+                  </div>
+                  <TextArea value={termoConteudo} onChange={e => setTermoConteudo(e.target.value)} placeholder='Escreva os termos aqui...' />
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <SaveBtn onClick={saveTermo} disabled={savingTermo}>{savingTermo ? 'Salvando...' : 'Salvar Termo (nova versão)'}</SaveBtn>
+                  </div>
+                </div>
+              )}
             </CardBody>
           </Card>
         </Content>
