@@ -674,7 +674,16 @@ export const SalesView = ({ navigate }) => {
       // Fetch full receipt
       let saleData = null
       if (saleId) saleData = await getSale(saleId).catch(() => null)
-      setReceipt({ saleId, saleData, cart: [...cart], total, payment, discount: hasDiscount ? discount : 0, client: !anonymous && selectedClient ? selectedClient : null })
+      setReceipt({
+        saleId,
+        saleData,
+        cart: [...cart],
+        total,
+        payment,
+        discount: hasDiscount ? discount : 0,
+        client: !anonymous && selectedClient ? selectedClient : null,
+        paymentsSent: paymentsPayload
+      })
       setCart([]); setHasDiscount(false); setSelectedClient(null); setAnonymous(true)
     } catch (e) {
       const msg = e?.response?.data?.message || ''
@@ -1091,10 +1100,21 @@ export const SalesView = ({ navigate }) => {
         const saleData = receipt.saleData || null
         const items = saleData?.items || receipt.cart
         const subtotal = items.reduce((a,it) => a + (it.quantity||it.qty)*(it.precoUnitarioVenda||it.price), 0)
-        const surchargeFromPayments = saleData?.payments ? saleData.payments.reduce((s,p) => s + Number(p.acrescimoValor || 0), 0) : 0
+        // prefer server payments; fallback to paymentsSent if available
+        const paymentsFromServer = saleData?.payments && saleData.payments.length > 0 ? saleData.payments : null
+        const paymentsFromSent = (!paymentsFromServer && receipt.paymentsSent && receipt.paymentsSent.length > 0) ? receipt.paymentsSent.map(p => ({
+          paymentMethod: p.paymentMethod,
+          valor: Number(p.valor),
+          acrescimoValor: p.paymentMethod === 'CREDITO' ? Number((Number(p.valor) * 0.05).toFixed(2)) : 0,
+          valorPago: p.paymentMethod === 'CREDITO' ? Number((Number(p.valor) + (Number(p.valor) * 0.05)).toFixed(2)) : Number(p.valor)
+        })) : null
+        const paymentsToShow = paymentsFromServer || paymentsFromSent
+        const surchargeFromPayments = paymentsToShow ? paymentsToShow.reduce((s,p) => s + Number(p.acrescimoValor || 0), 0) : 0
         const now = new Date().toLocaleString('pt-BR')
         const baseTotal = saleData?.totalValue != null ? Number(saleData.totalValue) : Number(receipt.total || 0)
         const totalWithSurcharge = baseTotal + surchargeFromPayments
+        const singleSurcharge = !paymentsToShow && receipt.payment === 'CREDITO' ? Number((baseTotal * 0.05).toFixed(2)) : 0
+        const singleAmount = baseTotal + singleSurcharge
         return (
         <Overlay>
           <ReceiptWrap>
@@ -1135,16 +1155,20 @@ export const SalesView = ({ navigate }) => {
                 <span>{fmt(totalWithSurcharge)}</span>
               </TTotalRow>
 
-              {/* Payments breakdown (prefer server-provided payments) */}
-              {saleData?.payments && saleData.payments.length > 0 ? (
-                saleData.payments.map((p, i) => (
+              {/* Payments breakdown (prefer server-provided payments or fallback to sent payments) */}
+              {paymentsToShow ? (
+                paymentsToShow.map((p, i) => (
                   <div key={i}>
                     <TRow><span>{PAY_LABELS[p.paymentMethod] || p.paymentMethod}</span><span>{fmt(Number(p.valorPago != null ? p.valorPago : p.valor))}</span></TRow>
-                    {p.acrescimoValor > 0 && <TSubRow>Taxa financeira: +{fmt(Number(p.acrescimoValor))}</TSubRow>}
+                    {Number(p.acrescimoValor || 0) > 0 && <TSubRow>Taxa financeira: +{fmt(Number(p.acrescimoValor || 0))}</TSubRow>}
                   </div>
                 ))
               ) : (
-                <TRow><span>PAGAMENTO</span><span>{PAY_LABELS[receipt.payment] || receipt.payment}</span></TRow>
+                <>
+                  <TRow><span>PAGAMENTO</span><span>{PAY_LABELS[receipt.payment] || receipt.payment}</span></TRow>
+                  <TRow><span>VALOR</span><span>{fmt(singleAmount)}</span></TRow>
+                  {singleSurcharge > 0 && <TSubRow>Taxa financeira: +{fmt(singleSurcharge)}</TSubRow>}
+                </>
               )}
 
               {receipt.client && <TRow><span>CLIENTE</span><span>{receipt.client.nickname}</span></TRow>}
