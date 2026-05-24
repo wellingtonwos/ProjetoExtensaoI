@@ -162,7 +162,7 @@ export const ClienteHistoricoView = ({ navigate, clientId }) => {
     </Wrapper>
   )
 
-  const totalGasto  = sales.reduce((a, s) => a + Number(s.totalValue || 0), 0)
+  const totalGasto  = sales.reduce((a, s) => a + Number(s.totalValue || 0) + Number(s.surchargeTotal || 0), 0)
   const qtdCompras  = sales.length
   const ticketMedio = qtdCompras > 0 ? totalGasto / qtdCompras : 0
   const initials    = client.nickname?.trim().split(' ').slice(0, 2).map(w => w[0]?.toUpperCase()).join('') || '?'
@@ -242,11 +242,18 @@ export const ClienteHistoricoView = ({ navigate, clientId }) => {
                       <SaleHead>
                         <div className='left'>
                           <span className='id'>Venda #{s.id}</span>
-                          <Badge $m={s.paymentMethod}>{s.paymentMethod}</Badge>
+                          {s.payments && s.payments.length > 0 ? (
+                            s.payments.map((p, idx) => (
+                              <Badge key={idx} $m={p.paymentMethod} style={{ marginRight:6 }}>{p.paymentMethod}</Badge>
+                            ))
+                          ) : (
+                            <Badge $m={s.paymentMethod}>{s.paymentMethod}</Badge>
+                          )}
                           {s.hasDiscount && <Badge $m='DESCONTO' style={{ background:'#fffbeb', color:'#b45309' }}>5% OFF</Badge>}
+                          {s.surchargeTotal > 0 && <span style={{marginLeft:8,fontSize:12,color:'#1d4ed8'}}>+{fmt(s.surchargeTotal)} (taxa)</span>}
                         </div>
                         <div style={{ textAlign: 'right' }}>
-                          <div className='total'>{fmt(s.totalValue)}</div>
+                          <div className='total'>{fmt(Number(s.totalValue || 0) + Number(s.surchargeTotal || 0))}</div>
                           <div className='date'>{fmtD(s.dataVenda)}</div>
                         </div>
                       </SaleHead>
@@ -262,6 +269,18 @@ export const ClienteHistoricoView = ({ navigate, clientId }) => {
                             <span className='price'>{fmt(Number(it.quantity) * Number(it.precoUnitarioVenda))}</span>
                           </SaleItem>
                         ))}
+
+                        {/* Payments breakdown */}
+                        {s.payments && s.payments.length > 0 && (
+                          <div style={{marginTop:8}}>
+                            {s.payments.map((p, i) => (
+                              <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',fontSize:13}}>
+                                <div>{p.paymentMethod}{p.parcelas ? ` • ${p.parcelas}x` : ''}</div>
+                                <div>{fmt(Number(p.valorPago != null ? p.valorPago : p.valor))}{p.acrescimoValor ? ` (+${fmt(p.acrescimoValor)})` : ''}</div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </SaleItems>
                     </SaleCard>
                   ))
