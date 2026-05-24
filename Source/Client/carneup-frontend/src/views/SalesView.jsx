@@ -2,7 +2,8 @@ import styled, { keyframes } from 'styled-components'
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { Sidebar } from '../components/Sidebar'
 import productsApi, { getAllProductsUnpaged } from '../services/productsApi'
-import { createSale, getSale, searchClients, createClient } from '../services/salesApi'
+import { createSale, getSale, searchClients, createClient, getAllClients } from '../services/salesApi'
+import api from '../services/apiClient'
 import { toast } from 'react-toastify'
 import { loadStoreConfig } from './ConfiguracaoView'
 
@@ -185,8 +186,8 @@ const QCtrl = styled.div`
     color:#57534e; span{font-size:13px;} &:hover{background:#f5f5f4;}}
 `
 const QIn = styled.input`
-  width:44px;text-align:center;border:1px solid #e7e5e4;border-radius:4px;
-  padding:1px 3px;font-size:11px;font-family:'Work Sans',sans-serif;
+  width:72px; text-align:center; border:1px solid #e7e5e4; border-radius:4px;
+  padding:1px 6px; font-size:11px; font-family:'Work Sans',sans-serif;
   &:focus{outline:none;border-color:#610005;}
 `
 const RmBtn = styled.button`
@@ -420,6 +421,19 @@ export const SalesView = ({ navigate }) => {
   const [inlineQty, setInlineQty] = useState('')
   const [inlinePrice, setInlinePrice] = useState('')
 
+  // Price helpers (mask like PurchaseView): format display and accept digits-only input
+  const formatPriceDisplay = (value) => {
+    if (value == null || value === '') return ''
+    const num = typeof value === 'number' ? value : parseFloat(String(value).replace(',', '.'))
+    if (isNaN(num)) return ''
+    return num.toFixed(2).replace('.', ',')
+  }
+  const handleInlinePriceChange = (e) => {
+    const digits = String(e.target.value || '').replace(/\D/g, '')
+    const cents = parseInt(digits || '0', 10)
+    setInlinePrice(cents === 0 ? '' : (cents / 100).toFixed(2).replace('.', ','))
+  }
+
   // Cart
   const [cart, setCart] = useState([])
 
@@ -432,6 +446,12 @@ export const SalesView = ({ navigate }) => {
   const [clientModal, setClientModal] = useState(false)
   const [clientForm, setClientForm] = useState({ nickname: '' })
   const [clientSaving, setClientSaving] = useState(false)
+  // Terms modal for client creation
+  const [showTermosModal, setShowTermosModal] = useState(false)
+  const [latestTermo, setLatestTermo] = useState(null)
+  const [termosLoading, setTermosLoading] = useState(false)
+  const [aceitaTermos, setAceitaTermos] = useState(false)
+  const [receberPromocoes, setReceberPromocoes] = useState(false)
 
   // Payment & options
   const [payment, setPayment] = useState('DINHEIRO')
@@ -497,9 +517,11 @@ export const SalesView = ({ navigate }) => {
   const selectProduct = (p) => {
     if (selectedId === p.id) { setSelectedId(null); return }
     setSelectedId(p.id)
-    setInlineQty(p.unit === 'UN' ? '1' : '0.500')
-    setInlinePrice(p.price > 0 ? String(p.price) : '')
-  }
+      // Do not prefill quantity; user must type desired amount
+      setInlineQty('')
+      // Prefill price formatted with two decimals (comma as decimal separator)
+      setInlinePrice(formatPriceDisplay(p.price > 0 ? p.price : ''))
+    }
 
   // Add to cart
   const addToCart = (p) => {
@@ -552,18 +574,59 @@ export const SalesView = ({ navigate }) => {
     e.preventDefault()
     const nickname = clientForm.nickname.trim()
     if (!nickname) return
+    // fetch latest termo and show terms modal
+    setTermosLoading(true)
+    try {
+      const data = await api.get('/termos/latest').then(r => r.data).catch(() => null)
+      setLatestTermo(data)
+      setAceitaTermos(false)
+      setReceberPromocoes(false)
+      setShowTermosModal(true)
+    } catch (err) {
+      console.error(err)
+      toast.error('Erro ao carregar termos. Tente novamente.')
+    } finally {
+      setTermosLoading(false)
+    }
+  }
+
+  const handleConfirmTermos = async (e) => {
+    e?.preventDefault()
+    if (!aceitaTermos) { toast.warning('É necessário aceitar os Termos de Serviço para cadastrar o cliente.'); return }
     setClientSaving(true)
     try {
+      const nickname = clientForm.nickname.trim()
       const id = await createClient({
         nickname,
         telefone: clientForm.telefone?.trim() || null,
         aniversario: clientForm.aniversario || null,
+        aceitaTermosServico: true,
+        receberPromocoes: receberPromocoes ? true : false,
       })
-      setSelectedClient({ id: Number(id), nickname })
-      setClientSearch(''); setClientModal(false); setAnonymous(false)
-      toast.success(`Cliente "${nickname}" identificado!`)
-    } catch { toast.error('Erro ao cadastrar cliente.') }
-    finally { setClientSaving(false) }
+
+      if (id) {
+        setSelectedClient({ id: Number(id), nickname })
+        setClientSearch(''); setClientModal(false); setShowTermosModal(false); setAnonymous(false)
+        toast.success(`Cliente "${nickname}" identificado!`)
+      } else {
+        // fallback: try to find the created client by nickname
+        const all = await getAllClients().catch(() => [])
+        const found = (all || []).find(c => (c.nickname || '').trim() === nickname)
+        if (found) {
+          setSelectedClient(found)
+          setClientSearch(''); setClientModal(false); setShowTermosModal(false); setAnonymous(false)
+          toast.success(`Cliente "${nickname}" identificado!`)
+        } else {
+          setClientModal(false); setShowTermosModal(false); setAnonymous(false)
+          toast.warn('Cliente cadastrado, mas não foi possível obter o id automaticamente. Atualize a lista para selecioná-lo.')
+        }
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error('Erro ao cadastrar cliente.')
+    } finally {
+      setClientSaving(false)
+    }
   }
 
   // Finalize
@@ -669,9 +732,11 @@ export const SalesView = ({ navigate }) => {
                         onFocus={e => e.target.select()}
                         onKeyDown={e => e.key === 'Enter' && addToCart(p)} />
                       <ILabel>Preço R$</ILabel>
-                      <IInput type='number' min='0' step='0.01'
-                        value={inlinePrice} onChange={e => setInlinePrice(e.target.value)}
-                        onFocus={e => e.target.select()}
+                      <IInput type='text' inputMode='numeric' placeholder='0,00'
+                        value={inlinePrice}
+                        onChange={handleInlinePriceChange}
+                        onFocus={e => { e.target.select(); }}
+                        onBlur={() => setInlinePrice(formatPriceDisplay(inlinePrice))}
                         onKeyDown={e => e.key === 'Enter' && addToCart(p)} />
                       <IAdd onClick={() => addToCart(p)}>
                         <span className='material-symbols-outlined' style={{ fontSize:15 }}>add_shopping_cart</span>
@@ -879,6 +944,49 @@ export const SalesView = ({ navigate }) => {
                 <CModalCancel type='button' onClick={() => setClientModal(false)}>Cancelar</CModalCancel>
                 <CModalConfirm type='submit' disabled={clientSaving || !clientForm.nickname.trim()}>
                   {clientSaving ? 'Salvando...' : 'Confirmar Identificação'}
+                </CModalConfirm>
+              </CModalActions>
+            </form>
+          </CModal>
+        </Overlay>
+      )}
+
+      {showTermosModal && (
+        <Overlay onClick={() => setShowTermosModal(false)}>
+          <CModal onClick={e => e.stopPropagation()}>
+            <CModalHead>
+              <div>
+                <h2>Termos e Condições</h2>
+                <p style={{margin:0,fontSize:12,color:'#78716c'}}>Revise e aceite os Termos de Serviço para prosseguir com o cadastro do cliente.</p>
+              </div>
+              <button onClick={() => setShowTermosModal(false)}>
+                <span className='material-symbols-outlined'>close</span>
+              </button>
+            </CModalHead>
+
+            <form onSubmit={handleConfirmTermos}>
+              <CModalBody>
+                <div style={{maxHeight:220, overflowY:'auto', padding:12, border:'1px solid #f0f0f0', borderRadius:8, whiteSpace:'pre-wrap', fontSize:13, color:'#333'}}>
+                  {termosLoading ? 'Carregando termo...' : (latestTermo?.conteudo || 'Nenhum termo cadastrado.')}
+                </div>
+
+                <div style={{marginTop:12}}>
+                  <label style={{display:'flex', alignItems:'center', gap:8}}>
+                    <input type='checkbox' checked={aceitaTermos} onChange={e => setAceitaTermos(e.target.checked)} />
+                    Estou de acordo com os Termos de Serviço (obrigatório)
+                  </label>
+                  <label style={{display:'flex', alignItems:'center', gap:8, marginTop:8}}>
+                    <input type='checkbox' checked={receberPromocoes} onChange={e => setReceberPromocoes(e.target.checked)} />
+                    Desejo receber promoções e marketing (opcional)
+                  </label>
+                </div>
+
+              </CModalBody>
+
+              <CModalActions>
+                <CModalCancel type='button' onClick={() => setShowTermosModal(false)}>Cancelar</CModalCancel>
+                <CModalConfirm type='submit' disabled={!aceitaTermos || clientSaving}>
+                  {clientSaving ? 'Salvando...' : 'Aceitar e Salvar'}
                 </CModalConfirm>
               </CModalActions>
             </form>
