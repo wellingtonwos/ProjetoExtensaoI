@@ -4,6 +4,7 @@ import com.example.SpringBootApp.DTOs.VendaItemResponseDTO;
 import com.example.SpringBootApp.DTOs.VendaResponseDTO;
 import com.example.SpringBootApp.models.Movimentacao;
 import com.example.SpringBootApp.models.Venda;
+import com.example.SpringBootApp.models.VendaPagamento;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -25,11 +26,34 @@ public class VendaMapper {
             dto.setClienteId(venda.getCliente().getId());
             dto.setClienteNickname(venda.getCliente().getNickname());
         }
-        String paymentMethod = null;
-        if (venda.getPagamentos() != null && !venda.getPagamentos().isEmpty() && venda.getPagamentos().get(0).getMetodoPagamento() != null) {
-            paymentMethod = venda.getPagamentos().get(0).getMetodoPagamento().name();
+
+        // map payments
+        List<VendaPagamento> pagamentos = venda.getPagamentos();
+        if (pagamentos != null && !pagamentos.isEmpty()) {
+            // set paymentMethod to first (legacy) or combined
+            String pm = pagamentos.get(0).getMetodoPagamento() != null ? pagamentos.get(0).getMetodoPagamento().name() : null;
+            dto.setPaymentMethod(pm);
+
+            List<com.example.SpringBootApp.DTOs.VendaPagamentoDTO> payDTOs = pagamentos.stream().map(p -> {
+                com.example.SpringBootApp.DTOs.VendaPagamentoDTO pd = new com.example.SpringBootApp.DTOs.VendaPagamentoDTO();
+                pd.setPaymentMethod(p.getMetodoPagamento() != null ? p.getMetodoPagamento().name() : null);
+                pd.setValor(p.getValor());
+                pd.setAcrescimoPercent(p.getAcrescimoPercent());
+                pd.setAcrescimoValor(p.getAcrescimoValor());
+                pd.setValorPago(p.getValorPago());
+                pd.setParcelas(p.getParcelas());
+                pd.setReferencia(p.getReferencia());
+                return pd;
+            }).collect(Collectors.toList());
+            dto.setPayments(payDTOs);
+
+            BigDecimal surcharge = pagamentos.stream()
+                    .map(VendaPagamento::getAcrescimoValor)
+                    .filter(v -> v != null)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            dto.setSurchargeTotal(surcharge);
         }
-        dto.setPaymentMethod(paymentMethod);
+
         dto.setHasDiscount(venda.getTemDesconto());
         dto.setTotalValue(venda.getValorTotal());
 

@@ -116,7 +116,16 @@ const Loading = styled.div`padding: 32px; text-align: center; color: var(--muted
 
 const fmt  = v  => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0)
 const fmtDT = dt => dt ? new Date(dt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—'
-const fmtD  = d  => d  ? new Date(d ).toLocaleDateString('pt-BR') : '—'
+const fmtD  = d  => {
+  if (!d) return '—'
+  // Handle plain YYYY-MM-DD strings as local dates (avoid UTC shift when using new Date('YYYY-MM-DD'))
+  if (typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d)) {
+    const [y, m, day] = d.split('-')
+    return `${day}/${m}/${y}`
+  }
+  const date = new Date(d)
+  return isNaN(date) ? '—' : date.toLocaleDateString('pt-BR')
+}
 
 // ── Component ──────────────────────────────────────────────────────────────────
 

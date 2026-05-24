@@ -683,7 +683,20 @@ export const SalesView = ({ navigate }) => {
     } finally { setSubmitting(false) }
   }
 
-  const handleNewSale = () => { setReceipt(null); searchRef.current?.focus() }
+  const handleNewSale = () => {
+    setReceipt(null)
+    setCart([])
+    setHasDiscount(false)
+    setSelectedClient(null)
+    setAnonymous(true)
+    setPayment('DINHEIRO')
+    setSplitPayments(false)
+    setPaymentsList([])
+    setInlineQty('')
+    setInlinePrice('')
+    setSearch('')
+    searchRef.current?.focus()
+  }
 
   const handlePrint = () => window.print()
 
@@ -1075,9 +1088,13 @@ export const SalesView = ({ navigate }) => {
       {/* ── RECIBO TÉRMICO 80mm ── */}
       {receipt && (() => {
         const cfg = loadStoreConfig()
-        const items = receipt.saleData?.items || receipt.cart
+        const saleData = receipt.saleData || null
+        const items = saleData?.items || receipt.cart
         const subtotal = items.reduce((a,it) => a + (it.quantity||it.qty)*(it.precoUnitarioVenda||it.price), 0)
+        const surchargeFromPayments = saleData?.payments ? saleData.payments.reduce((s,p) => s + Number(p.acrescimoValor || 0), 0) : 0
         const now = new Date().toLocaleString('pt-BR')
+        const baseTotal = saleData?.totalValue != null ? Number(saleData.totalValue) : Number(receipt.total || 0)
+        const totalWithSurcharge = baseTotal + surchargeFromPayments
         return (
         <Overlay>
           <ReceiptWrap>
@@ -1115,9 +1132,21 @@ export const SalesView = ({ navigate }) => {
               )}
               <TTotalRow>
                 <span>TOTAL</span>
-                <span>{fmt(receipt.total)}</span>
+                <span>{fmt(totalWithSurcharge)}</span>
               </TTotalRow>
-              <TRow><span>PAGAMENTO</span><span>{PAY_LABELS[receipt.payment] || receipt.payment}</span></TRow>
+
+              {/* Payments breakdown (prefer server-provided payments) */}
+              {saleData?.payments && saleData.payments.length > 0 ? (
+                saleData.payments.map((p, i) => (
+                  <div key={i}>
+                    <TRow><span>{PAY_LABELS[p.paymentMethod] || p.paymentMethod}</span><span>{fmt(Number(p.valorPago != null ? p.valorPago : p.valor))}</span></TRow>
+                    {p.acrescimoValor > 0 && <TSubRow>Taxa financeira: +{fmt(Number(p.acrescimoValor))}</TSubRow>}
+                  </div>
+                ))
+              ) : (
+                <TRow><span>PAGAMENTO</span><span>{PAY_LABELS[receipt.payment] || receipt.payment}</span></TRow>
+              )}
+
               {receipt.client && <TRow><span>CLIENTE</span><span>{receipt.client.nickname}</span></TRow>}
               <TDash />
               <TFooter>{cfg.footerMsg}</TFooter>

@@ -131,6 +131,15 @@ const pct  = v  => `${Number(v||0).toFixed(1)}%`
 const today = () => new Date().toISOString().slice(0,10)
 const daysAgo = n => { const d = new Date(); d.setDate(d.getDate()-n); return d.toISOString().slice(0,10) }
 const firstOfMonth = () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0,10) }
+const fmtDate = d => {
+  if (!d) return '—'
+  if (typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d)) {
+    const [y, m, day] = d.split('-')
+    return `${day}/${m}/${y}`
+  }
+  const date = new Date(d)
+  return isNaN(date) ? '—' : date.toLocaleDateString('pt-BR')
+}
 const daysUntil = dateStr => {
   if (!dateStr) return 999
   const [y, m, d] = dateStr.split('-').map(Number)
@@ -379,7 +388,7 @@ export const ReportsView = ({ navigate }) => {
     // ── VENDAS ──────────────────────────────────────────────────────────────────
     if (activeTab === 'vendas') {
       const sales = data
-      const revenue = sales.reduce((a,s) => a+(s.totalPrice||0), 0)
+      const revenue = sales.reduce((a,s) => a + ((s.totalPrice||0) + (s.surchargeTotal||0)), 0)
       const cost    = sales.reduce((a,s) => a+(s.totalCost||0), 0)
       const profit  = revenue - cost
       const margin  = revenue > 0 ? (profit/revenue)*100 : 0
@@ -412,25 +421,34 @@ export const ReportsView = ({ navigate }) => {
             <TableHead><h3>Detalhamento</h3><span className='cnt'>{sales.length} registros</span></TableHead>
             {sales.length === 0 && <Empty><span className='material-symbols-outlined'>receipt_long</span>Nenhuma venda no período.</Empty>}
             {sales.length > 0 && <Table><thead><tr>
-                <th>#</th><th>Data</th><th>Vendedor</th><th>Pagamento</th>
+                            <th>#</th><th>Data</th><th>Vendedor</th><th>Pagamento</th><th style={{textAlign:'right'}}>Acréscimo</th>
                 <th style={{textAlign:'right'}}>Custo</th>
                 <th style={{textAlign:'right'}}>Faturamento</th>
                 <th style={{textAlign:'right'}}>Margem</th>
               </tr></thead>
               <tbody>{sales.slice((tablePage-1)*PAGE_SIZE, tablePage*PAGE_SIZE).map(s => {
-                const r=s.totalPrice||0, c=s.totalCost||0
+                            const r=(s.totalPrice||0) + (s.surchargeTotal||0), c=s.totalCost||0
                 const m=r>0?((r-c)/r*100):0
-                const pc=PAY_COLORS[s.paymentMethod]||{}
-                return (<tr key={s.id}>
-                  <td style={{color:'var(--muted)'}}>#{s.id}</td>
-                  <td>{s.saleDate}</td>
-                  <td>{s.salesmanName||'—'}</td>
-                  <td><Badge $c={pc.c} $t={pc.t}>{s.paymentMethod}</Badge></td>
-                  <td style={{textAlign:'right'}}>{fmt(c)}</td>
-                  <td style={{textAlign:'right',fontWeight:700}}>{fmt(r)}</td>
-                  <td style={{textAlign:'right',color:m>=20?'var(--success)':m>=10?'var(--warning)':'var(--danger)'}}>{pct(m)}</td>
-                </tr>)
-              })}</tbody></Table>}
+                            return (<tr key={s.id}>
+                              <td style={{color:'var(--muted)'}}>#{s.id}</td>
+                              <td>{s.saleDate}</td>
+                              <td>{s.salesmanName||'—'}</td>
+                              <td>
+                                {s.payments && s.payments.length > 0 ? (
+                                  s.payments.map((p, i) => {
+                                    const pc = PAY_COLORS[p.paymentMethod] || {}
+                                    return <Badge key={i} $c={pc.c} $t={pc.t} style={{marginRight:6}}>{p.paymentMethod}</Badge>
+                                  })
+                                ) : (
+                                  (() => { const pc = PAY_COLORS[s.paymentMethod]||{}; return <Badge $c={pc.c} $t={pc.t}>{s.paymentMethod}</Badge> })()
+                                )}
+                              </td>
+                              <td style={{textAlign:'right'}}>{fmt(s.surchargeTotal || 0)}</td>
+                              <td style={{textAlign:'right'}}>{fmt(c)}</td>
+                              <td style={{textAlign:'right',fontWeight:700}}>{fmt(r)}</td>
+                              <td style={{textAlign:'right',color:m>=20?'var(--success)':m>=10?'var(--warning)':'var(--danger)'}}>{pct(m)}</td>
+                            </tr>)
+                          })}</tbody></Table>}
             {sales.length > 0 && <PaginationBar page={tablePage} totalPages={Math.ceil(sales.length/PAGE_SIZE)} totalItems={sales.length} onPageChange={setTablePage} />}
           </TableWrap>
         </>
@@ -674,7 +692,7 @@ export const ReportsView = ({ navigate }) => {
                           </div>
                         </td>
                         <td>{c.telefone || <span style={{color:'var(--muted)'}}>—</span>}</td>
-                        <td>{c.aniversario ? new Date(c.aniversario).toLocaleDateString('pt-BR') : <span style={{color:'var(--muted)'}}>—</span>}</td>
+                        <td>{c.aniversario ? fmtDate(c.aniversario) : <span style={{color:'var(--muted)'}}>—</span>}</td>
                         <td style={{color:'var(--muted)'}}>{dtCad}</td>
                         <td style={{textAlign:'right'}}>
                           <div style={{display:'flex',gap:6,justifyContent:'flex-end'}}>

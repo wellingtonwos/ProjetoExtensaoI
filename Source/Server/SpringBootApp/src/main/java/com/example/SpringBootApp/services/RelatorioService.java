@@ -33,8 +33,34 @@ public class RelatorioService {
         reportDTO.setId(venda.getId());
         reportDTO.setSaleDate(venda.getDataVenda());
         String pm = null;
-        if (venda.getPagamentos() != null && !venda.getPagamentos().isEmpty() && venda.getPagamentos().get(0).getMetodoPagamento() != null) {
-            pm = venda.getPagamentos().get(0).getMetodoPagamento().name();
+        List<com.example.SpringBootApp.models.VendaPagamento> pagamentos = venda.getPagamentos();
+        if (pagamentos != null && !pagamentos.isEmpty()) {
+            // build combined payment method (first or concat of distinct)
+            java.util.Set<String> methods = pagamentos.stream()
+                    .map(p -> p.getMetodoPagamento() != null ? p.getMetodoPagamento().name() : null)
+                    .filter(java.util.Objects::nonNull)
+                    .collect(Collectors.toCollection(java.util.LinkedHashSet::new));
+            pm = String.join("+", methods);
+
+            // map payments to DTO
+            List<com.example.SpringBootApp.DTOs.VendaPagamentoDTO> payDTOs = pagamentos.stream().map(p -> {
+                com.example.SpringBootApp.DTOs.VendaPagamentoDTO pd = new com.example.SpringBootApp.DTOs.VendaPagamentoDTO();
+                pd.setPaymentMethod(p.getMetodoPagamento() != null ? p.getMetodoPagamento().name() : null);
+                pd.setValor(p.getValor());
+                pd.setAcrescimoPercent(p.getAcrescimoPercent());
+                pd.setAcrescimoValor(p.getAcrescimoValor());
+                pd.setValorPago(p.getValorPago());
+                pd.setParcelas(p.getParcelas());
+                pd.setReferencia(p.getReferencia());
+                return pd;
+            }).collect(Collectors.toList());
+            reportDTO.setPayments(payDTOs);
+
+            java.math.BigDecimal surcharge = pagamentos.stream()
+                    .map(com.example.SpringBootApp.models.VendaPagamento::getAcrescimoValor)
+                    .filter(v -> v != null)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            reportDTO.setSurchargeTotal(surcharge);
         }
         reportDTO.setPaymentMethod(pm);
         reportDTO.setSalesmanName(venda.getUsuario().getNome());

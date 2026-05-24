@@ -14,8 +14,10 @@ public class VendReportDTO {
     private String salesmanName;
     private BigDecimal totalCost;
     private BigDecimal totalPrice;
+    private BigDecimal surchargeTotal; // sum of payment.acrescimoValor
     private Boolean hasDiscount;
     private List<VendItemReportDTO> items;
+    private java.util.List<com.example.SpringBootApp.DTOs.VendaPagamentoDTO> payments;
 
 }
 

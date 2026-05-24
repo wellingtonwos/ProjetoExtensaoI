@@ -17,5 +17,7 @@ public class VendaResponseDTO {
     private String paymentMethod;
     private Boolean hasDiscount;
     private BigDecimal totalValue;
+    private BigDecimal surchargeTotal; // sum of payment.acrescimoValor
     private List<VendaItemResponseDTO> items;
+    private java.util.List<com.example.SpringBootApp.DTOs.VendaPagamentoDTO> payments;
 }
