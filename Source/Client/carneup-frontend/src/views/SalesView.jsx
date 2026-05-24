@@ -898,7 +898,7 @@ export const SalesView = ({ navigate }) => {
                   { (splitPayments || payment === 'CREDITO') && (
                     <div style={{fontSize:12,color:'#78716c'}}>
                       {splitPayments
-                        ? `Atribuído: ${fmt(paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0))} — Restante: ${fmt(Math.max(0, total - paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0)))}
+                        ? `Atribuído: ${fmt(paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0))} — Restante: ${fmt(Math.max(0, total - paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0)))}`
                         : payment === 'CREDITO' ? `Acréscimo no crédito: ${fmt(total * 0.05)}` : null
                       }
                     </div>
