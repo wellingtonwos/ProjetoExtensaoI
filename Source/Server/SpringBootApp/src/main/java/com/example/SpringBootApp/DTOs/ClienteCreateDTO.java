@@ -17,4 +17,17 @@ public class ClienteCreateDTO {
 
     private String telefone;
     private java.time.LocalDate aniversario;
+
+    // new: consent flags handled by the create endpoint (aceitaTermosServico must be true to allow creation)
+    private Boolean aceitaTermosServico;
+    private Boolean receberPromocoes;
+
+    // keep backward-compatible constructor used in tests
+    public ClienteCreateDTO(String nickname, String telefone, java.time.LocalDate aniversario) {
+        this.nickname = nickname;
+        this.telefone = telefone;
+        this.aniversario = aniversario;
+        this.aceitaTermosServico = null;
+        this.receberPromocoes = null;
+    }
 }

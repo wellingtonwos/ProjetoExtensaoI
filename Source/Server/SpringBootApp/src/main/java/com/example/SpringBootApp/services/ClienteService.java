@@ -3,6 +3,7 @@ package com.example.SpringBootApp.services;
 import com.example.SpringBootApp.DTOs.ClienteCreateDTO;
 import com.example.SpringBootApp.DTOs.ClienteResponseDTO;
 import com.example.SpringBootApp.exceptions.ResourceNotFoundException;
+import com.example.SpringBootApp.exceptions.BusinessException;
 import com.example.SpringBootApp.models.Cliente;
 import com.example.SpringBootApp.repositories.ClienteRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -16,12 +17,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Map;
 import com.example.SpringBootApp.models.Permissao;
 import java.util.stream.Collectors;
 import java.util.Optional;
+import com.example.SpringBootApp.services.TermoService;
+import com.example.SpringBootApp.models.Termo;
 
 @Service
 @Transactional
@@ -29,15 +33,44 @@ import java.util.Optional;
 public class ClienteService {
 
     private final ClienteRepository clienteRepository;
+
+    @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private TermoService termoService;
+
     public Cliente createClient(ClienteCreateDTO dto) {
+        // business rule: client must accept terms of service to be created
+        if (dto.getAceitaTermosServico() == null || !dto.getAceitaTermosServico()) {
+            throw new BusinessException("Cliente deve aceitar os termos de serviço para cadastro");
+        }
+
         Cliente c = new Cliente();
         c.setNickname(dto.getNickname());
         c.setTelefone(dto.getTelefone());
         c.setAniversario(dto.getAniversario());
         c.setDataCadastro(java.time.LocalDateTime.now());
-        return clienteRepository.save(c);
+        Cliente saved = clienteRepository.save(c);
+
+        // persist consentimentos: TERMOS_SERVICO (required)
+        Long termoId = null;
+        if (termoService != null) {
+            var opt = termoService.getLatestTermo();
+            if (opt.isPresent()) termoId = opt.get().getId();
+        }
+
+        if (jdbcTemplate != null) {
+            String sql = "INSERT INTO consentimentos (fk_cliente_id, fk_usuario_id, tipo, aceito, fk_termo_id, capturado_em) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)";
+            jdbcTemplate.update(sql, saved.getId(), null, "TERMOS_SERVICO", true, termoId);
+
+            // optionally persist promotions consent if provided
+            if (dto.getReceberPromocoes() != null) {
+                jdbcTemplate.update(sql, saved.getId(), null, "RECEBER_PROMOCOES", dto.getReceberPromocoes(), termoId);
+            }
+        }
+
+        return saved;
     }
 
     public Cliente updateClient(Long id, ClienteCreateDTO dto) {
