@@ -415,7 +415,7 @@ export const ReportsView = ({ navigate }) => {
                     <p className='lbl'>Pagamento</p>
                     <p className='val' style={{ fontSize:16 }}>
                       {parts.map((t, idx) => (
-                        <span key={idx} style={{ display: 'inline-block', marginRight: 8 }}>{t}{idx < parts.length - 1 && <span style={{ marginLeft: 6, marginRight: 6 }}>+</span>}</span>
+                        <span key={idx} style={{ display: 'inline-block', whiteSpace: 'nowrap', marginRight: 8 }}>{t}{idx < parts.length - 1 && <span style={{ marginLeft: 6, marginRight: 6 }}>+</span>}</span>
                       ))}
                     </p>
                     <p className='sub'>{c} venda{c!==1?'s':''} · {pct((c/sales.length)*100)}</p>
