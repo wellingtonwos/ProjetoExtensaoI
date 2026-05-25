@@ -573,6 +573,11 @@ export const SalesView = ({ navigate }) => {
     : (payment === 'CREDITO' ? total * 0.05 : 0)
   const totalWithSurcharge = total + surchargeTotal
 
+  // split payments helpers
+  const assignedAmount = paymentsList.reduce((s, p) => s + parseBRL(p.valor || 0), 0)
+  const remainingAmount = Math.max(0, total - assignedAmount)
+  const paymentInfoText = splitPayments ? `Atribuído: ${fmt(assignedAmount)} — Restante: ${fmt(remainingAmount)}` : (payment === 'CREDITO' ? `Acréscimo no crédito: ${fmt(total * 0.05)}` : null)
+
   // Client ops
   const handleSelectClient = (c) => {
     setSelectedClient(c); setShowClientDrop(false); setClientSearch('')
@@ -926,12 +931,7 @@ export const SalesView = ({ navigate }) => {
                       }}>Adicionar forma</button>
                     </div>
 
-                    <div style={{fontSize:12,color:'#78716c'}}>
-                      {splitPayments
-                        ? `Atribuído: ${fmt(paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0))} — Restante: ${fmt(Math.max(0, total - paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0)))}`
-                        : payment === 'CREDITO' ? `Acréscimo no crédito: ${fmt(total * 0.05)}` : null
-                      }
-                    </div>
+                    <div style={{fontSize:12,color:'#78716c'}}>{paymentInfoText}</div>
                   </div>
 
                   {splitPayments && (
