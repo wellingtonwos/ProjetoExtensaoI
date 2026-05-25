@@ -674,7 +674,7 @@ export const SalesView = ({ navigate }) => {
       // Fetch full receipt
       let saleData = null
       if (saleId) saleData = await getSale(saleId).catch(() => null)
-      setReceipt({ saleId, saleData, cart: [...cart], total, payment, discount: hasDiscount ? discount : 0, client: !anonymous && selectedClient ? selectedClient : null })
+      setReceipt({ saleId, saleData, cart: [...cart], total, payment, discount: hasDiscount ? discount : 0, client: !anonymous && selectedClient ? selectedClient : null, paymentsSent: paymentsPayload })
       setCart([]); setHasDiscount(false); setSelectedClient(null); setAnonymous(true)
     } catch (e) {
       const msg = e?.response?.data?.message || ''
@@ -1166,7 +1166,14 @@ export const SalesView = ({ navigate }) => {
                 saleData.payments.map((p, i) => (
                   <div key={i}>
                     <TRow><span>{PAY_LABELS[p.paymentMethod] || p.paymentMethod}</span><span>{fmt(Number(p.valorPago != null ? p.valorPago : p.valor))}</span></TRow>
-                    {p.acrescimoValor > 0 && <TSubRow>Taxa financeira: +{fmt(Number(p.acrescimoValor))}</TSubRow>}
+                    {Number(p.acrescimoValor || 0) > 0 && <TSubRow>Taxa financeira: +{fmt(Number(p.acrescimoValor || 0))}</TSubRow>}
+                  </div>
+                ))
+              ) : receipt.paymentsSent && receipt.paymentsSent.length > 0 ? (
+                receipt.paymentsSent.map((p, i) => (
+                  <div key={i}>
+                    <TRow><span>{PAY_LABELS[p.paymentMethod] || p.paymentMethod}</span><span>{fmt(Number(p.valor != null ? p.valor : p.valorPago || 0))}</span></TRow>
+                    {(p.paymentMethod === 'CREDITO') && <TSubRow>Taxa financeira: +{fmt(Number(p.valor != null ? p.valor : p.valorPago || 0) * 0.05)}</TSubRow>}
                   </div>
                 ))
               ) : (
