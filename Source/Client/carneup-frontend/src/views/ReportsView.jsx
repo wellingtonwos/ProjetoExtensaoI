@@ -84,8 +84,8 @@ const SumCard = styled.div`
   border-left: 3px solid ${p => p.$c || 'var(--brand)'};
   border: 1px solid var(--border); border-left-width: 3px;
   p.lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin: 0 0 6px; }
-  p.val { font-family: 'Epilogue', sans-serif; font-size: 22px; font-weight: 900; color: var(--text); margin: 0; white-space: normal; word-break: normal; overflow-wrap: break-word; line-height: 1.05; }
-  p.sub { font-size: 10px; color: var(--muted); margin: 3px 0 0; white-space: normal; word-break: normal; overflow-wrap: break-word; }
+  p.val { font-family: 'Epilogue', sans-serif; font-size: 22px; font-weight: 900; color: var(--text); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; line-height: 1.05; }
+  p.sub { font-size: 10px; color: var(--muted); margin: 3px 0 0; white-space: normal; word-break: normal; overflow-wrap: normal; }
 `
 
 // Table
