@@ -577,6 +577,12 @@ export const SalesView = ({ navigate }) => {
   const assignedAmount = paymentsList.reduce((s, p) => s + parseBRL(p.valor || 0), 0)
   const remainingAmount = Math.max(0, total - assignedAmount)
   const paymentInfoText = splitPayments ? `Atribuído: ${fmt(assignedAmount)} — Restante: ${fmt(remainingAmount)}` : (payment === 'CREDITO' ? `Acréscimo no crédito: ${fmt(total * 0.05)}` : null)
+  const equalSplitButtons = [2,3,4].map(n => (
+    <button key={n} type='button' style={{padding:'6px 8px',borderRadius:6,border:'1px solid #e7e5e4'}} onClick={() => {
+      const per = total / n
+      setPaymentsList(Array.from({length:n}).map((_,i)=>({ id: Date.now()+i, paymentMethod: i===0?payment:'DINHEIRO', valor: formatPriceDisplay(per) })))
+    }}>{n}x</button>
+  ))
 
   // Client ops
   const handleSelectClient = (c) => {
@@ -938,14 +944,9 @@ export const SalesView = ({ navigate }) => {
                     <div style={{marginTop:8, border:'1px solid #e7e5e4', borderRadius:8, padding:8, background:'#fff'}}>
                       <div style={{display:'flex', gap:8, alignItems:'center', marginBottom:8}}>
                         <div style={{fontSize:12,color:'#78716c'}}>Dividir igualmente</div>
-                        {[2,3,4].map(n => (
-                          <button key={n} type='button' style={{padding:'6px 8px',borderRadius:6,border:'1px solid #e7e5e4'}} onClick={() => {
-                            const per = total / n
-                            setPaymentsList(Array.from({length:n}).map((_,i)=>({ id: Date.now()+i, paymentMethod: i===0?payment:'DINHEIRO', valor: formatPriceDisplay(per) })))
-                          }}>{n}x</button>
-                        ))}
+                        {equalSplitButtons}
                         <div style={{flex:1}} />
-                        <div style={{fontSize:12,color:'#78716c'}}>Atribuído: {fmt(paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0))} — Restante: {fmt(Math.max(0, total - paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0)))}</div>
+                        <div style={{fontSize:12,color:'#78716c'}}>Atribuído: {fmt(assignedAmount)} — Restante: {fmt(remainingAmount)}</div>
                       </div>
 
                       {paymentsList.map((p, idx) => (
