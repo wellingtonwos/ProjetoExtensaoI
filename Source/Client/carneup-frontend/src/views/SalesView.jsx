@@ -573,17 +573,6 @@ export const SalesView = ({ navigate }) => {
     : (payment === 'CREDITO' ? total * 0.05 : 0)
   const totalWithSurcharge = total + surchargeTotal
 
-  // split payments helpers
-  const assignedAmount = paymentsList.reduce((s, p) => s + parseBRL(p.valor || 0), 0)
-  const remainingAmount = Math.max(0, total - assignedAmount)
-  const paymentInfoText = splitPayments ? `Atribuído: ${fmt(assignedAmount)} — Restante: ${fmt(remainingAmount)}` : (payment === 'CREDITO' ? `Acréscimo no crédito: ${fmt(total * 0.05)}` : null)
-  const equalSplitButtons = [2,3,4].map(n => (
-    <button key={n} type='button' style={{padding:'6px 8px',borderRadius:6,border:'1px solid #e7e5e4'}} onClick={() => {
-      const per = total / n
-      setPaymentsList(Array.from({length:n}).map((_,i)=>({ id: Date.now()+i, paymentMethod: i===0?payment:'DINHEIRO', valor: formatPriceDisplay(per) })))
-    }}>{n}x</button>
-  ))
-
   // Client ops
   const handleSelectClient = (c) => {
     setSelectedClient(c); setShowClientDrop(false); setClientSearch('')
@@ -685,16 +674,7 @@ export const SalesView = ({ navigate }) => {
       // Fetch full receipt
       let saleData = null
       if (saleId) saleData = await getSale(saleId).catch(() => null)
-      setReceipt({
-        saleId,
-        saleData,
-        cart: [...cart],
-        total,
-        payment,
-        discount: hasDiscount ? discount : 0,
-        client: !anonymous && selectedClient ? selectedClient : null,
-        paymentsSent: paymentsPayload
-      })
+      setReceipt({ saleId, saleData, cart: [...cart], total, payment, discount: hasDiscount ? discount : 0, client: !anonymous && selectedClient ? selectedClient : null })
       setCart([]); setHasDiscount(false); setSelectedClient(null); setAnonymous(true)
     } catch (e) {
       const msg = e?.response?.data?.message || ''
@@ -907,7 +887,7 @@ export const SalesView = ({ navigate }) => {
               {/* Pagamento */}
               <Section>
                 <SLabel>Forma de Pagamento</SLabel>
-                <PayGrid style={{ display: splitPayments ? 'none' : undefined }}>
+                <PayGrid>
                   {PAYMENTS.map(opt => (
                     <PayBtn key={opt.id} $a={payment === opt.id} onClick={() => setPayment(opt.id)}>
                       <span className={`material-symbols-outlined icon${payment===opt.id?" fill":""}`}
@@ -917,31 +897,54 @@ export const SalesView = ({ navigate }) => {
                   ))}
                 </PayGrid>
 
-                <div style={{marginTop:10}}>
-                  <div style={{display:'flex', gap:8, alignItems:'center', justifyContent:'space-between'}}>
-                    <div style={{display:'flex', gap:8}}>
-                      <button type='button' style={{padding:'6px 10px',borderRadius:8,border:'1px solid #e7e5e4',background:splitPayments ? '#fff8f8':'#fff'}} onClick={() => {
-                        if (!splitPayments) {
-                          setSplitPayments(true)
-                          setPaymentsList([{ id: Date.now(), paymentMethod: payment, valor: formatPriceDisplay(total) }])
-                        } else {
-                          setSplitPayments(false)
-                          setPaymentsList([])
-                        }
-                      }}>{splitPayments ? 'Cancelar divisão' : 'Dividir pagamento'}</button>
+                <div style={{marginTop:10, display:'flex', gap:8, alignItems:'center'}}>
+                  <button type='button' style={{padding:'6px 10px',borderRadius:8,border:'1px solid #e7e5e4',background:splitPayments ? '#fff8f8':'#fff'}} onClick={() => {
+                    if (!splitPayments) {
+                      setSplitPayments(true)
+                      setPaymentsList([{ id: Date.now(), paymentMethod: payment, valor: formatPriceDisplay(total) }])
+                    } else {
+                      setSplitPayments(false)
+                      setPaymentsList([])
+                    }
+                  }}>{splitPayments ? 'Cancelar divisão' : 'Dividir pagamento'}</button>
 
-                      {splitPayments && <button type='button' style={{padding:'6px 10px',borderRadius:8,border:'1px solid #e7e5e4'}} onClick={() => {
-                        const assigned = paymentsList.reduce((s,p) => s + parseBRL(p.valor), 0)
-                        const remaining = Math.max(0, total - assigned)
-                        setPaymentsList(prev => [...prev, { id: Date.now() + Math.random(), paymentMethod: payment, valor: formatPriceDisplay(remaining) }])
-                      }}>Adicionar forma</button>
+                  { (splitPayments || payment === 'CREDITO') && (
+                    <div style={{fontSize:12,color:'#78716c'}}>
+                      {splitPayments
+                        ? `Atribuído: ${fmt(paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0))} — Restante: ${fmt(Math.max(0, total - paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0)))}`
+                        : payment === 'CREDITO' ? `Acréscimo no crédito: ${fmt(total * 0.05)}` : null
+                      }
                     </div>
-
-                    <div style={{fontSize:12,color:'#78716c'}}>{paymentInfoText}</div>
-                  </div>
-
-                  {splitPayments && <div style={{marginTop:8}}></div>}
+                  )}
                 </div>
+
+                {splitPayments && paymentsList.map((p, idx) => (
+                  <div key={p.id} style={{marginTop:8, display:'flex', gap:8, alignItems:'center'}}>
+                    <select value={p.paymentMethod} onChange={e => {
+                      const v = e.target.value
+                      setPaymentsList(prev => prev.map(it => it.id === p.id ? {...it, paymentMethod: v} : it))
+                    }}>
+                      {PAYMENTS.map(opt => <option key={opt.id} value={opt.id}>{opt.label}</option>)}
+                    </select>
+                    <input type='text' inputMode='numeric' placeholder='0,00' value={p.valor}
+                      onChange={e => {
+                        const digits = String(e.target.value || '').replace(/\D/g, '')
+                        const cents = parseInt(digits || '0', 10)
+                        const str = cents === 0 ? '' : (cents / 100).toFixed(2).replace('.', ',')
+                        setPaymentsList(prev => prev.map(it => it.id === p.id ? {...it, valor: str} : it))
+                      }}
+                      style={{padding:'8px 10px', border:'1px solid #e7e5e4', borderRadius:6, width:120}}
+                    />
+                    {p.paymentMethod === 'CREDITO' && <span style={{fontSize:12,color:'#1d4ed8'}}>{`+${fmt(parseBRL(p.valor)*0.05)} (5%)`}</span>}
+                    <button type='button' onClick={() => setPaymentsList(prev => prev.filter(it => it.id !== p.id))} style={{border:'none',background:'none',color:'#dc2626',cursor:'pointer'}}>Remover</button>
+                  </div>
+                ))}
+
+                {splitPayments && <div style={{marginTop:8}}><button type='button' onClick={() => {
+                  const assigned = paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0)
+                  const remaining = Math.max(0, total - assigned)
+                  setPaymentsList(prev => [...prev, { id: Date.now()+Math.random(), paymentMethod: payment, valor: formatPriceDisplay(remaining) }])
+                }} style={{padding:'6px 10px', borderRadius:8, border:'1px solid #e7e5e4'}}>Adicionar forma</button></div>}
 
               </Section>
 
@@ -1088,21 +1091,10 @@ export const SalesView = ({ navigate }) => {
         const saleData = receipt.saleData || null
         const items = saleData?.items || receipt.cart
         const subtotal = items.reduce((a,it) => a + (it.quantity||it.qty)*(it.precoUnitarioVenda||it.price), 0)
-        // prefer server payments; fallback to paymentsSent if available
-        const paymentsFromServer = saleData?.payments && saleData.payments.length > 0 ? saleData.payments : null
-        const paymentsFromSent = (!paymentsFromServer && receipt.paymentsSent && receipt.paymentsSent.length > 0) ? receipt.paymentsSent.map(p => ({
-          paymentMethod: p.paymentMethod,
-          valor: Number(p.valor),
-          acrescimoValor: p.paymentMethod === 'CREDITO' ? Number((Number(p.valor) * 0.05).toFixed(2)) : 0,
-          valorPago: p.paymentMethod === 'CREDITO' ? Number((Number(p.valor) + (Number(p.valor) * 0.05)).toFixed(2)) : Number(p.valor)
-        })) : null
-        const paymentsToShow = paymentsFromServer || paymentsFromSent
-        const surchargeFromPayments = paymentsToShow ? paymentsToShow.reduce((s,p) => s + Number(p.acrescimoValor || 0), 0) : 0
+        const surchargeFromPayments = saleData?.payments ? saleData.payments.reduce((s,p) => s + Number(p.acrescimoValor || 0), 0) : 0
         const now = new Date().toLocaleString('pt-BR')
         const baseTotal = saleData?.totalValue != null ? Number(saleData.totalValue) : Number(receipt.total || 0)
         const totalWithSurcharge = baseTotal + surchargeFromPayments
-        const singleSurcharge = !paymentsToShow && receipt.payment === 'CREDITO' ? Number((baseTotal * 0.05).toFixed(2)) : 0
-        const singleAmount = baseTotal + singleSurcharge
         return (
         <Overlay>
           <ReceiptWrap>
@@ -1143,20 +1135,16 @@ export const SalesView = ({ navigate }) => {
                 <span>{fmt(totalWithSurcharge)}</span>
               </TTotalRow>
 
-              {/* Payments breakdown (prefer server-provided payments or fallback to sent payments) */}
-              {paymentsToShow ? (
-                paymentsToShow.map((p, i) => (
+              {/* Payments breakdown (prefer server-provided payments) */}
+              {saleData?.payments && saleData.payments.length > 0 ? (
+                saleData.payments.map((p, i) => (
                   <div key={i}>
                     <TRow><span>{PAY_LABELS[p.paymentMethod] || p.paymentMethod}</span><span>{fmt(Number(p.valorPago != null ? p.valorPago : p.valor))}</span></TRow>
-                    {Number(p.acrescimoValor || 0) > 0 && <TSubRow>Taxa financeira: +{fmt(Number(p.acrescimoValor || 0))}</TSubRow>}
+                    {p.acrescimoValor > 0 && <TSubRow>Taxa financeira: +{fmt(Number(p.acrescimoValor))}</TSubRow>}
                   </div>
                 ))
               ) : (
-                <>
-                  <TRow><span>PAGAMENTO</span><span>{PAY_LABELS[receipt.payment] || receipt.payment}</span></TRow>
-                  <TRow><span>VALOR</span><span>{fmt(singleAmount)}</span></TRow>
-                  {singleSurcharge > 0 && <TSubRow>Taxa financeira: +{fmt(singleSurcharge)}</TSubRow>}
-                </>
+                <TRow><span>PAGAMENTO</span><span>{PAY_LABELS[receipt.payment] || receipt.payment}</span></TRow>
               )}
 
               {receipt.client && <TRow><span>CLIENTE</span><span>{receipt.client.nickname}</span></TRow>}
