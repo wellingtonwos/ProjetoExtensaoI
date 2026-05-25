@@ -6,7 +6,11 @@ import DataTable from '../components/DataTable'
 import { Button } from '../components/Button'
 import { Footer } from '../components/Footer'
 import productsApi, { getProductById, updateProduct, getAllProductsUnpaged } from '../services/productsApi'
+<<<<<<< HEAD
 import { useAttributes } from '../context/attributes'
+=======
+import { useAttributes } from '../context/AttributesContext'
+>>>>>>> origin/main
 import { toast } from 'react-toastify'
 import { toTitleCase } from '../services/textUtils'
 import QuickCreateModal from '../components/QuickCreateModal'
@@ -259,6 +263,33 @@ export const StockView = ({ navigate }) => {
 	const { brands, categories, addBrand, addCategory } = useAttributes()
 	const isAdmin = localStorage.getItem('accessLevel') === 'ADM'
 	const [formOpen, setFormOpen] = useState(false)
+<<<<<<< HEAD
+=======
+
+	const [quickCreate, setQuickCreate] = useState({ open: false, type: null })
+
+	const handleQuickCreate = async (type, value) => {
+		try {
+			if (type === 'brand') {
+				const created = await addBrand(toTitleCase(value))
+				if (created?.id) {
+					setForm(f => ({ ...f, brandId: String(created.id) }))
+					setEditForm(f => ({ ...f, brandId: String(created.id) }))
+				}
+			} else {
+				const created = await addCategory(toTitleCase(value))
+				if (created?.id) {
+					setForm(f => ({ ...f, categoryId: String(created.id) }))
+					setEditForm(f => ({ ...f, categoryId: String(created.id) }))
+				}
+			}
+			setQuickCreate({ open: false, type: null })
+			toast.success(`${type === 'brand' ? 'Marca' : 'Categoria'} criada com sucesso!`)
+		} catch (e) {
+			toast.error(e?.response?.data?.message || `Erro ao criar ${type === 'brand' ? 'marca' : 'categoria'}.`)
+		}
+	}
+>>>>>>> origin/main
 
 	const [quickCreate, setQuickCreate] = useState({ open: false, type: null })
 
@@ -405,9 +436,13 @@ export const StockView = ({ navigate }) => {
 		try {
 			const all = await getAllProductsUnpaged()
 			setAllRows(all.map(mapDto))
+<<<<<<< HEAD
 		} catch (error) {
 			console.error('Failed to load stock stats', error)
 		}
+=======
+		} catch {}
+>>>>>>> origin/main
 	}, [])
 
 	// Initial load
