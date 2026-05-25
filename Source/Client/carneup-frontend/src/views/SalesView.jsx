@@ -896,6 +896,7 @@ export const SalesView = ({ navigate }) => {
               {/* Pagamento */}
               <Section>
                 <SLabel>Forma de Pagamento</SLabel>
+                <>
                 {!splitPayments && (
                 <PayGrid>
                   {PAYMENTS.map(opt => (
@@ -976,6 +977,7 @@ export const SalesView = ({ navigate }) => {
                     </div>
                   )}
                 </div>
+                </>
 
               </Section>
 
