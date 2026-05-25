@@ -84,7 +84,7 @@ const SumCard = styled.div`
   border-left: 3px solid ${p => p.$c || 'var(--brand)'};
   border: 1px solid var(--border); border-left-width: 3px;
   p.lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin: 0 0 6px; }
-  p.val { font-family: 'Epilogue', sans-serif; font-size: 22px; font-weight: 900; color: var(--text); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; line-height: 1.05; }
+  p.val { font-family: 'Epilogue', sans-serif; font-size: 22px; font-weight: 900; color: var(--text); margin: 0; white-space: normal; word-break: normal; overflow-wrap: break-word; display: block; line-height: 1.05; }
   p.sub { font-size: 10px; color: var(--muted); margin: 3px 0 0; white-space: normal; word-break: normal; overflow-wrap: normal; }
 `
 
@@ -408,13 +408,20 @@ export const ReportsView = ({ navigate }) => {
 
           {Object.keys(byPayment).length > 0 && (
             <SumGrid>
-              {Object.entries(byPayment).map(([m,c]) => (
-                <SumCard key={m} $c='#e7e5e4'>
-                  <p className='lbl'>Pagamento</p>
-                  <p className='val' style={{ fontSize:16 }}>{m}</p>
-                  <p className='sub'>{c} venda{c!==1?'s':''} · {pct((c/sales.length)*100)}</p>
-                </SumCard>
-              ))}
+              {Object.entries(byPayment).map(([m,c]) => {
+                const parts = String(m).split(/\s*\+\s*/)
+                return (
+                  <SumCard key={m} $c='#e7e5e4'>
+                    <p className='lbl'>Pagamento</p>
+                    <p className='val' style={{ fontSize:16 }}>
+                      {parts.map((t, idx) => (
+                        <span key={idx} style={{ display: 'inline-block', marginRight: 8 }}>{t}{idx < parts.length - 1 && <span style={{ marginLeft: 6, marginRight: 6 }}>+</span>}</span>
+                      ))}
+                    </p>
+                    <p className='sub'>{c} venda{c!==1?'s':''} · {pct((c/sales.length)*100)}</p>
+                  </SumCard>
+                )
+              })}
             </SumGrid>
           )}
 
