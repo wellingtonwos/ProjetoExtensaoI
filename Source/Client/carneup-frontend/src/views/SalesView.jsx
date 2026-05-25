@@ -1130,6 +1130,7 @@ export const SalesView = ({ navigate }) => {
               {cfg.city    && <TCenter>{cfg.city}</TCenter>}
               {cfg.phone   && <TCenter>Tel: {cfg.phone}</TCenter>}
               <TDash />
+              {cfg.instagram && <TCenter>Instagram: {cfg.instagram}</TCenter>}
               <TCenter>{now}</TCenter>
               {receipt.saleId && <TCenter>Venda #{receipt.saleId}</TCenter>}
               <TDash />
