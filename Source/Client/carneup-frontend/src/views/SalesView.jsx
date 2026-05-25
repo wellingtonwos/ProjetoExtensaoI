@@ -896,8 +896,7 @@ export const SalesView = ({ navigate }) => {
               {/* Pagamento */}
               <Section>
                 <SLabel>Forma de Pagamento</SLabel>
-                <>
-                {!splitPayments && (
+                {!splitPayments ? (
                 <PayGrid>
                   {PAYMENTS.map(opt => (
                     <PayBtn key={opt.id} $a={payment === opt.id} onClick={() => setPayment(opt.id)}>
@@ -907,7 +906,7 @@ export const SalesView = ({ navigate }) => {
                     </PayBtn>
                   ))}
                 </PayGrid>
-                )} 
+                ) : null}
 
                 <div style={{marginTop:10}}>
                   <div style={{display:'flex', gap:8, alignItems:'center', justifyContent:'space-between'}}>
@@ -977,7 +976,6 @@ export const SalesView = ({ navigate }) => {
                     </div>
                   )}
                 </div>
-                </>
 
               </Section>
 
