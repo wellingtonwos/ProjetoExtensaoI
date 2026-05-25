@@ -967,7 +967,7 @@ export const SalesView = ({ navigate }) => {
                               }}
                               style={{padding:'8px 10px', border:'1px solid #e7e5e4', borderRadius:6, width:110}} />
 
-                            <div style={{fontSize:12,color:'#1d4ed8',textAlign:'right'}}>{p.paymentMethod === 'CREDITO' ? `+${fmt(parseBRL(p.valor)*0.05)} (5%)` : <span style={{color:'#78716c'}}>-</span>}</div>
+                            <div style={{fontSize:12,color:'#1d4ed8',textAlign:'right'}}>{p.paymentMethod === 'CREDITO' ? '+' + fmt(parseBRL(p.valor)*0.05) + ' (5%)' : '-'}</div>
 
                             <button type='button' onClick={() => setPaymentsList(prev => prev.filter(it => it.id !== p.id))} style={{border:'none',background:'none',color:'#dc2626',cursor:'pointer'}}>✕</button>
                           </div>
