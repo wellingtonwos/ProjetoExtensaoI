@@ -114,7 +114,8 @@ const Loading = styled.div`
   padding: 32px; text-align: center; color: var(--muted); font-size: 13px;
 `
 const Badge = styled.span`
-  display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 700;
+  display: inline-flex; align-items:center; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 700;
+  white-space: nowrap; overflow: visible; word-break: normal;
   background: ${p => p.$c || '#f0f0f0'}; color: ${p => p.$t || '#374151'};
 `
 const AlertBadge = styled.span`
