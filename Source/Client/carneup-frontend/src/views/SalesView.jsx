@@ -1,9 +1,1168 @@
-import React from "react";
+import styled, { keyframes } from 'styled-components'
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
+import { Sidebar } from '../components/Sidebar'
+import productsApi, { getAllProductsUnpaged } from '../services/productsApi'
+import { createSale, getSale, searchClients, createClient, getAllClients } from '../services/salesApi'
+import api from '../services/apiClient'
+import { toast } from 'react-toastify'
+import { loadStoreConfig } from './ConfiguracaoView'
+
+// ── Animations ─────────────────────────────────────────────────────────────────
+const slideIn = keyframes`from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}`
+const spin = keyframes`to{transform:rotate(360deg)}`
+
+// ── Layout ─────────────────────────────────────────────────────────────────────
+const Wrapper = styled.div`
+  display:flex; height:100vh; overflow:hidden;
+  background:#f1f0ef; font-family:'Work Sans',sans-serif; color:#1c1917;
+`
+const PdvArea = styled.div`
+  flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0;
+`
+
+// ── Top bar ────────────────────────────────────────────────────────────────────
+const TopBar = styled.div`
+  background:#1c1917; padding:10px 20px;
+  display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+`
+const TopLeft = styled.div`
+  display:flex; align-items:center; gap:12px;
+`
+const BackBtn = styled.button`
+  background:rgba(255,255,255,0.08); border:none; border-radius:8px;
+  padding:6px 12px; color:rgba(255,255,255,0.7); cursor:pointer; font-size:13px;
+  display:flex; align-items:center; gap:6px;
+  &:hover{background:rgba(255,255,255,0.15);}
+  span{font-size:16px;}
+`
+const Title = styled.h1`
+  font-family:'Epilogue',sans-serif; font-size:15px; font-weight:900;
+  color:#fff; text-transform:uppercase; letter-spacing:0.05em; margin:0;
+`
+const TopRight = styled.div`
+  font-size:11px; color:rgba(255,255,255,0.4); text-align:right;
+  p{margin:0;} strong{color:rgba(255,255,255,0.7);}
+`
+
+// ── Body ───────────────────────────────────────────────────────────────────────
+const Body = styled.div`
+  flex:1; display:flex; overflow:hidden; min-height:0;
+`
+
+// ── Product Panel ──────────────────────────────────────────────────────────────
+const ProductPanel = styled.section`
+  flex:1; display:flex; flex-direction:column; min-width:0; background:#fafaf9;
+`
+const PSearch = styled.div`
+  padding:14px 16px; background:#fff; border-bottom:1px solid #e7e5e4; flex-shrink:0;
+`
+const SearchBox = styled.div`
+  display:flex; align-items:center; gap:8px;
+  background:#f5f5f4; border-radius:8px; padding:8px 12px;
+  border:1px solid transparent;
+  &:focus-within{border-color:#610005;background:#fff;}
+  input{flex:1;border:none;background:transparent;font-size:14px;font-family:'Work Sans',sans-serif;outline:none;color:#1c1917;&::placeholder{color:#a8a29e;}}
+  span{color:#a8a29e;font-size:20px;}
+`
+const CatTabs = styled.div`
+  display:flex; gap:6px; overflow-x:auto; padding:10px 16px; background:#fff;
+  border-bottom:1px solid #e7e5e4; flex-shrink:0;
+  &::-webkit-scrollbar{display:none;}
+`
+const CatBtn = styled.button`
+  padding:5px 14px; border-radius:999px; white-space:nowrap; cursor:pointer;
+  font-size:12px; font-weight:700; font-family:'Epilogue',sans-serif;
+  border:1px solid ${p=>p.$a?'#610005':'#e7e5e4'};
+  background:${p=>p.$a?'#610005':'#fff'};
+  color:${p=>p.$a?'#fff':'#44403c'};
+  &:hover{border-color:#610005;color:${p=>p.$a?'#fff':'#610005'};}
+`
+const PCount = styled.div`
+  padding:8px 16px; background:#f5f5f4; border-bottom:1px solid #e7e5e4;
+  font-size:11px; font-weight:600; color:#78716c; flex-shrink:0;
+`
+const PList = styled.div`
+  flex:1; overflow-y:auto;
+  &::-webkit-scrollbar{width:4px;}
+  &::-webkit-scrollbar-thumb{background:#e7e5e4;border-radius:4px;}
+`
+const PRow = styled.div`
+  border-bottom:1px solid #f0eeec;
+  background:${p=>p.$sel?'#fff8f8':'#fff'};
+  cursor:pointer;
+  &:hover{background:#fef2f2;}
+`
+const PRowMain = styled.div`
+  display:grid; grid-template-columns:1fr auto auto auto;
+  align-items:center; gap:10px; padding:11px 16px;
+`
+const PName = styled.div`
+  min-width:0;
+  .name{font-weight:700;font-size:13px;color:#1c1917;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .sub{font-size:11px;color:#a8a29e;margin-top:1px;}
+`
+const CBadge = styled.span`
+  font-size:9px;font-weight:700;text-transform:uppercase;
+  padding:2px 7px;border-radius:999px;background:#ffdad6;color:#610005;white-space:nowrap;
+`
+const UTag = styled.span`
+  font-size:11px;font-weight:700;color:#78716c;background:#f5f5f4;padding:2px 7px;border-radius:5px;
+`
+const PPrice = styled.span`
+  font-family:'Epilogue',sans-serif;font-size:14px;font-weight:900;color:#610005;white-space:nowrap;
+`
+const InlineAdd = styled.div`
+  display:flex; align-items:center; gap:8px; padding:8px 16px 12px;
+  background:#fff8f8; border-top:1px dashed #ffdad6;
+  animation:${slideIn} 0.15s ease;
+`
+const ILabel = styled.span`font-size:10px;font-weight:700;color:#78716c;text-transform:uppercase;`
+const IInput = styled.input`
+  width:88px; padding:7px 10px; border:1px solid #e7e5e4; border-radius:6px;
+  font-size:13px; font-family:'Work Sans',sans-serif; text-align:center;
+  &:focus{outline:none;border-color:#610005;}
+`
+const IAdd = styled.button`
+  padding:7px 14px; background:#610005; color:#fff; border:none; border-radius:6px;
+  font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:4px;
+  &:hover{background:#7f1d1d;}
+`
+const ICancel = styled.button`
+  padding:7px 10px; border:1px solid #e7e5e4; background:#fff; border-radius:6px;
+  font-size:12px; cursor:pointer; color:#78716c;
+  &:hover{background:#f5f5f4;}
+`
+const EmptyP = styled.div`
+  padding:40px 16px; text-align:center; color:#a8a29e; font-size:13px;
+  span{display:block;font-size:36px;margin-bottom:8px;}
+`
+
+// ── Cart Panel ─────────────────────────────────────────────────────────────────
+const CartPanel = styled.aside`
+  width:380px; min-width:320px; background:#fff;
+  border-left:1px solid #e7e5e4; display:flex; flex-direction:column; flex-shrink:0;
+`
+const CartHead = styled.div`
+  padding:14px 18px; border-bottom:1px solid #f5f5f4;
+  display:flex; justify-content:space-between; align-items:center; flex-shrink:0;
+  h2{font-family:'Epilogue',sans-serif;font-size:14px;font-weight:900;
+     text-transform:uppercase;color:#1c1917;margin:0;}
+  span.cnt{font-size:11px;color:#78716c;font-weight:600;}
+`
+const ClearB = styled.button`
+  background:none;border:none;cursor:pointer;color:#d6d3d1;display:flex;align-items:center;
+  &:hover{color:#dc2626;}
+`
+const CartItems = styled.div`
+  flex:1; overflow-y:auto; padding:4px 0;
+  &::-webkit-scrollbar{width:4px;}
+  &::-webkit-scrollbar-thumb{background:#e7e5e4;border-radius:4px;}
+`
+const CItem = styled.div`
+  display:flex; align-items:flex-start; gap:10px;
+  padding:10px 16px; border-bottom:1px solid #f5f5f4;
+  &:hover{background:#fafaf9;}
+`
+const CIcon = styled.div`
+  width:32px; height:32px; border-radius:6px; background:#ffdad6;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  span{color:#610005;font-size:16px;}
+`
+const CInfo = styled.div`
+  flex:1; min-width:0;
+  .name{font-weight:700;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .detail{font-size:10px;color:#78716c;margin-top:2px;}
+`
+const CRight = styled.div`
+  display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0;
+`
+const CTotal = styled.span`
+  font-family:'Epilogue',sans-serif; font-weight:900; font-size:13px; color:#1c1917;
+`
+const QCtrl = styled.div`
+  display:flex; align-items:center; gap:3px;
+  button{width:22px;height:22px;border-radius:4px;border:1px solid #e7e5e4;
+    background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    color:#57534e; span{font-size:13px;} &:hover{background:#f5f5f4;}}
+`
+const QIn = styled.input`
+  width:72px; text-align:center; border:1px solid #e7e5e4; border-radius:4px;
+  padding:1px 6px; font-size:11px; font-family:'Work Sans',sans-serif;
+  &:focus{outline:none;border-color:#610005;}
+`
+const RmBtn = styled.button`
+  background:none;border:none;cursor:pointer;color:#d6d3d1;padding:0;display:flex;align-items:center;
+  &:hover{color:#dc2626;} span{font-size:14px;}
+`
+const EmptyCart = styled.div`
+  padding:32px 16px; text-align:center; color:#a8a29e; font-size:13px;
+  span{display:block;font-size:36px;margin-bottom:8px;}
+`
+
+// ── Cart Footer ────────────────────────────────────────────────────────────────
+const CartFooter = styled.div`
+  border-top:2px solid #f5f5f4; display:flex; flex-direction:column; gap:0; flex-shrink:0;
+`
+const Section = styled.div`
+  padding:10px 16px; border-bottom:1px solid #f5f5f4;
+`
+const SLabel = styled.p`
+  font-size:9px; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.15em; color:#a8a29e; margin:0 0 7px;
+`
+
+// Client
+const ClientRow = styled.div`display:flex;gap:6px;align-items:center;`
+const ClientAnon = styled.button`
+  flex:1; padding:8px 10px; border:2px solid ${p=>p.$a?'#610005':'#e7e5e4'};
+  background:${p=>p.$a?'#fef2f2':'#fff'}; border-radius:8px; cursor:pointer;
+  font-size:11px; font-weight:700; color:${p=>p.$a?'#610005':'#78716c'};
+  display:flex; align-items:center; gap:5px; justify-content:center;
+  &:hover{border-color:#610005;}
+`
+const ClientSearch = styled.input`
+  flex:2; padding:8px 10px; border:1px solid #e7e5e4; border-radius:8px;
+  font-size:12px; font-family:'Work Sans',sans-serif;
+  &:focus{outline:none;border-color:#610005;}
+`
+const ClientDropdown = styled.div`
+  margin-top:4px; background:#fff; border:1px solid #e7e5e4; border-radius:8px;
+  overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.1); max-height:140px; overflow-y:auto;
+`
+const ClientOpt = styled.div`
+  padding:8px 12px; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:8px;
+  &:hover{background:#fef2f2;}
+  span.ic{color:#610005;font-size:14px;}
+`
+const ClientBadge = styled.div`
+  display:flex; align-items:center; gap:6px; background:#fef2f2;
+  border:1px solid #ffdad6; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:700; color:#610005;
+  button{background:none;border:none;cursor:pointer;color:#a8a29e;padding:0;display:flex;align-items:center;
+    &:hover{color:#dc2626;} span{font-size:14px;}}
+`
+
+// Payment
+const PayGrid = styled.div`display:grid;grid-template-columns:repeat(4,1fr);gap:5px;`
+const PayBtn = styled.button`
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:7px 4px; border-radius:8px;
+  border:2px solid ${p=>p.$a?'#610005':'#e7e5e4'};
+  background:${p=>p.$a?'#fef2f2':'#fff'};
+  cursor:pointer; transition:all 0.12s;
+  &:hover{border-color:#610005;}
+  span.icon{font-size:18px;color:${p=>p.$a?'#610005':'#a8a29e'};}
+  span.txt{font-size:8px;font-weight:900;text-transform:uppercase;color:${p=>p.$a?'#610005':'#1c1917'};margin-top:1px;letter-spacing:0.05em;}
+`
+
+// Advanced / Discount
+const AdvTrigger = styled.button`
+  display:flex; align-items:center; gap:6px; background:none; border:none;
+  font-size:10px; font-weight:600; color:#a8a29e; cursor:pointer; padding:0;
+  text-transform:uppercase; letter-spacing:0.1em;
+  &:hover{color:#78716c;}
+  span{font-size:14px;transition:transform 0.2s;transform:${p=>p.$open?'rotate(180deg)':'none'};}
+`
+const AdvPanel = styled.div`
+  overflow:hidden; transition:max-height 0.25s ease;
+  max-height:${p=>p.$open?'120px':'0'};
+`
+const DiscountRow = styled.label`
+  display:flex; align-items:center; gap:10px; cursor:pointer;
+  padding:8px 0; font-size:12px; color:#57534e;
+  input{accent-color:#610005;width:16px;height:16px;}
+`
+const DiscTag = styled.span`
+  background:#fef3c7; color:#b45309; font-size:10px; font-weight:700;
+  padding:2px 7px; border-radius:999px;
+`
+
+// Total + Finalize
+const TotalBox = styled.div`
+  background:#1c1917; border-radius:10px; padding:14px 16px;
+  display:flex; justify-content:space-between; align-items:center; margin:10px 16px 0;
+  .lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#a8a29e;}
+  .val{font-family:'Epilogue',sans-serif;font-size:26px;font-weight:900;color:#fff;line-height:1;}
+  .disc{font-size:9px;color:#f87171;margin-top:2px;}
+`
+const FinalBtn = styled.button`
+  margin:10px 16px 14px; padding:14px;
+  background:${p=>p.$empty?'#e7e5e4':'#610005'};
+  color:${p=>p.$empty?'#a8a29e':'#fff'};
+  border:none; border-radius:10px;
+  font-family:'Epilogue',sans-serif; font-size:13px; font-weight:900;
+  text-transform:uppercase; letter-spacing:0.18em;
+  cursor:${p=>p.$empty?'not-allowed':'pointer'};
+  display:flex; justify-content:center; align-items:center; gap:8px;
+  transition:all 0.15s;
+  &:hover:not(:disabled){filter:brightness(1.08);}
+`
+const Spinner = styled.span`
+  display:inline-block; width:16px; height:16px;
+  border:2px solid rgba(255,255,255,0.3); border-top-color:#fff;
+  border-radius:50%; animation:${spin} 0.7s linear infinite;
+`
+
+// ── Client Modal ───────────────────────────────────────────────────────────────
+const CModal = styled.div`
+  background:#fff; border-radius:16px; width:400px; max-width:calc(100% - 32px);
+  box-shadow:0 24px 48px rgba(0,0,0,0.2); animation:${slideIn} 0.2s ease;
+`
+const CModalHead = styled.div`
+  padding:20px 22px 16px;
+  display:flex; justify-content:space-between; align-items:flex-start;
+  border-bottom:1px solid #f5f5f4;
+  h2{font-family:'Epilogue',sans-serif;font-size:17px;font-weight:900;color:#1c1917;margin:0;}
+  p{font-size:12px;color:#78716c;margin:4px 0 0;}
+  button{background:none;border:none;cursor:pointer;color:#a8a29e;display:flex;align-items:center;padding:0;
+    &:hover{color:#dc2626;} span{font-size:20px;}}
+`
+const CModalBody = styled.div`padding:18px 22px;`
+const CModalField = styled.div`
+  margin-bottom:14px;
+  label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;
+    letter-spacing:0.12em;color:#78716c;margin-bottom:6px;}
+  input{width:100%;padding:10px 12px;border:1px solid #e5e7eb;border-radius:8px;
+    font-size:14px;font-family:'Work Sans',sans-serif;box-sizing:border-box;
+    &:focus{outline:none;border-color:#610005;}
+  }
+  small{display:block;font-size:11px;color:#a8a29e;margin-top:4px;}
+`
+const CModalActions = styled.div`
+  display:flex;gap:8px;padding:0 22px 20px;
+`
+const CModalCancel = styled.button`
+  flex:1;padding:10px;border:1px solid #e5e7eb;border-radius:8px;
+  background:#fff;cursor:pointer;font-size:13px;font-family:'Work Sans',sans-serif;color:#78716c;
+  &:hover{background:#f5f5f4;}
+`
+const CModalConfirm = styled.button`
+  flex:2;padding:10px;border:none;border-radius:8px;
+  background:#610005;color:#fff;cursor:pointer;
+  font-family:'Epilogue',sans-serif;font-weight:900;font-size:13px;text-transform:uppercase;
+  &:hover{background:#7f1d1d;}
+  &:disabled{opacity:0.5;cursor:not-allowed;}
+`
+
+// ── Receipt Modal (formato térmico 80mm) ───────────────────────────────────────
+const Overlay = styled.div`
+  position:fixed;inset:0;background:rgba(0,0,0,0.55);
+  display:flex;align-items:center;justify-content:center;z-index:200;
+`
+const ReceiptWrap = styled.div`
+  background:#fff; border-radius:12px; width:340px; max-width:calc(100%-32px);
+  max-height:92vh; overflow-y:auto; box-shadow:0 24px 48px rgba(0,0,0,0.2);
+  animation:${slideIn} 0.2s ease;
+  @media print {
+    position:fixed; inset:0; width:80mm; max-width:80mm; border-radius:0;
+    max-height:none; overflow:visible; box-shadow:none; margin:0;
+  }
+`
+const Thermal = styled.div`
+  font-family:'Courier New',Courier,monospace;
+  font-size:12px; line-height:1.55; padding:16px 14px; color:#111;
+  @media print { padding:4mm 3mm; font-size:11px; }
+`
+const TCenter = styled.div`text-align:center;`
+const TBold = styled.div`font-weight:700; text-align:center; font-size:13px;`
+const TDash = styled.div`
+  border-top:1px dashed #999; margin:6px 0;
+  @media print { border-top:1px dashed #000; }
+`
+const TRow = styled.div`
+  display:flex; justify-content:space-between; align-items:flex-start;
+  gap:4px; margin:3px 0;
+  .name{flex:1;word-break:break-word;}
+  .price{flex-shrink:0;font-weight:700;text-align:right;}
+`
+const TSubRow = styled.div`color:#555;font-size:11px;margin:-2px 0 4px 2px;`
+const TTotalRow = styled.div`
+  display:flex; justify-content:space-between; margin:4px 0;
+  font-weight:700; font-size:13px;
+`
+const TFooter = styled.div`text-align:center;margin-top:8px;font-size:11px;color:#555;`
+const RActions = styled.div`
+  display:flex; gap:8px; padding:12px 14px; border-top:1px solid #eee;
+  @media print { display:none; }
+`
+const RBtn = styled.button`
+  flex:1; padding:10px; border-radius:8px; cursor:pointer; font-weight:700; font-size:12px;
+  font-family:'Epilogue',sans-serif; text-transform:uppercase; letter-spacing:0.05em;
+  border:${p=>p.$sec?'1px solid #e7e5e4':'none'};
+  background:${p=>p.$sec?'#fff':'#610005'}; color:${p=>p.$sec?'#1c1917':'#fff'};
+  &:hover{opacity:0.9;}
+`
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+const fmt = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0)
+
+const fmtStock = (qty, unit) => {
+  if (unit === 'UN') return `${Math.floor(qty ?? 0)} un`
+  const g = Math.round((qty ?? 0) * 1000)
+  if (g >= 1000) return `${(g / 1000).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 3 })} kg`
+  return `${g} g`
+}
+
+const PAYMENTS = [
+  { id: 'PIX',      label: 'PIX',      icon: 'qr_code' },
+  { id: 'DINHEIRO', label: 'Dinheiro', icon: 'payments' },
+  { id: 'CREDITO',  label: 'Crédito',  icon: 'credit_card' },
+  { id: 'DEBITO',   label: 'Débito',   icon: 'contactless' },
+]
+const PAY_LABELS = { PIX:'PIX', DINHEIRO:'Dinheiro', CREDITO:'Crédito', DEBITO:'Débito' }
+
+// ── Component ──────────────────────────────────────────────────────────────────
 export const SalesView = ({ navigate }) => {
+  // Products
+  const [products, setProducts] = useState([])
+  const [loadingP, setLoadingP] = useState(true)
+  const [search, setSearch] = useState('')
+  const [activeCat, setActiveCat] = useState('TODOS')
+  const [selectedId, setSelectedId] = useState(null)
+  const [inlineQty, setInlineQty] = useState('')
+  const [inlinePrice, setInlinePrice] = useState('')
+
+  // Price helpers (mask like PurchaseView): format display and accept digits-only input
+  const formatPriceDisplay = (value) => {
+    if (value == null || value === '') return ''
+    const num = typeof value === 'number' ? value : parseFloat(String(value).replace(',', '.'))
+    if (isNaN(num)) return ''
+    return num.toFixed(2).replace('.', ',')
+  }
+  const parseBRL = (v) => {
+    if (v == null || v === '') return 0
+    const digits = String(v).replace(/\D/g, '')
+    const cents = parseInt(digits || '0', 10)
+    return cents / 100
+  }
+  const handleInlinePriceChange = (e) => {
+    const digits = String(e.target.value || '').replace(/\D/g, '')
+    const cents = parseInt(digits || '0', 10)
+    setInlinePrice(cents === 0 ? '' : (cents / 100).toFixed(2).replace('.', ','))
+  }
+
+  // Cart
+  const [cart, setCart] = useState([])
+
+  // Client
+  const [anonymous, setAnonymous] = useState(true)
+  const [clientSearch, setClientSearch] = useState('')
+  const [clientResults, setClientResults] = useState([])
+  const [selectedClient, setSelectedClient] = useState(null)
+  const [showClientDrop, setShowClientDrop] = useState(false)
+  const [clientModal, setClientModal] = useState(false)
+  const [clientForm, setClientForm] = useState({ nickname: '' })
+  const [clientSaving, setClientSaving] = useState(false)
+  // Terms modal for client creation
+  const [showTermosModal, setShowTermosModal] = useState(false)
+  const [latestTermo, setLatestTermo] = useState(null)
+  const [termosLoading, setTermosLoading] = useState(false)
+  const [aceitaTermos, setAceitaTermos] = useState(false)
+  const [receberPromocoes, setReceberPromocoes] = useState(false)
+
+  // Payment & options
+  const [payment, setPayment] = useState('DINHEIRO')
+  const [advOpen, setAdvOpen] = useState(false)
+  const [hasDiscount, setHasDiscount] = useState(false)
+  // Split payments support
+  const [splitPayments, setSplitPayments] = useState(false)
+  const [paymentsList, setPaymentsList] = useState([])
+
+  // Sale state
+  const [submitting, setSubmitting] = useState(false)
+  const [receipt, setReceipt] = useState(null)
+
+  const searchRef = useRef(null)
+  const qtyRef = useRef(null)
+  const clientTimer = useRef(null)
+
+  // Load products — busca TODAS as páginas para exibir catálogo completo no PDV
+  useEffect(() => {
+    setLoadingP(true)
+    getAllProductsUnpaged()
+      .then(all => setProducts(all.map(p => ({
+        id: p.id, name: p.name || '', code: p.code || '',
+        brand: p.brandName || '', category: p.categoryName || '',
+        unit: p.unitMeasurement || 'UN', price: Number(p.precoVenda || 0),
+        stock: Number(p.stockQuantity ?? 0),
+      }))))
+      .catch(() => toast.error('Erro ao carregar produtos.'))
+      .finally(() => setLoadingP(false))
+  }, [])
+
+  // Focus search on mount
+  useEffect(() => { searchRef.current?.focus() }, [])
+  useEffect(() => { if (selectedId) setTimeout(() => qtyRef.current?.focus(), 50) }, [selectedId])
+
+  // Client search debounce
+  useEffect(() => {
+    if (anonymous || clientSearch.length < 2) { setClientResults([]); setShowClientDrop(false); return }
+    clearTimeout(clientTimer.current)
+    clientTimer.current = setTimeout(async () => {
+      const res = await searchClients(clientSearch).catch(() => [])
+      setClientResults(res)
+      setShowClientDrop(true)
+    }, 300)
+    return () => clearTimeout(clientTimer.current)
+  }, [clientSearch, anonymous])
+
+  // Categories
+  const categories = useMemo(() => {
+    const cats = [...new Set(products.map(p => p.category).filter(Boolean))].sort()
+    return ['TODOS', ...cats]
+  }, [products])
+
+  // Filtered products
+  const displayed = useMemo(() => {
+    let list = products
+    if (activeCat !== 'TODOS') list = list.filter(p => p.category === activeCat)
+    const q = search.trim().toLowerCase()
+    if (q.length >= 1) list = list.filter(p =>
+      p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q)
+    )
+    return list
+  }, [products, activeCat, search])
+
+  // Select product
+  const selectProduct = (p) => {
+    if (selectedId === p.id) { setSelectedId(null); return }
+    setSelectedId(p.id)
+      // Do not prefill quantity; user must type desired amount
+      setInlineQty('')
+      // Prefill price formatted with two decimals (comma as decimal separator)
+      setInlinePrice(formatPriceDisplay(p.price > 0 ? p.price : ''))
+    }
+
+  // Add to cart
+  const addToCart = (p) => {
+    const qty = parseFloat(String(inlineQty).replace(',', '.'))
+    const minQty = p.unit === 'UN' ? 1 : 0.001
+    if (!qty || qty < minQty) {
+      toast.warning(p.unit === 'UN' ? 'Quantidade mínima: 1 unidade.' : 'Quantidade mínima: 1 grama (0,001 kg).')
+      return
+    }
+    if (p.unit === 'UN' && !Number.isInteger(qty)) { toast.warning('Quantidade inteira para UN.'); return }
+    const price = parseFloat(String(inlinePrice).replace(',', '.'))
+    if (isNaN(price) || price < 0) { toast.warning('Preço inválido.'); return }
+    const cartQty = cart.filter(it => it.productId === p.id).reduce((s, it) => s + it.qty, 0)
+    if (p.stock != null && !isNaN(p.stock) && qty + cartQty > p.stock + 0.0001) {
+      const avail = Math.max(0, p.stock - cartQty)
+      toast.warning(`Estoque insuficiente. Disponível: ${fmtStock(avail, p.unit)}`)
+      return
+    }
+    setCart(prev => [...prev, { key: Date.now(), productId: p.id, name: p.name, unit: p.unit, qty, price }])
+    setSelectedId(null); setInlineQty(''); setInlinePrice('')
+    searchRef.current?.focus()
+  }
+
+  // Cart ops
+  const updateQty = (key, val) => {
+    const q = parseFloat(String(val).replace(',', '.'))
+    if (isNaN(q) || q <= 0) { removeItem(key); return }
+    setCart(prev => prev.map(it => it.key === key ? { ...it, qty: q } : it))
+  }
+  const removeItem = (key) => setCart(prev => prev.filter(it => it.key !== key))
+  const clearCart = () => { setCart([]); setSelectedId(null) }
+
+  // Totals
+  const subtotal = cart.reduce((s, it) => s + it.qty * it.price, 0)
+  const total = hasDiscount ? subtotal * 0.95 : subtotal
+  const discount = subtotal - total
+  // surcharge calculations: sum of 5% over credit parts (frontend-visible only)
+  const surchargeTotal = (splitPayments && paymentsList && paymentsList.length > 0)
+    ? paymentsList.reduce((s, p) => s + ((p.paymentMethod === 'CREDITO') ? (parseBRL(p.valor) * 0.05) : 0), 0)
+    : (payment === 'CREDITO' ? total * 0.05 : 0)
+  const totalWithSurcharge = total + surchargeTotal
+
+  // Client ops
+  const handleSelectClient = (c) => {
+    setSelectedClient(c); setShowClientDrop(false); setClientSearch('')
+  }
+
+  const openClientModal = () => {
+    setClientForm({ nickname: clientSearch.trim(), aniversario: '' })
+    setShowClientDrop(false)
+    setClientModal(true)
+  }
+
+  const handleClientModalSubmit = async (e) => {
+    e.preventDefault()
+    const nickname = clientForm.nickname.trim()
+    if (!nickname) return
+    // fetch latest termo and show terms modal
+    setTermosLoading(true)
+    try {
+      const data = await api.get('/termos/latest').then(r => r.data).catch(() => null)
+      setLatestTermo(data)
+      setAceitaTermos(false)
+      setReceberPromocoes(false)
+      setShowTermosModal(true)
+    } catch (err) {
+      console.error(err)
+      toast.error('Erro ao carregar termos. Tente novamente.')
+    } finally {
+      setTermosLoading(false)
+    }
+  }
+
+  const handleConfirmTermos = async (e) => {
+    e?.preventDefault()
+    if (!aceitaTermos) { toast.warning('É necessário aceitar os Termos de Serviço para cadastrar o cliente.'); return }
+    setClientSaving(true)
+    try {
+      const nickname = clientForm.nickname.trim()
+      const id = await createClient({
+        nickname,
+        telefone: clientForm.telefone?.trim() || null,
+        aniversario: clientForm.aniversario || null,
+        aceitaTermosServico: true,
+        receberPromocoes: receberPromocoes ? true : false,
+      })
+
+      if (id) {
+        setSelectedClient({ id: Number(id), nickname })
+        setClientSearch(''); setClientModal(false); setShowTermosModal(false); setAnonymous(false)
+        toast.success(`Cliente "${nickname}" identificado!`)
+      } else {
+        // fallback: try to find the created client by nickname
+        const all = await getAllClients().catch(() => [])
+        const found = (all || []).find(c => (c.nickname || '').trim() === nickname)
+        if (found) {
+          setSelectedClient(found)
+          setClientSearch(''); setClientModal(false); setShowTermosModal(false); setAnonymous(false)
+          toast.success(`Cliente "${nickname}" identificado!`)
+        } else {
+          setClientModal(false); setShowTermosModal(false); setAnonymous(false)
+          toast.warn('Cliente cadastrado, mas não foi possível obter o id automaticamente. Atualize a lista para selecioná-lo.')
+        }
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error('Erro ao cadastrar cliente.')
+    } finally {
+      setClientSaving(false)
+    }
+  }
+
+  // Finalize
+  const handleFinalize = async () => {
+    if (!cart.length || submitting) return
+    const userId = Number(localStorage.getItem('userId'))
+    if (!userId) { toast.error('Sessão expirada. Faça login novamente.'); return }
+    setSubmitting(true)
+    try {
+      // build payments payload
+      let paymentsPayload = null
+      if (splitPayments && paymentsList && paymentsList.length > 0) {
+        paymentsPayload = paymentsList.map(p => ({
+          paymentMethod: p.paymentMethod,
+          valor: parseBRL(p.valor)
+        }))
+      } else {
+        paymentsPayload = [{ paymentMethod: payment, valor: Number((total).toFixed(2)) }]
+      }
+
+      const payload = {
+        userId,
+        paymentMethod: payment, // legacy field kept for compatibility
+        payments: paymentsPayload,
+        hasDiscount,
+        saleDate: new Date().toISOString().slice(0, 10),
+        clienteId: (!anonymous && selectedClient) ? selectedClient.id : null,
+        items: cart.map(it => ({ productId: it.productId, quantity: it.qty, precoUnitarioVenda: it.price })),
+      }
+      const { saleId } = await createSale(payload)
+      // Fetch full receipt
+      let saleData = null
+      if (saleId) saleData = await getSale(saleId).catch(() => null)
+      setReceipt({ saleId, saleData, cart: [...cart], total, payment, discount: hasDiscount ? discount : 0, client: !anonymous && selectedClient ? selectedClient : null })
+      setCart([]); setHasDiscount(false); setSelectedClient(null); setAnonymous(true)
+    } catch (e) {
+      const msg = e?.response?.data?.message || ''
+      if (msg.includes('insuficiente') || msg.includes('Insufficient')) toast.error('Estoque insuficiente. Faça uma entrada antes de vender.')
+      else toast.error(msg || 'Erro ao finalizar venda.')
+    } finally { setSubmitting(false) }
+  }
+
+  const handleNewSale = () => {
+    setReceipt(null)
+    setCart([])
+    setHasDiscount(false)
+    setSelectedClient(null)
+    setAnonymous(true)
+    setPayment('DINHEIRO')
+    setSplitPayments(false)
+    setPaymentsList([])
+    setInlineQty('')
+    setInlinePrice('')
+    setSearch('')
+    searchRef.current?.focus()
+  }
+
+  const handlePrint = () => window.print()
+
+  // ── Render ────────────────────────────────────────────────────────────────────
+  const userName = localStorage.getItem('userName') || 'Operador'
+
   return (
-    <div style={{ padding: 16 }}>
-      <h1>Ponto de Venda (temporário)</h1>
-      <p>Temporary placeholder to unblock the dev server. Will restore full PDV UI in follow-up commits.</p>
-    </div>
-  );
-};
+    <Wrapper>
+      <Sidebar navigate={navigate} activeView='sales' />
+
+      <PdvArea>
+        {/* Top Bar */}
+        <TopBar>
+          <TopLeft>
+            <BackBtn onClick={() => navigate('dashboard')}>
+              <span className='material-symbols-outlined'>arrow_back</span>Voltar
+            </BackBtn>
+            <Title>Ponto de Venda</Title>
+          </TopLeft>
+          <TopRight>
+            <p>Operador: <strong>{userName}</strong></p>
+            <p>Terminal #01</p>
+          </TopRight>
+        </TopBar>
+
+        <Body>
+          {/* ── PRODUTOS ── */}
+          <ProductPanel>
+            <PSearch>
+              <SearchBox>
+                <span className='material-symbols-outlined'>search</span>
+                <input ref={searchRef} placeholder='Buscar produto por nome, código ou marca...'
+                  value={search} onChange={e => setSearch(e.target.value)} />
+                {search && <span className='material-symbols-outlined' style={{ cursor:'pointer', fontSize:18 }} onClick={() => setSearch('')}>close</span>}
+              </SearchBox>
+            </PSearch>
+
+            <CatTabs>
+              {categories.map(c => (
+                <CatBtn key={c} $a={activeCat === c} onClick={() => setActiveCat(c)}>{c}</CatBtn>
+              ))}
+            </CatTabs>
+
+            {!loadingP && <PCount>{displayed.length} produto{displayed.length !== 1 ? 's' : ''}</PCount>}
+
+            <PList>
+              {loadingP && <EmptyP><span className='material-symbols-outlined'>hourglass_empty</span>Carregando produtos...</EmptyP>}
+              {!loadingP && displayed.length === 0 && <EmptyP><span className='material-symbols-outlined'>search_off</span>Nenhum produto encontrado.</EmptyP>}
+              {displayed.map(p => (
+                <PRow key={p.id} $sel={selectedId === p.id}>
+                  <PRowMain onClick={() => selectProduct(p)}>
+                    <PName>
+                      <div className='name'>{p.name}</div>
+                      <div className='sub'>
+                        {p.code}{p.brand ? ` · ${p.brand}` : ''}
+                        <span style={{ marginLeft:6, color: p.stock <= 0 ? '#dc2626' : p.stock < (p.unit==='UN' ? 2 : 0.1) ? '#f59e0b' : '#a8a29e' }}>
+                          · {fmtStock(p.stock, p.unit)}
+                        </span>
+                      </div>
+                    </PName>
+                    <CBadge>{p.category || '—'}</CBadge>
+                    <UTag>{p.unit}</UTag>
+                    <PPrice>{fmt(p.price)}/{p.unit}</PPrice>
+                  </PRowMain>
+
+                  {selectedId === p.id && (
+                    <InlineAdd onClick={e => e.stopPropagation()}>
+                      <ILabel>Qtd</ILabel>
+                      <IInput ref={qtyRef} type='number' min='0'
+                        step={p.unit === 'UN' ? '1' : '0.050'}
+                        value={inlineQty} onChange={e => setInlineQty(e.target.value)}
+                        onFocus={e => e.target.select()}
+                        onKeyDown={e => e.key === 'Enter' && addToCart(p)} />
+                      <ILabel>Preço R$</ILabel>
+                      <IInput type='text' inputMode='numeric' placeholder='0,00'
+                        value={inlinePrice}
+                        onChange={handleInlinePriceChange}
+                        onFocus={e => { e.target.select(); }}
+                        onBlur={() => setInlinePrice(formatPriceDisplay(inlinePrice))}
+                        onKeyDown={e => e.key === 'Enter' && addToCart(p)} />
+                      <IAdd onClick={() => addToCart(p)}>
+                        <span className='material-symbols-outlined' style={{ fontSize:15 }}>add_shopping_cart</span>
+                        Adicionar
+                      </IAdd>
+                      <ICancel onClick={() => setSelectedId(null)}>✕</ICancel>
+                    </InlineAdd>
+                  )}
+                </PRow>
+              ))}
+            </PList>
+          </ProductPanel>
+
+          {/* ── CARRINHO ── */}
+          <CartPanel>
+            <CartHead>
+              <div>
+                <h2>Pedido</h2>
+                <span className='cnt'>{cart.length} item{cart.length !== 1 ? 's' : ''}</span>
+              </div>
+              {cart.length > 0 && <ClearB onClick={clearCart} title='Limpar'><span className='material-symbols-outlined'>delete_sweep</span></ClearB>}
+            </CartHead>
+
+            <CartItems>
+              {cart.length === 0 && <EmptyCart><span className='material-symbols-outlined'>shopping_cart</span>Clique em um produto para adicionar.</EmptyCart>}
+              {cart.map(it => (
+                <CItem key={it.key}>
+                  <CIcon><span className='material-symbols-outlined'>restaurant</span></CIcon>
+                  <CInfo>
+                    <div className='name'>{it.name}</div>
+                    <div className='detail'>{fmt(it.price)}/{it.unit}</div>
+                  </CInfo>
+                  <CRight>
+                    <CTotal>{fmt(it.qty * it.price)}</CTotal>
+                    <QCtrl>
+                      <button onClick={() => updateQty(it.key, Math.max(0, it.qty - (it.unit==='UN'?1:0.05)).toFixed(it.unit==='UN'?0:3))}>
+                        <span className='material-symbols-outlined'>remove</span>
+                      </button>
+                      <QIn value={it.qty} type='number' min='0' step={it.unit==='UN'?'1':'0.050'}
+                        onChange={e => updateQty(it.key, e.target.value)} />
+                      <button onClick={() => updateQty(it.key, it.qty + (it.unit==='UN'?1:0.05))}>
+                        <span className='material-symbols-outlined'>add</span>
+                      </button>
+                      <RmBtn onClick={() => removeItem(it.key)}><span className='material-symbols-outlined'>close</span></RmBtn>
+                    </QCtrl>
+                  </CRight>
+                </CItem>
+              ))}
+            </CartItems>
+
+            <CartFooter>
+              {/* Cliente */}
+              <Section>
+                <SLabel>Cliente</SLabel>
+                {selectedClient && !anonymous ? (
+                  <ClientBadge>
+                    <span className='material-symbols-outlined' style={{ fontSize:16 }}>person</span>
+                    {selectedClient.nickname}
+                    <button onClick={() => { setSelectedClient(null); setAnonymous(true) }}>
+                      <span className='material-symbols-outlined'>close</span>
+                    </button>
+                  </ClientBadge>
+                ) : (
+                  <>
+                    <ClientRow>
+                      <ClientAnon $a={anonymous} onClick={() => { setAnonymous(true); setSelectedClient(null); setClientSearch('') }}>
+                        <span className='material-symbols-outlined' style={{ fontSize:14 }}>person_off</span>
+                        Sem identificação
+                      </ClientAnon>
+                      <ClientSearch
+                        placeholder='Buscar cliente...'
+                        value={clientSearch}
+                        onFocus={() => setAnonymous(false)}
+                        onChange={e => { setAnonymous(false); setClientSearch(e.target.value) }}
+                      />
+                    </ClientRow>
+                    {showClientDrop && (
+                      <ClientDropdown>
+                        {clientResults.map(c => (
+                          <ClientOpt key={c.id} onClick={() => handleSelectClient(c)}>
+                            <span className='ic material-symbols-outlined'>person</span>
+                            {c.nickname}
+                          </ClientOpt>
+                        ))}
+                        <ClientOpt
+                          onClick={openClientModal}
+                          style={{ borderTop:'1px solid #f0f0f0', color:'#610005', fontWeight:700 }}
+                        >
+                          <span className='ic material-symbols-outlined'>person_add</span>
+                          {clientSearch.trim().length >= 2
+                            ? `Cadastrar "${clientSearch.trim()}"...`
+                            : 'Cadastrar novo cliente...'}
+                        </ClientOpt>
+                      </ClientDropdown>
+                    )}
+                    {!showClientDrop && !anonymous && clientSearch === '' && (
+                      <ClientOpt
+                        onClick={openClientModal}
+                        style={{ marginTop:4, borderRadius:8, border:'1px dashed #e7e5e4', color:'#610005', fontWeight:700 }}
+                      >
+                        <span className='ic material-symbols-outlined'>person_add</span>
+                        Cadastrar novo cliente
+                      </ClientOpt>
+                    )}
+                  </>
+                )}
+              </Section>
+
+              {/* Pagamento */}
+              <Section>
+                <SLabel>Forma de Pagamento</SLabel>
+                <PayGrid>
+                  {PAYMENTS.map(opt => (
+                    <PayBtn key={opt.id} $a={payment === opt.id} onClick={() => setPayment(opt.id)}>
+                      <span className={`material-symbols-outlined icon${payment===opt.id?" fill":""}`}
+                        style={payment===opt.id?{fontVariationSettings:"'FILL' 1"}:{}}>{opt.icon}</span>
+                      <span className='txt'>{opt.label}</span>
+                    </PayBtn>
+                  ))}
+                </PayGrid>
+
+                <div style={{marginTop:10, display:'flex', gap:8, alignItems:'center'}}>
+                  <button type='button' style={{padding:'6px 10px',borderRadius:8,border:'1px solid #e7e5e4',background:splitPayments ? '#fff8f8':'#fff'}} onClick={() => {
+                    if (!splitPayments) {
+                      setSplitPayments(true)
+                      setPaymentsList([{ id: Date.now(), paymentMethod: payment, valor: formatPriceDisplay(total) }])
+                    } else {
+                      setSplitPayments(false)
+                      setPaymentsList([])
+                    }
+                  }}>{splitPayments ? 'Cancelar divisão' : 'Dividir pagamento'}</button>
+
+                  { (splitPayments || payment === 'CREDITO') && (
+                    <div style={{fontSize:12,color:'#78716c'}}>
+                      {splitPayments
+                        ? `Atribuído: ${fmt(paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0))} — Restante: ${fmt(Math.max(0, total - paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0)))}`
+                        : payment === 'CREDITO' ? `Acréscimo no crédito: ${fmt(total * 0.05)}` : null
+                      }
+                    </div>
+                  )}
+                </div>
+
+                {splitPayments && paymentsList.map((p, idx) => (
+                  <div key={p.id} style={{marginTop:8, display:'flex', gap:8, alignItems:'center'}}>
+                    <select value={p.paymentMethod} onChange={e => {
+                      const v = e.target.value
+                      setPaymentsList(prev => prev.map(it => it.id === p.id ? {...it, paymentMethod: v} : it))
+                    }}>
+                      {PAYMENTS.map(opt => <option key={opt.id} value={opt.id}>{opt.label}</option>)}
+                    </select>
+                    <input type='text' inputMode='numeric' placeholder='0,00' value={p.valor}
+                      onChange={e => {
+                        const digits = String(e.target.value || '').replace(/\D/g, '')
+                        const cents = parseInt(digits || '0', 10)
+                        const str = cents === 0 ? '' : (cents / 100).toFixed(2).replace('.', ',')
+                        setPaymentsList(prev => prev.map(it => it.id === p.id ? {...it, valor: str} : it))
+                      }}
+                      style={{padding:'8px 10px', border:'1px solid #e7e5e4', borderRadius:6, width:120}}
+                    />
+                    {p.paymentMethod === 'CREDITO' && <span style={{fontSize:12,color:'#1d4ed8'}}>{`+${fmt(parseBRL(p.valor)*0.05)} (5%)`}</span>}
+                    <button type='button' onClick={() => setPaymentsList(prev => prev.filter(it => it.id !== p.id))} style={{border:'none',background:'none',color:'#dc2626',cursor:'pointer'}}>Remover</button>
+                  </div>
+                ))}
+
+                {splitPayments && <div style={{marginTop:8}}><button type='button' onClick={() => {
+                  const assigned = paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0)
+                  const remaining = Math.max(0, total - assigned)
+                  setPaymentsList(prev => [...prev, { id: Date.now()+Math.random(), paymentMethod: payment, valor: formatPriceDisplay(remaining) }])
+                }} style={{padding:'6px 10px', borderRadius:8, border:'1px solid #e7e5e4'}}>Adicionar forma</button></div>}
+
+              </Section>
+
+              {/* Opções avançadas (desconto escondido) */}
+              <Section>
+                <AdvTrigger $open={advOpen} onClick={() => setAdvOpen(o => !o)}>
+                  <span className='material-symbols-outlined'>tune</span>
+                  Opções
+                  <span className='material-symbols-outlined'>expand_more</span>
+                </AdvTrigger>
+                <AdvPanel $open={advOpen}>
+                  <DiscountRow>
+                    <input type='checkbox' checked={hasDiscount}
+                      onChange={e => setHasDiscount(e.target.checked)} />
+                    Aplicar desconto <DiscTag>5% OFF</DiscTag>
+                    {hasDiscount && <span style={{ fontSize:11, color:'#b45309' }}>— {fmt(discount)}</span>}
+                  </DiscountRow>
+                </AdvPanel>
+              </Section>
+
+              {/* Total */}
+              <TotalBox>
+                <div>
+                  <p className='lbl'>Total</p>
+                  {hasDiscount && <p className='disc'>Com desconto de {fmt(discount)}</p>}
+                  {surchargeTotal > 0 && <p style={{fontSize:11,color:'#1d4ed8',margin:0}}>Acréscimos no cartão: {fmt(surchargeTotal)}</p>}
+                </div>
+                <p className='val'>{fmt(total)}</p>
+                {surchargeTotal > 0 && <p style={{fontSize:11,color:'#fff',opacity:0.95,marginTop:6}}>A pagar (com acréscimos): {fmt(totalWithSurcharge)}</p>}
+              </TotalBox>
+
+              <FinalBtn $empty={cart.length === 0} onClick={handleFinalize}
+                disabled={cart.length === 0 || submitting}>
+                {submitting ? <Spinner /> : <span className='material-symbols-outlined'>check_circle</span>}
+                {submitting ? 'Processando...' : 'Finalizar Venda'}
+              </FinalBtn>
+            </CartFooter>
+          </CartPanel>
+        </Body>
+      </PdvArea>
+
+      {/* ── MODAL CADASTRO CLIENTE ── */}
+      {clientModal && (
+        <Overlay onClick={() => setClientModal(false)}>
+          <CModal onClick={e => e.stopPropagation()}>
+            <CModalHead>
+              <div>
+                <h2>Identificar Cliente</h2>
+                <p>Informe o apelido ou nome para identificar o cliente nesta venda.</p>
+              </div>
+              <button onClick={() => setClientModal(false)}>
+                <span className='material-symbols-outlined'>close</span>
+              </button>
+            </CModalHead>
+
+            <form onSubmit={handleClientModalSubmit}>
+              <CModalBody>
+                <CModalField>
+                  <label>Apelido / Nome *</label>
+                  <input
+                    autoFocus
+                    placeholder='Ex: João da Silva, Mesa 3...'
+                    value={clientForm.nickname}
+                    onChange={e => setClientForm(f => ({ ...f, nickname: e.target.value }))}
+                    required
+                  />
+                  <small>Obrigatório — usado para identificar o cliente nos relatórios.</small>
+                </CModalField>
+                <CModalField>
+                  <label>Telefone</label>
+                  <input
+                    placeholder='Ex: (11) 99999-9999'
+                    value={clientForm.telefone || ''}
+                    onChange={e => setClientForm(f => ({ ...f, telefone: e.target.value }))}
+                  />
+                </CModalField>
+                <CModalField>
+                  <label>Aniversário</label>
+                  <input
+                    type='date'
+                    value={clientForm.aniversario || ''}
+                    onChange={e => setClientForm(f => ({ ...f, aniversario: e.target.value }))}
+                  />
+                  <small>Todos os campos acima são opcionais, exceto o apelido.</small>
+                </CModalField>
+              </CModalBody>
+              <CModalActions>
+                <CModalCancel type='button' onClick={() => setClientModal(false)}>Cancelar</CModalCancel>
+                <CModalConfirm type='submit' disabled={clientSaving || !clientForm.nickname.trim()}>
+                  {clientSaving ? 'Salvando...' : 'Confirmar Identificação'}
+                </CModalConfirm>
+              </CModalActions>
+            </form>
+          </CModal>
+        </Overlay>
+      )}
+
+      {showTermosModal && (
+        <Overlay onClick={() => setShowTermosModal(false)}>
+          <CModal onClick={e => e.stopPropagation()}>
+            <CModalHead>
+              <div>
+                <h2>Termos e Condições</h2>
+                <p style={{margin:0,fontSize:12,color:'#78716c'}}>Revise e aceite os Termos de Serviço para prosseguir com o cadastro do cliente.</p>
+              </div>
+              <button onClick={() => setShowTermosModal(false)}>
+                <span className='material-symbols-outlined'>close</span>
+              </button>
+            </CModalHead>
+
+            <form onSubmit={handleConfirmTermos}>
+              <CModalBody>
+                <div style={{maxHeight:220, overflowY:'auto', padding:12, border:'1px solid #f0f0f0', borderRadius:8, whiteSpace:'pre-wrap', fontSize:13, color:'#333'}}>
+                  {termosLoading ? 'Carregando termo...' : (latestTermo?.conteudo || 'Nenhum termo cadastrado.')}
+                </div>
+
+                <div style={{marginTop:12}}>
+                  <label style={{display:'flex', alignItems:'center', gap:8}}>
+                    <input type='checkbox' checked={aceitaTermos} onChange={e => setAceitaTermos(e.target.checked)} />
+                    Estou de acordo com os Termos de Serviço (obrigatório)
+                  </label>
+                  <label style={{display:'flex', alignItems:'center', gap:8, marginTop:8}}>
+                    <input type='checkbox' checked={receberPromocoes} onChange={e => setReceberPromocoes(e.target.checked)} />
+                    Desejo receber promoções e marketing (opcional)
+                  </label>
+                </div>
+
+              </CModalBody>
+
+              <CModalActions>
+                <CModalCancel type='button' onClick={() => setShowTermosModal(false)}>Cancelar</CModalCancel>
+                <CModalConfirm type='submit' disabled={!aceitaTermos || clientSaving}>
+                  {clientSaving ? 'Salvando...' : 'Aceitar e Salvar'}
+                </CModalConfirm>
+              </CModalActions>
+            </form>
+          </CModal>
+        </Overlay>
+      )}
+
+      {/* ── RECIBO TÉRMICO 80mm ── */}
+      {receipt && (() => {
+        const cfg = loadStoreConfig()
+        const saleData = receipt.saleData || null
+        const items = saleData?.items || receipt.cart
+        const subtotal = items.reduce((a,it) => a + (it.quantity||it.qty)*(it.precoUnitarioVenda||it.price), 0)
+        const surchargeFromPayments = saleData?.payments ? saleData.payments.reduce((s,p) => s + Number(p.acrescimoValor || 0), 0) : 0
+        const now = new Date().toLocaleString('pt-BR')
+        const baseTotal = saleData?.totalValue != null ? Number(saleData.totalValue) : Number(receipt.total || 0)
+        const totalWithSurcharge = baseTotal + surchargeFromPayments
+        return (
+        <Overlay>
+          <ReceiptWrap>
+            <Thermal>
+              <TBold>{cfg.storeName.toUpperCase()}</TBold>
+              {cfg.address && <TCenter>{cfg.address}</TCenter>}
+              {cfg.city    && <TCenter>{cfg.city}</TCenter>}
+              {cfg.phone   && <TCenter>Tel: {cfg.phone}</TCenter>}
+              <TDash />
+              <TCenter>{now}</TCenter>
+              {receipt.saleId && <TCenter>Venda #{receipt.saleId}</TCenter>}
+              <TDash />
+
+              {items.map((it, i) => {
+                const qty   = Number(it.quantity || it.qty)
+                const price = Number(it.precoUnitarioVenda || it.price)
+                const total = qty * price
+                const name  = (it.productName || it.name || '').toUpperCase()
+                return (
+                  <div key={i}>
+                    <TRow>
+                      <span className='name'>{name}</span>
+                      <span className='price'>{fmt(total)}</span>
+                    </TRow>
+                    <TSubRow>
+                      {qty.toFixed(qty % 1 === 0 ? 0 : 3)} x {fmt(price)}
+                    </TSubRow>
+                  </div>
+                )
+              })}
+
+              <TDash />
+              {receipt.discount > 0 && (
+                <TRow><span>DESCONTO (5%)</span><span>-{fmt(receipt.discount)}</span></TRow>
+              )}
+              <TTotalRow>
+                <span>TOTAL</span>
+                <span>{fmt(totalWithSurcharge)}</span>
+              </TTotalRow>
+
+              {/* Payments breakdown (prefer server-provided payments) */}
+              {saleData?.payments && saleData.payments.length > 0 ? (
+                saleData.payments.map((p, i) => (
+                  <div key={i}>
+                    <TRow><span>{PAY_LABELS[p.paymentMethod] || p.paymentMethod}</span><span>{fmt(Number(p.valorPago != null ? p.valorPago : p.valor))}</span></TRow>
+                    {p.acrescimoValor > 0 && <TSubRow>Taxa financeira: +{fmt(Number(p.acrescimoValor))}</TSubRow>}
+                  </div>
+                ))
+              ) : (
+                <TRow><span>PAGAMENTO</span><span>{PAY_LABELS[receipt.payment] || receipt.payment}</span></TRow>
+              )}
+
+              {receipt.client && <TRow><span>CLIENTE</span><span>{receipt.client.nickname}</span></TRow>}
+              <TDash />
+              <TFooter>{cfg.footerMsg}</TFooter>
+            </Thermal>
+
+            <RActions>
+              <RBtn $sec onClick={handlePrint}>
+                <span className='material-symbols-outlined' style={{ verticalAlign:'middle', marginRight:4, fontSize:16 }}>print</span>
+                Imprimir
+              </RBtn>
+              <RBtn onClick={handleNewSale}>Nova Venda</RBtn>
+            </RActions>
+          </ReceiptWrap>
+        </Overlay>
+        )
+      })()}
+    </Wrapper>
+  )
+}
