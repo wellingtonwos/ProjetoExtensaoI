@@ -944,34 +944,35 @@ export const SalesView = ({ navigate }) => {
                     <div style={{marginTop:8, border:'1px solid #e7e5e4', borderRadius:8, padding:8, background:'#fff'}}>
                       <div style={{display:'flex', gap:8, alignItems:'center', marginBottom:8}}>
                         <div style={{fontSize:12,color:'#78716c'}}>Dividir igualmente</div>
-                        {equalSplitButtons}
-                        <div style={{flex:1}} />
-                        <div style={{fontSize:12,color:'#78716c'}}>Atribuído: {fmt(assignedAmount)} — Restante: {fmt(remainingAmount)}</div>
+                        <div>{equalSplitButtons}</div>
+                        <div style={{marginLeft:'auto', fontSize:12,color:'#78716c'}}>Atribuído: {fmt(assignedAmount)} — Restante: {fmt(remainingAmount)}</div>
                       </div>
 
-                      {paymentsList.map((p, idx) => (
-                        <div key={p.id} style={{display:'grid', gridTemplateColumns:'1fr 110px 120px 36px', gap:8, alignItems:'center', marginBottom:8}}>
-                          <select value={p.paymentMethod} onChange={e => {
-                            const v = e.target.value
-                            setPaymentsList(prev => prev.map(it => it.id === p.id ? {...it, paymentMethod: v} : it))
-                          }}>
-                            {PAYMENTS.map(opt => <option key={opt.id} value={opt.id}>{opt.label}</option>)}
-                          </select>
+                      <div>
+                        {paymentsList.map((p, idx) => (
+                          <div key={p.id} style={{display:'grid', gridTemplateColumns:'1fr 110px 120px 36px', gap:8, alignItems:'center', marginBottom:8}}>
+                            <select value={p.paymentMethod} onChange={e => {
+                              const v = e.target.value
+                              setPaymentsList(prev => prev.map(it => it.id === p.id ? {...it, paymentMethod: v} : it))
+                            }}>
+                              {PAYMENTS.map(opt => <option key={opt.id} value={opt.id}>{opt.label}</option>)}
+                            </select>
 
-                          <input type='text' inputMode='numeric' placeholder='0,00' value={p.valor}
-                            onChange={e => {
-                              const digits = String(e.target.value || '').replace(/\D/g, '')
-                              const cents = parseInt(digits || '0', 10)
-                              const str = cents === 0 ? '' : (cents / 100).toFixed(2).replace('.', ',')
-                              setPaymentsList(prev => prev.map(it => it.id === p.id ? {...it, valor: str} : it))
-                            }}
-                            style={{padding:'8px 10px', border:'1px solid #e7e5e4', borderRadius:6, width:110}} />
+                            <input type='text' inputMode='numeric' placeholder='0,00' value={p.valor}
+                              onChange={e => {
+                                const digits = String(e.target.value || '').replace(/\D/g, '')
+                                const cents = parseInt(digits || '0', 10)
+                                const str = cents === 0 ? '' : (cents / 100).toFixed(2).replace('.', ',')
+                                setPaymentsList(prev => prev.map(it => it.id === p.id ? {...it, valor: str} : it))
+                              }}
+                              style={{padding:'8px 10px', border:'1px solid #e7e5e4', borderRadius:6, width:110}} />
 
-                          <div style={{fontSize:12,color:'#1d4ed8',textAlign:'right'}}>{p.paymentMethod === 'CREDITO' ? `+${fmt(parseBRL(p.valor)*0.05)} (5%)` : <span style={{color:'#78716c'}}>-</span>}</div>
+                            <div style={{fontSize:12,color:'#1d4ed8',textAlign:'right'}}>{p.paymentMethod === 'CREDITO' ? `+${fmt(parseBRL(p.valor)*0.05)} (5%)` : <span style={{color:'#78716c'}}>-</span>}</div>
 
-                          <button type='button' onClick={() => setPaymentsList(prev => prev.filter(it => it.id !== p.id))} style={{border:'none',background:'none',color:'#dc2626',cursor:'pointer'}}>✕</button>
-                        </div>
-                      ))}
+                            <button type='button' onClick={() => setPaymentsList(prev => prev.filter(it => it.id !== p.id))} style={{border:'none',background:'none',color:'#dc2626',cursor:'pointer'}}>✕</button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
