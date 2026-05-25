@@ -698,6 +698,21 @@ export const SalesView = ({ navigate }) => {
     searchRef.current?.focus()
   }
 
+  const equalSplit = (n) => {
+    if (!n || n < 1) return
+    const per = Number((total / n).toFixed(2))
+    const arr = Array.from({ length: n }).map((_, i) => {
+      let v = per
+      if (i === n - 1) {
+        const sum = per * (n - 1)
+        v = Number((total - sum).toFixed(2))
+      }
+      return { id: Date.now() + i, paymentMethod: PAYMENTS[i % PAYMENTS.length].id, valor: formatPriceDisplay(v) }
+    })
+    setPaymentsList(arr)
+    setSplitPayments(true)
+  }
+
   const handlePrint = () => window.print()
 
   // ── Render ────────────────────────────────────────────────────────────────────
@@ -887,15 +902,17 @@ export const SalesView = ({ navigate }) => {
               {/* Pagamento */}
               <Section>
                 <SLabel>Forma de Pagamento</SLabel>
-                <PayGrid>
-                  {PAYMENTS.map(opt => (
-                    <PayBtn key={opt.id} $a={payment === opt.id} onClick={() => setPayment(opt.id)}>
-                      <span className={`material-symbols-outlined icon${payment===opt.id?" fill":""}`}
-                        style={payment===opt.id?{fontVariationSettings:"'FILL' 1"}:{}}>{opt.icon}</span>
-                      <span className='txt'>{opt.label}</span>
-                    </PayBtn>
-                  ))}
-                </PayGrid>
+                {!splitPayments && (
+                  <PayGrid>
+                    {PAYMENTS.map(opt => (
+                      <PayBtn key={opt.id} $a={payment === opt.id} onClick={() => setPayment(opt.id)}>
+                        <span className={`material-symbols-outlined icon${payment===opt.id?" fill":""}`}
+                          style={payment===opt.id?{fontVariationSettings:"'FILL' 1"}:{}}>{opt.icon}</span>
+                        <span className='txt'>{opt.label}</span>
+                      </PayBtn>
+                    ))}
+                  </PayGrid>
+                )}
 
                 <div style={{marginTop:10, display:'flex', gap:8, alignItems:'center'}}>
                   <button type='button' style={{padding:'6px 10px',borderRadius:8,border:'1px solid #e7e5e4',background:splitPayments ? '#fff8f8':'#fff'}} onClick={() => {
