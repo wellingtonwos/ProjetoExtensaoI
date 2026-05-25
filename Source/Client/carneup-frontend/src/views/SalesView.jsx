@@ -896,6 +896,7 @@ export const SalesView = ({ navigate }) => {
               {/* Pagamento */}
               <Section>
                 <SLabel>Forma de Pagamento</SLabel>
+                {!splitPayments && (
                 <PayGrid>
                   {PAYMENTS.map(opt => (
                     <PayBtn key={opt.id} $a={payment === opt.id} onClick={() => setPayment(opt.id)}>
@@ -905,6 +906,7 @@ export const SalesView = ({ navigate }) => {
                     </PayBtn>
                   ))}
                 </PayGrid>
+                )} 
 
                 <div style={{marginTop:10}}>
                   <div style={{display:'flex', gap:8, alignItems:'center', justifyContent:'space-between'}}>
@@ -919,7 +921,7 @@ export const SalesView = ({ navigate }) => {
                         }
                       }}>{splitPayments ? 'Cancelar divisão' : 'Dividir pagamento'}</button>
 
-                      <button type='button' style={{padding:'6px 10px',borderRadius:8,border:'1px solid #e7e5e4'}} onClick={() => {
+                      {splitPayments && <button type='button' style={{padding:'6px 10px',borderRadius:8,border:'1px solid #e7e5e4'}} onClick={() => {
                         const assigned = paymentsList.reduce((s,p) => s + parseBRL(p.valor), 0)
                         const remaining = Math.max(0, total - assigned)
                         setPaymentsList(prev => [...prev, { id: Date.now() + Math.random(), paymentMethod: payment, valor: formatPriceDisplay(remaining) }])
