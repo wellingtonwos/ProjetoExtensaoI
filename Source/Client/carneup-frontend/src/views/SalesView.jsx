@@ -925,6 +925,15 @@ export const SalesView = ({ navigate }) => {
                     }
                   }}>{splitPayments ? 'Cancelar divisão' : 'Dividir pagamento'}</button>
 
+                  {splitPayments && (
+                    <div style={{display:'flex', gap:8, alignItems:'center'}}>
+                      <div style={{fontSize:12,color:'#78716c'}}>Dividir igualmente</div>
+                      {[2,3,4].map(n => (
+                        <button key={n} type='button' style={{padding:'6px 8px',borderRadius:6,border:'1px solid #e7e5e4'}} onClick={() => equalSplit(n)}>{n}x</button>
+                      ))}
+                    </div>
+                  )}
+
                   { (splitPayments || payment === 'CREDITO') && (
                     <div style={{fontSize:12,color:'#78716c'}}>
                       {splitPayments
