@@ -47,4 +47,17 @@ public class Produto {
 
     @OneToMany(mappedBy = "produto", fetch = FetchType.LAZY)
     private List<Movimentacao> itens;
+
+    public Produto(Long id, String nome, UnitMeasurement unidadeMedida, String codigo, Boolean perecivel, java.math.BigDecimal precoVenda, Categoria categoria, Marca marca, java.util.List<Movimentacao> itens) {
+        this.id = id;
+        this.nome = nome;
+        this.unidadeMedida = unidadeMedida;
+        this.codigo = codigo;
+        this.perecivel = perecivel;
+        this.precoVenda = precoVenda;
+        this.categoria = categoria;
+        this.marca = marca;
+        this.itens = itens;
+        this.estoqueMinimo = 5;
+    }
 }
