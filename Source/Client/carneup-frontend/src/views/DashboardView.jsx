@@ -282,7 +282,8 @@ export const DashboardView = ({ navigate }) => {
 	const [loading, setLoading] = useState(true)
 	const [hidden, setHidden] = useState(true)   // valores ocultos por padrão
 	const [birthdayClients, setBirthdayClients] = useState([])
-
+	const [alerts, setAlerts] = useState({ expiryAlerts: [], lowStockAlerts: [] })
+		
 	const val = (formatted) => hidden ? MASK : formatted
 
 	// Clock
@@ -304,14 +305,15 @@ export const DashboardView = ({ navigate }) => {
 			api.get(`/sales?startDate=${today}&endDate=${today}`).catch(() => ({ data: [] })),
 			api.get('/sales?page=0&size=5').catch(() => ({ data: { content: [] } })),
 			api.get('/clients').catch(() => ({ data: [] })),
-		]).then(([todayResp, recentResp, clientsResp]) => {
+			api.get('/alerts').catch(() => ({ data: { expiryAlerts: [], lowStockAlerts: [] } })),
+		]).then(([todayResp, recentResp, clientsResp, alertsResp]) => {
 			const todaySales = todayResp.data || []
 			const total = todaySales.reduce((a, s) => a + (s.totalPrice || 0), 0)
 			setTodayTotal(total)
 			setTodayCount(todaySales.length)
 			setAvgTicket(todaySales.length > 0 ? total / todaySales.length : 0)
 			setRecentSales(recentResp.data?.content || [])
-
+					
 			const clients = clientsResp.data || []
 			const todayMD = today.slice(5)
 			const bdays = (clients || []).filter(c => {
@@ -325,6 +327,7 @@ export const DashboardView = ({ navigate }) => {
 				return md === todayMD && optedIn
 			})
 			setBirthdayClients(bdays)
+			setAlerts(alertsResp.data || { expiryAlerts: [], lowStockAlerts: [] })
 		}).finally(() => setLoading(false))
 	}, [])
 
@@ -414,12 +417,58 @@ export const DashboardView = ({ navigate }) => {
 								<SalesHeader>
 									<h3>Alertas</h3>
 								</SalesHeader>
-								<div style={{ padding: 16 }}>
-									<EmptyMsg>
-										<span className='material-symbols-outlined'>campaign</span>
-										Sem alertas por enquanto.
-									</EmptyMsg>
-								</div>
+
+								{loading && (
+									<div style={{ padding: 16 }}>
+										<EmptyMsg><span className='material-symbols-outlined'>hourglass_empty</span>Carregando...</EmptyMsg>
+									</div>
+								)}
+
+								{!loading && (alerts.expiryAlerts?.length === 0 && alerts.lowStockAlerts?.length === 0) && (
+									<div style={{ padding: 16 }}>
+										<EmptyMsg>
+											<span className='material-symbols-outlined'>campaign</span>
+											Sem alertas por enquanto.
+										</EmptyMsg>
+									</div>
+								)}
+
+								{!loading && (alerts.expiryAlerts?.length > 0) && (
+									<div>
+										<SectionLabel style={{ padding: '12px 16px 0' }}>Vencimentos Próximos</SectionLabel>
+										{alerts.expiryAlerts.map((a, idx) => (
+											<SaleRow key={`exp-${idx}`}>
+												<SaleIcon><span className='material-symbols-outlined'>inventory_2</span></SaleIcon>
+												<SaleInfo>
+													<p className='id'>{a.productName}</p>
+													<p className='date'>Vence em {a.daysToExpiry} dia(s) — {a.expiringDate}</p>
+												</SaleInfo>
+												<SaleRight>
+													<p className='value'>{a.quantity}</p>
+												</SaleRight>
+											</SaleRow>
+										))}
+									</div>
+								)}
+
+								{!loading && (alerts.lowStockAlerts?.length > 0) && (
+									<div>
+										<SectionLabel style={{ padding: '12px 16px 0' }}>Estoque Baixo</SectionLabel>
+										{alerts.lowStockAlerts.map((a, idx) => (
+											<SaleRow key={`low-${idx}`}>
+												<SaleIcon><span className='material-symbols-outlined'>warning</span></SaleIcon>
+												<SaleInfo>
+													<p className='id'>{a.productName}</p>
+													<p className='date'>Estoque atual: {a.currentStock}</p>
+												</SaleInfo>
+												<SaleRight>
+													<p className='value'>Min: {a.minStock}</p>
+												</SaleRight>
+											</SaleRow>
+										))}
+									</div>
+								)}
+
 							</SalesCard>
 						</div>
 					</div>
