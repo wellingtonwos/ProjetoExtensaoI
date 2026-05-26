@@ -78,6 +78,7 @@ const DEFAULT_CONFIG = {
   phone:        '(11) 3456-7890',
   instagram:    '',
   footerMsg:    'Obrigado pela preferência!',
+  expiryDays:   7,
 }
 
 export const loadStoreConfig = () => {
@@ -252,7 +253,13 @@ export const ConfiguracaoView = ({ navigate }) => {
                     <Input value={form.footerMsg} onChange={handleChange('footerMsg')} placeholder='Ex: Obrigado pela preferência!' />
                   </Field>
                 </Grid>
-                <SaveBtn type='submit'>{saved ? '✓ Salvo!' : 'Salvar Configurações'}</SaveBtn>
+                                <Grid style={{ marginBottom: 20 }}>
+                                  <Field>
+                                    <Label>Dias para alertas de validade</Label>
+                                    <Input type='number' min='1' value={form.expiryDays || 7} onChange={e => setForm(f => ({ ...f, expiryDays: Number(e.target.value) }))} />
+                                  </Field>
+                                </Grid>
+                                <SaveBtn type='submit'>{saved ? '✓ Salvo!' : 'Salvar Configurações'}</SaveBtn>
               </CardBody>
             </Card>
           </form>

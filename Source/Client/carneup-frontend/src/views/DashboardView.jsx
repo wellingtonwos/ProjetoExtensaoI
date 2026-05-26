@@ -2,6 +2,7 @@ import styled, { keyframes } from 'styled-components'
 import { Sidebar } from '../components/Sidebar'
 import { useState, useEffect, useCallback } from 'react'
 import api from '../services/apiClient'
+import { loadStoreConfig } from './ConfiguracaoView'
 
 // ── Animations ─────────────────────────────────────────────────────────────────
 const fadeUp = keyframes`from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); }`
@@ -301,11 +302,13 @@ export const DashboardView = ({ navigate }) => {
 		const today = `${yyyy}-${mm}-${dd}`
 		setLoading(true)
 
+		const cfg = loadStoreConfig();
+		const expiry = cfg.expiryDays || 7;
 		Promise.all([
 			api.get(`/sales?startDate=${today}&endDate=${today}`).catch(() => ({ data: [] })),
 			api.get('/sales?page=0&size=5').catch(() => ({ data: { content: [] } })),
 			api.get('/clients').catch(() => ({ data: [] })),
-			api.get('/alerts').catch(() => ({ data: { expiryAlerts: [], lowStockAlerts: [] } })),
+			api.get(`/alerts?expiryDays=${expiry}`).catch(() => ({ data: { expiryAlerts: [], lowStockAlerts: [] } })),
 		]).then(([todayResp, recentResp, clientsResp, alertsResp]) => {
 			const todaySales = todayResp.data || []
 			const total = todaySales.reduce((a, s) => a + (s.totalPrice || 0), 0)
