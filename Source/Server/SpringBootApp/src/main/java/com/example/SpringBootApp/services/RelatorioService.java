@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,7 +21,9 @@ public class RelatorioService {
     private final VendaRepository vendaRepository;
 
     public List<VendReportDTO> getSalesReport(LocalDate startDate, LocalDate endDate) {
-        List<Venda> sales = vendaRepository.findByDatavendaBetweenWithMovements(startDate, endDate);
+        java.time.LocalDateTime start = startDate.atStartOfDay();
+        java.time.LocalDateTime end = endDate.plusDays(1).atStartOfDay();
+        List<Venda> sales = vendaRepository.findByDatavendaBetweenWithMovements(start, end);
 
         return sales.stream()
                 .map(this::convertToVendReportDTO)

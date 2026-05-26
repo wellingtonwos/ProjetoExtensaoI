@@ -34,7 +34,7 @@ public class VendaMapperAdditionalTest {
     public void fullMapping_negativeQuantityMapped() {
         Venda v = new Venda();
         v.setId(1L);
-        v.setDataVenda(LocalDate.of(2020,1,1));
+        v.setDataVenda(java.time.LocalDate.of(2020,1,1).atStartOfDay());
         Usuario user = new Usuario();
         user.setId(2L);
         user.setNome("John");

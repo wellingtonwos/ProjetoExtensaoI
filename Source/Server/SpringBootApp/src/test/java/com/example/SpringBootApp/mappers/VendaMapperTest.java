@@ -32,7 +32,7 @@ class VendaMapperTest {
 
         Venda venda = new Venda();
         venda.setId(50L);
-        venda.setDataVenda(LocalDate.of(2026, 5, 3));
+        venda.setDataVenda(java.time.LocalDate.of(2026, 5, 3).atStartOfDay());
         venda.setValorTotal(new BigDecimal("25.50"));
         com.example.SpringBootApp.models.VendaPagamento vp = new com.example.SpringBootApp.models.VendaPagamento();
         vp.setMetodoPagamento(PaymentMethod.PIX);

@@ -3,13 +3,13 @@ package com.example.SpringBootApp.DTOs;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 public class VendaResponseDTO {
     private Long id;
-    private LocalDate dataVenda;
+    private LocalDateTime dataVenda;
     private Long usuarioId;
     private String usuarioNome;
     private Long clienteId;

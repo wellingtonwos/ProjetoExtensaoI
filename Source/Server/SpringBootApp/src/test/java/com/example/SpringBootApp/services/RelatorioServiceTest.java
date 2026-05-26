@@ -47,7 +47,7 @@ class RelatorioServiceTest {
 
         Venda v = new Venda();
         v.setId(1L);
-        v.setDataVenda(LocalDate.of(2024,5,1));
+        v.setDataVenda(java.time.LocalDate.of(2024,5,1).atStartOfDay());
         com.example.SpringBootApp.models.VendaPagamento vp = new com.example.SpringBootApp.models.VendaPagamento();
         vp.setMetodoPagamento(PaymentMethod.DINHEIRO);
         vp.setVenda(v);

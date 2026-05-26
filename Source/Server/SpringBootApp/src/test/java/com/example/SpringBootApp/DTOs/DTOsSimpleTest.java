@@ -71,7 +71,7 @@ class DTOsSimpleTest {
 
         VendaResponseDTO vr = new VendaResponseDTO();
         vr.setId(77L);
-        vr.setDataVenda(LocalDate.of(2023,1,1));
+        vr.setDataVenda(java.time.LocalDate.of(2023,1,1).atStartOfDay());
         vr.setUsuarioId(1L);
         vr.setUsuarioNome("u");
         vr.setClienteId(2L);

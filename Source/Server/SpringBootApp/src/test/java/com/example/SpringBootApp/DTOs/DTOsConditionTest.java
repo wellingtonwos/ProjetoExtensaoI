@@ -105,7 +105,7 @@ class DTOsConditionTest {
     void vendaResponse_and_produtoComCompraDTO_nestedEquals() {
         VendaResponseDTO vr1 = new VendaResponseDTO();
         vr1.setId(2L);
-        vr1.setDataVenda(LocalDate.of(2022,1,1));
+        vr1.setDataVenda(java.time.LocalDate.of(2022,1,1).atStartOfDay());
         vr1.setUsuarioId(3L);
         vr1.setUsuarioNome("U");
         vr1.setClienteId(4L);
@@ -117,7 +117,7 @@ class DTOsConditionTest {
 
         VendaResponseDTO vr2 = new VendaResponseDTO();
         vr2.setId(2L);
-        vr2.setDataVenda(LocalDate.of(2022,1,1));
+        vr2.setDataVenda(java.time.LocalDate.of(2022,1,1).atStartOfDay());
         vr2.setUsuarioId(3L);
         vr2.setUsuarioNome("U");
         vr2.setClienteId(4L);

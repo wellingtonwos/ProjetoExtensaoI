@@ -3,13 +3,13 @@ package com.example.SpringBootApp.DTOs;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 public class VendReportDTO {
     private Long id;
-    private LocalDate saleDate;
+    private LocalDateTime saleDate;
     private String paymentMethod;
     private String salesmanName;
     private BigDecimal totalCost;
