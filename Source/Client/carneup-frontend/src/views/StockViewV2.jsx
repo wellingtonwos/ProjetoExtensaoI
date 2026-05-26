@@ -251,6 +251,7 @@ const mapDto = (p) => ({
 	unit: p.unitMeasurement || '',
 	price: p.precoVenda != null ? Number(p.precoVenda) : null,
 	stock: p.stockQuantity != null ? Number(p.stockQuantity) : 0,
+	minStock: p.minStock != null ? Number(p.minStock) : 5,
 })
 
 // ── Component ──────────────────────────────────────────────────────────────────
@@ -294,7 +295,7 @@ export const StockView = ({ navigate }) => {
 	const [totalItems, setTotalItems] = useState(0)
 
 	// product form state
-	const [form, setForm] = useState({ name: '', code: '', unit: 'KG', perecivel: false, price: '', categoryId: '', brandId: '' })
+	const [form, setForm] = useState({ name: '', code: '', unit: 'KG', perecivel: false, price: '', categoryId: '', brandId: '', minStock: '5' })
 	const [formPriceDisplay, setFormPriceDisplay] = useState('')
 	const [submitting, setSubmitting] = useState(false)
 
@@ -331,6 +332,7 @@ export const StockView = ({ navigate }) => {
 				price: p.precoVenda != null ? String(p.precoVenda) : '',
 				categoryId: p.categoryId != null ? String(p.categoryId) : '',
 				brandId: p.brandId != null ? String(p.brandId) : '',
+				minStock: p.minStock != null ? String(p.minStock) : '5',
 			})
 			setEditPriceDisplay(toBrlDisplay(p.precoVenda))
 			setEditModal(p)
@@ -363,6 +365,7 @@ export const StockView = ({ navigate }) => {
 				precoVenda: editForm.price !== '' ? parseFloat(editForm.price) : 0,
 				categoryId: Number(editForm.categoryId),
 				brandId: Number(editForm.brandId),
+				minStock: editForm.minStock !== undefined && editForm.minStock !== '' ? Number(editForm.minStock) : 5,
 			})
 			toast.success(`Produto "${editForm.name}" atualizado com sucesso!`)
 			setEditModal(null)
@@ -435,7 +438,10 @@ export const StockView = ({ navigate }) => {
 
 	// ── Stats ──────────────────────────────────────────────────────────────────
 
-	const lowStock = allRows.filter(r => r.stock > 0 && r.stock < 5).length
+	const lowStock = allRows.filter(r => {
+		const threshold = r.minStock != null ? Number(r.minStock) : 5
+		return r.stock > 0 && r.stock < threshold
+	}).length
 	const outOfStock = allRows.filter(r => r.stock === 0).length
 
 	// ── Product form ───────────────────────────────────────────────────────────
@@ -468,9 +474,10 @@ export const StockView = ({ navigate }) => {
 				precoVenda: form.price !== '' ? parseFloat(form.price) : 0,
 				categoryId: Number(form.categoryId),
 				brandId: Number(form.brandId),
+				minStock: form.minStock !== undefined && form.minStock !== '' ? Number(form.minStock) : 5,
 			})
 			toast.success(`Produto "${form.name}" cadastrado com sucesso!`)
-			setForm({ name: '', code: '', unit: 'KG', perecivel: false, price: '', categoryId: '', brandId: '' })
+			setForm({ name: '', code: '', unit: 'KG', perecivel: false, price: '', categoryId: '', brandId: '', minStock: '5' })
 			setFormPriceDisplay('')
 			setSearchQuery('')
 			setCurrentPage(1)
@@ -644,7 +651,13 @@ export const StockView = ({ navigate }) => {
 									</Label>
 								</Field>
 							</FormGrid2>
-							<SubmitBtn type='submit' disabled={submitting}>
+							<FormGrid2>
+						<Field>
+							<Label>Estoque Mínimo</Label>
+							<Input type='number' min='0' value={form.minStock} onChange={handleFormChange('minStock')} />
+						</Field>
+					</FormGrid2>
+					<SubmitBtn type='submit' disabled={submitting}>
 								{submitting ? 'Cadastrando...' : 'Cadastrar Produto'}
 							</SubmitBtn>
 						</form>}
@@ -760,6 +773,12 @@ export const StockView = ({ navigate }) => {
 									/>
 									Produto Perecível
 								</MLabel>
+							</MField>
+						</MGrid2>
+						<MGrid2>
+							<MField>
+								<MLabel>Estoque Mínimo</MLabel>
+								<MInput type='number' min='0' value={editForm.minStock} onChange={handleEditChange('minStock')} />
 							</MField>
 						</MGrid2>
 						<ModalActions>
