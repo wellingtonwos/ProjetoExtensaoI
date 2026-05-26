@@ -530,8 +530,10 @@ export const ReportsView = ({ navigate, initialTab }) => {
       data.forEach(p => {
         (p.purchases||[]).forEach(l => {
           if (!l.expiring_date) return
+          const qty = Number(l.quantity || 0)
+          if (qty <= 0) return
           const d = daysUntil(l.expiring_date)
-          if (d <= maxDays) lots.push({ ...l, productName: p.product_name, code: p.code, unit: p.unitMeasurement, daysLeft: d })
+          if (d <= maxDays) lots.push({ ...l, productName: p.product_name, code: p.code, unit: p.unitMeasurement, daysLeft: d, quantity: qty })
         })
       })
       lots.sort((a,b) => a.daysLeft - b.daysLeft)
