@@ -224,8 +224,8 @@ const SaleIcon = styled.div`
 `
 const SaleInfo = styled.div`
 	flex: 1; min-width: 0;
-	p.id { font-weight: 700; font-size: 13px; color: #1c1917; margin: 0; }
-	p.date { font-size: 11px; color: #a8a29e; margin: 1px 0 0; }
+	p.id { font-weight: 700; font-size: 14px; color: #1c1917; margin: 0; }
+	p.date { font-size: 14px; color: #374151; margin: 1px 0 0; }
 `
 const SaleRight = styled.div`
 	text-align: right;
@@ -456,12 +456,20 @@ export const DashboardView = ({ navigate }) => {
 											const brand = a.brandName ? ` (${a.brandName})` : ''
 											const title = `${product}${brand}`
 											const expDate = formatISODate(a.expiringDate)
-											const days = a.daysToExpiry != null ? `${a.daysToExpiry} dia(s)` : ''
+											const daysNum = a.daysToExpiry != null ? Number(a.daysToExpiry) : null
+											let dateColor = '#374151'
+											if (typeof daysNum === 'number' && !isNaN(daysNum)) {
+												if (daysNum <= 0) dateColor = '#ef4444'
+												else if (daysNum <= 3) dateColor = '#f97316'
+												else if (daysNum <= 7) dateColor = '#f59e0b'
+												else dateColor = '#10b981'
+											}
+											const days = daysNum != null ? `${daysNum} dia(s)` : ''
 											return (
 												<SaleRow key={`exp-${idx}`}>
 													<SaleIcon><span className='material-symbols-outlined'>inventory_2</span></SaleIcon>
 													<SaleInfo>
-														<p className='date'><strong>{title}</strong> vence em <strong>{days}</strong> - <strong>{expDate}</strong></p>
+														<p className='date'><strong style={{ fontSize: '14px' }}>{title}</strong> vence em <strong style={{ color: dateColor }}>{days}</strong> - <strong style={{ color: dateColor }}>{expDate}</strong></p>
 													</SaleInfo>
 													<SaleRight>
 														<p className='value'>{a.quantity}</p>
