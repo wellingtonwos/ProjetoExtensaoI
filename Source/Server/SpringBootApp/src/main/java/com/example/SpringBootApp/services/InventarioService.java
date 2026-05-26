@@ -194,7 +194,7 @@ public class InventarioService {
             }
             for (Movimentacao m : group) {
                 if (m.getVenda() != null && m.getVenda().getDataVenda() != null) {
-                    LocalDate saleDate = m.getVenda().getDataVenda();
+                    java.time.LocalDate saleDate = m.getVenda().getDataVenda().toLocalDate();
                     if (newExpiringDate.isBefore(saleDate)) {
                         throw new BusinessException("Cannot set expiration date before existing sale date: " + saleDate);
                     }
