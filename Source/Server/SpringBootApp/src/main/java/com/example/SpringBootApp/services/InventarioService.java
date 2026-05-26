@@ -215,6 +215,60 @@ public class InventarioService {
         return movimentacaoRepository.save(purchaseMov);
     }
 
+    public java.util.Map<String, java.util.List<java.util.Map<String, Object>>> getAlerts(Integer expiryDays) {
+        int days = expiryDays != null ? expiryDays : 7;
+        java.time.LocalDate now = java.time.LocalDate.now();
+        java.time.LocalDate limit = now.plusDays(days);
+
+        java.util.List<java.util.Map<String, Object>> expiryAlerts = new java.util.ArrayList<>();
+        java.util.List<java.util.Map<String, Object>> lowStockAlerts = new java.util.ArrayList<>();
+
+        // Expiry alerts: iterate products with items in stock and use grouped purchases
+        java.util.List<Produto> productsWithItems = ProdutoRepository.findAllWithItems();
+        for (Produto p : productsWithItems) {
+            if (p.getItens() == null || p.getItens().isEmpty()) continue;
+            java.util.List<CompraEmEstoqueDTO> grouped = groupItemsByPurchase(p.getItens());
+            for (CompraEmEstoqueDTO c : grouped) {
+                if (c.getExpiring_date() != null && !c.getExpiring_date().isAfter(limit)) {
+                    long daysToExpiry = java.time.temporal.ChronoUnit.DAYS.between(now, c.getExpiring_date());
+                    java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
+                    map.put("type", "expiry");
+                    map.put("productId", p.getId());
+                    map.put("productName", p.getNome());
+                    map.put("brandName", p.getMarca() != null ? p.getMarca().getNome() : null);
+                    map.put("purchaseId", c.getPurchase_id());
+                    map.put("expiringDate", c.getExpiring_date());
+                    map.put("quantity", c.getQuantity());
+                    map.put("daysToExpiry", daysToExpiry);
+                    expiryAlerts.add(map);
+                }
+            }
+        }
+
+        // Low-stock alerts: iterate all products and compare current stock to estoqueMinimo (default 5)
+        java.util.List<Produto> allProducts = ProdutoRepository.findAll();
+        for (Produto p : allProducts) {
+            Integer minStock = p.getEstoqueMinimo() != null ? p.getEstoqueMinimo() : 5;
+            java.math.BigDecimal total = movimentacaoRepository.sumQuantityByProdutoId(p.getId());
+            if (total == null) total = java.math.BigDecimal.ZERO;
+            if (total.compareTo(java.math.BigDecimal.valueOf(minStock)) < 0) {
+                java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
+                map.put("type", "low_stock");
+                map.put("productId", p.getId());
+                map.put("productName", p.getNome());
+                map.put("brandName", p.getMarca() != null ? p.getMarca().getNome() : null);
+                map.put("currentStock", total);
+                map.put("minStock", minStock);
+                lowStockAlerts.add(map);
+            }
+        }
+
+        java.util.Map<String, java.util.List<java.util.Map<String, Object>>> result = new java.util.LinkedHashMap<>();
+        result.put("expiryAlerts", expiryAlerts);
+        result.put("lowStockAlerts", lowStockAlerts);
+        return result;
+    }
+
     public List<java.util.Map<String, Object>> getDiscards() {
         return decarteRepository.findAll(org.springframework.data.domain.Sort.by(
                 org.springframework.data.domain.Sort.Direction.DESC, "disposalDate")).stream()
