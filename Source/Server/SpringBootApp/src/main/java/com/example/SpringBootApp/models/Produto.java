@@ -34,6 +34,9 @@ public class Produto {
     @Column(name = "preco_venda")
     private BigDecimal precoVenda;
 
+    @Column(name = "estoque_minimo")
+    private Integer estoqueMinimo;
+
     @ManyToOne
     @JoinColumn(name = "fk_categoria_id")
     private Categoria categoria;
