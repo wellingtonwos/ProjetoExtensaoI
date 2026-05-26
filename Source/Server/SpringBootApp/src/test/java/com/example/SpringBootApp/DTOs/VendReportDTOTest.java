@@ -3,7 +3,7 @@ package com.example.SpringBootApp.DTOs;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,7 +23,7 @@ class VendReportDTOTest {
 
         VendReportDTO dto = new VendReportDTO();
         dto.setId(11L);
-        dto.setSaleDate(LocalDate.of(2024,6,1));
+        dto.setSaleDate(java.time.LocalDate.of(2024,6,1).atStartOfDay());
         dto.setPaymentMethod("CASH");
         dto.setSalesmanName("Seller");
         dto.setTotalCost(new BigDecimal("10"));
