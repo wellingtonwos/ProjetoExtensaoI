@@ -236,6 +236,7 @@ public class InventarioService {
                     map.put("productId", p.getId());
                     map.put("productName", p.getNome());
                     map.put("brandName", p.getMarca() != null ? p.getMarca().getNome() : null);
+                    map.put("unitMeasurement", p.getUnidadeMedida() != null ? p.getUnidadeMedida().name() : "KG");
                     map.put("purchaseId", c.getPurchase_id());
                     map.put("expiringDate", c.getExpiring_date());
                     map.put("quantity", c.getQuantity());
@@ -262,6 +263,7 @@ public class InventarioService {
                 map.put("productId", p.getId());
                 map.put("productName", p.getNome());
                 map.put("brandName", p.getMarca() != null ? p.getMarca().getNome() : null);
+                map.put("unitMeasurement", p.getUnidadeMedida() != null ? p.getUnidadeMedida().name() : "KG");
                 map.put("currentStock", total);
                 map.put("minStock", minStock);
                 // Human-friendly title and message

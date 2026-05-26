@@ -277,6 +277,14 @@ const formatISODate = (s) => {
 	return String(s)
 }
 
+const formatQuantity = (value, unit) => {
+	const n = Number(value || 0)
+	if (unit === 'KG') {
+		return `${new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 3, maximumFractionDigits: 3 }).format(n)} kg`
+	}
+	return `${new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 }).format(n)} un`
+}
+
 const ACTIONS = [
 	{ icon: 'point_of_sale', label: 'Nova Venda', desc: 'Iniciar atendimento', view: 'sales', primary: true },
 	{ icon: 'add_shopping_cart', label: 'Entrada', desc: 'Registrar compra', view: 'purchases', primary: false },
@@ -469,11 +477,8 @@ export const DashboardView = ({ navigate }) => {
 												<SaleRow key={`exp-${idx}`}>
 													<SaleIcon><span className='material-symbols-outlined'>inventory_2</span></SaleIcon>
 													<SaleInfo>
-														<p className='date'><strong style={{ fontSize: '14px' }}>{title}</strong> vence em <strong style={{ color: dateColor }}>{days}</strong> - <strong style={{ color: dateColor }}>{expDate}</strong></p>
+														<p className='date'><strong style={{ fontSize: '14px' }}>{title}</strong> vence em <strong style={{ color: dateColor }}>{days}</strong> - <strong style={{ color: dateColor }}>{expDate}</strong>{a.quantity != null ? <> · Quantidade: <strong>{formatQuantity(a.quantity, a.unitMeasurement || 'KG')}</strong></> : null}</p>
 													</SaleInfo>
-													<SaleRight>
-														<p className='value'>{a.quantity}</p>
-													</SaleRight>
 												</SaleRow>
 											)
 										})}
@@ -493,11 +498,8 @@ export const DashboardView = ({ navigate }) => {
 												<SaleRow key={`low-${idx}`}>
 													<SaleIcon><span className='material-symbols-outlined'>warning</span></SaleIcon>
 													<SaleInfo>
-														<p className='date'><strong>{title}</strong> — Estoque atual: <strong>{current}</strong> · Mínimo: <strong>{min}</strong></p>
+														<p className='date'><strong>{title}</strong> — Estoque atual: <strong>{formatQuantity(a.currentStock, a.unitMeasurement || 'KG')}</strong> · Mínimo: <strong>{formatQuantity(a.minStock, a.unitMeasurement || 'KG')}</strong></p>
 													</SaleInfo>
-													<SaleRight>
-														<p className='value'>{min}</p>
-													</SaleRight>
 												</SaleRow>
 											)
 										})}
