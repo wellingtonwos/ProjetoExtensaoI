@@ -374,10 +374,10 @@ export const DashboardView = ({ navigate }) => {
 						{/* Birthdays Panel */}
 						<div>
 							<SectionLabel>Aniversariantes de Hoje</SectionLabel>
-							<SalesCard>
+							<SalesCard style={{height: '360px', overflowY: 'auto'}}>
 								<SalesHeader>
 									<h3>Aniversários</h3>
-									{isAdmin && <button onClick={() => navigate('clients')}>Ver clientes →</button>}
+									{isAdmin && <button onClick={() => navigate('reports', { tab: 'clientes' })}>Ver clientes →</button>}
 								</SalesHeader>
 
 								{loading && (
@@ -410,7 +410,7 @@ export const DashboardView = ({ navigate }) => {
 						{/* Alerts Panel */}
 						<div>
 							<SectionLabel>Alertas</SectionLabel>
-							<SalesCard>
+							<SalesCard style={{height: '360px', overflowY: 'auto'}}>
 								<SalesHeader>
 									<h3>Alertas</h3>
 								</SalesHeader>

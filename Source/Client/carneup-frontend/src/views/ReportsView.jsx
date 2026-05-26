@@ -246,8 +246,9 @@ const HRow = styled.div`
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
-export const ReportsView = ({ navigate }) => {
-  const [activeTab, setActiveTab] = useState('vendas')
+export const ReportsView = ({ navigate, initialTab }) => {
+  const [activeTab, setActiveTab] = useState(initialTab || 'vendas')
+  useEffect(() => { if (initialTab) setActiveTab(initialTab) }, [initialTab])
   const [tablePage, setTablePage] = useState(1)
   const PAGE_SIZE = 10
 
