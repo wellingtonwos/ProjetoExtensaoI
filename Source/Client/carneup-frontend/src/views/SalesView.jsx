@@ -666,7 +666,6 @@ export const SalesView = ({ navigate }) => {
         paymentMethod: payment, // legacy field kept for compatibility
         payments: paymentsPayload,
         hasDiscount,
-        saleDate: new Date().toISOString().slice(0, 10),
         clienteId: (!anonymous && selectedClient) ? selectedClient.id : null,
         items: cart.map(it => ({ productId: it.productId, quantity: it.qty, precoUnitarioVenda: it.price })),
       }
