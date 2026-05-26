@@ -456,17 +456,12 @@ export const DashboardView = ({ navigate }) => {
 											const brand = a.brandName ? ` (${a.brandName})` : ''
 											const title = `${product}${brand}`
 											const expDate = formatISODate(a.expiringDate)
-											const daysTxt = a.daysToExpiry != null ? `${a.daysToExpiry} dia(s)` : ''
-											const qtyTxt = a.quantity != null ? String(a.quantity) : ''
-											const purchaseId = a.purchaseId ?? a.purchase_id ?? ''
+											const days = a.daysToExpiry != null ? `${a.daysToExpiry} dia(s)` : ''
 											return (
 												<SaleRow key={`exp-${idx}`}>
 													<SaleIcon><span className='material-symbols-outlined'>inventory_2</span></SaleIcon>
 													<SaleInfo>
-														<p className='id'>{title}</p>
-														<p className='date'>
-															Lote <strong>{purchaseId}</strong> vence em <strong>{daysTxt}</strong>{expDate ? <> — <strong>{expDate}</strong></> : null}{qtyTxt ? <> · Quantidade: <strong>{qtyTxt}</strong></> : null}
-														</p>
+														<p className='date'><strong>{title}</strong> vence em <strong>{days}</strong> - <strong>{expDate}</strong></p>
 													</SaleInfo>
 													<SaleRight>
 														<p className='value'>{a.quantity}</p>
@@ -490,8 +485,7 @@ export const DashboardView = ({ navigate }) => {
 												<SaleRow key={`low-${idx}`}>
 													<SaleIcon><span className='material-symbols-outlined'>warning</span></SaleIcon>
 													<SaleInfo>
-														<p className='id'>{title}</p>
-														<p className='date'>Estoque atual: <strong>{current}</strong> · Mínimo definido: <strong>{min}</strong></p>
+														<p className='date'><strong>{title}</strong> — Estoque atual: <strong>{current}</strong> · Mínimo: <strong>{min}</strong></p>
 													</SaleInfo>
 													<SaleRight>
 														<p className='value'>{min}</p>
