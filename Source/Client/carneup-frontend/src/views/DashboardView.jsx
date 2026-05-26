@@ -293,7 +293,11 @@ export const DashboardView = ({ navigate }) => {
 
 	// Data
 	const loadData = useCallback(() => {
-		const today = new Date().toISOString().slice(0, 10)
+		const nowLocal = new Date();
+		const yyyy = nowLocal.getFullYear();
+		const mm = String(nowLocal.getMonth() + 1).padStart(2, '0');
+		const dd = String(nowLocal.getDate()).padStart(2, '0');
+		const today = `${yyyy}-${mm}-${dd}`
 		setLoading(true)
 
 		Promise.all([
