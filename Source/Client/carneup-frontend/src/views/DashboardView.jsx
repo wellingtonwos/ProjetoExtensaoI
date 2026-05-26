@@ -281,6 +281,7 @@ export const DashboardView = ({ navigate }) => {
 	const [recentSales, setRecentSales] = useState([])
 	const [loading, setLoading] = useState(true)
 	const [hidden, setHidden] = useState(true)   // valores ocultos por padrão
+	const [birthdayClients, setBirthdayClients] = useState([])
 
 	const val = (formatted) => hidden ? MASK : formatted
 
@@ -298,13 +299,25 @@ export const DashboardView = ({ navigate }) => {
 		Promise.all([
 			api.get(`/sales?startDate=${today}&endDate=${today}`).catch(() => ({ data: [] })),
 			api.get('/sales?page=0&size=5').catch(() => ({ data: { content: [] } })),
-		]).then(([todayResp, recentResp]) => {
+			api.get('/clients').catch(() => ({ data: [] })),
+		]).then(([todayResp, recentResp, clientsResp]) => {
 			const todaySales = todayResp.data || []
 			const total = todaySales.reduce((a, s) => a + (s.totalPrice || 0), 0)
 			setTodayTotal(total)
 			setTodayCount(todaySales.length)
 			setAvgTicket(todaySales.length > 0 ? total / todaySales.length : 0)
 			setRecentSales(recentResp.data?.content || [])
+
+			const clients = clientsResp.data || []
+			const todayMD = today.slice(5)
+			const bdays = (clients || []).filter(c => {
+				const ann = String(c.aniversario || c.aniversario_date || c.birthday || '')
+				if (!ann) return false
+				const md = ann.slice(-5)
+				const optedIn = Boolean(c.receberPromocoes || c.receber_promocoes || c.receber_promocao || c.receivePromocao)
+				return md === todayMD && optedIn
+			})
+			setBirthdayClients(bdays)
 		}).finally(() => setLoading(false))
 	}, [])
 
@@ -325,53 +338,8 @@ export const DashboardView = ({ navigate }) => {
 							<h1>🥩 CarneUp</h1>
 							<p>Painel Operacional · {userName}</p>
 						</Brand>
-						<div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-							<button
-								onClick={() => setHidden(h => !h)}
-								title={hidden ? 'Exibir valores' : 'Ocultar valores'}
-								style={{
-									background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
-									borderRadius: 8, padding: '6px 10px', cursor: 'pointer',
-									display: 'flex', alignItems: 'center', gap: 6,
-									color: 'rgba(255,255,255,0.7)', fontSize: 11, fontWeight: 700,
-									textTransform: 'uppercase', letterSpacing: '0.08em',
-								}}
-							>
-								<span className='material-symbols-outlined' style={{ fontSize: 16 }}>
-									{hidden ? 'visibility' : 'visibility_off'}
-								</span>
-								{hidden ? 'Exibir' : 'Ocultar'}
-							</button>
-							<Clock>
-								<p className='time'>{timeStr}</p>
-								<p className='date'>{dateStr}</p>
-							</Clock>
-						</div>
 					</HeroTop>
 
-					<MetricsRow>
-						<Metric>
-							<p className='label'>Faturamento Hoje</p>
-							<p className='value' style={hidden ? { letterSpacing: 3 } : {}}>
-								{loading ? '—' : val(fmt(todayTotal))}
-							</p>
-							<p className='sub'>{val(`${todayCount} venda${todayCount !== 1 ? 's' : ''} realizadas`)}</p>
-						</Metric>
-						<Metric>
-							<p className='label'>Qtd. de Vendas</p>
-							<p className='value' style={hidden ? { letterSpacing: 3 } : {}}>
-								{loading ? '—' : val(String(todayCount))}
-							</p>
-							<p className='sub'>no dia de hoje</p>
-						</Metric>
-						<Metric>
-							<p className='label'>Ticket Médio</p>
-							<p className='value' style={hidden ? { letterSpacing: 3 } : {}}>
-								{loading ? '—' : val(fmt(avgTicket))}
-							</p>
-							<p className='sub'>por atendimento</p>
-						</Metric>
-					</MetricsRow>
 				</Hero>
 
 				<Content>
@@ -395,40 +363,58 @@ export const DashboardView = ({ navigate }) => {
 						</ActionsGrid>
 					</div>
 
-					{/* ── Últimas Vendas ── */}
-					<div>
-						<SectionLabel>Últimas Vendas</SectionLabel>
-						<SalesCard>
-							<SalesHeader>
-								<h3>Transações Recentes</h3>
-								{isAdmin && <button onClick={() => navigate('reports')}>Ver relatório completo →</button>}
-							</SalesHeader>
+					<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+						{/* Birthdays Panel */}
+						<div>
+							<SectionLabel>Aniversariantes de Hoje</SectionLabel>
+							<SalesCard>
+								<SalesHeader>
+									<h3>Aniversários</h3>
+									{isAdmin && <button onClick={() => navigate('clients')}>Ver clientes →</button>}
+								</SalesHeader>
 
-							{loading && (
-								<EmptyMsg><span className='material-symbols-outlined'>hourglass_empty</span>Carregando...</EmptyMsg>
-							)}
-							{!loading && recentSales.length === 0 && (
-								<EmptyMsg>
-									<span className='material-symbols-outlined'>receipt_long</span>
-									Nenhuma venda registrada ainda.
-								</EmptyMsg>
-							)}
-							{recentSales.map(s => (
-								<SaleRow key={s.id}>
-									<SaleIcon><span className='material-symbols-outlined'>receipt_long</span></SaleIcon>
-									<SaleInfo>
-										<p className='id'>Venda #{s.id}</p>
-										<p className='date'>{s.saleDate || s.date || '—'}</p>
-									</SaleInfo>
-									<SaleRight>
-										<p className='value' style={hidden ? { letterSpacing: 3 } : {}}>
-											{val(fmt(s.totalValue || s.totalPrice))}
-										</p>
-										<PayBadge $m={s.paymentMethod}>{s.paymentMethod}</PayBadge>
-									</SaleRight>
-								</SaleRow>
-							))}
-						</SalesCard>
+								{loading && (
+									<EmptyMsg><span className='material-symbols-outlined'>hourglass_empty</span>Carregando...</EmptyMsg>
+								)}
+
+								{!loading && birthdayClients.length === 0 && (
+									<EmptyMsg>
+										<span className='material-symbols-outlined'>cake</span>
+										Nenhum aniversariante com promoções hoje.
+									</EmptyMsg>
+								)}
+
+								{birthdayClients.map(c => (
+									<SaleRow key={c.id}>
+										<SaleIcon><span className='material-symbols-outlined'>cake</span></SaleIcon>
+										<SaleInfo>
+											<p className='id'>{c.nickname || c.name || '—'}</p>
+											<p className='date'>{c.telefone || '—'}</p>
+										</SaleInfo>
+										<SaleRight>
+											<p className='value'>{c.aniversario ? String(c.aniversario).slice(-5).split('-').reverse().join('/') : '—'}</p>
+										</SaleRight>
+									</SaleRow>
+								))}
+
+							</SalesCard>
+						</div>
+
+						{/* Alerts Panel */}
+						<div>
+							<SectionLabel>Alertas</SectionLabel>
+							<SalesCard>
+								<SalesHeader>
+									<h3>Alertas</h3>
+								</SalesHeader>
+								<div style={{ padding: 16 }}>
+									<EmptyMsg>
+										<span className='material-symbols-outlined'>campaign</span>
+										Sem alertas por enquanto.
+									</EmptyMsg>
+								</div>
+							</SalesCard>
+						</div>
 					</div>
 				</Content>
 
