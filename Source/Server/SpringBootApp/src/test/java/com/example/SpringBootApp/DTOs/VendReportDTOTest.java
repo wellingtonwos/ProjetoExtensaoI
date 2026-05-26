@@ -32,7 +32,7 @@ class VendReportDTOTest {
         dto.setItems(List.of(item));
 
         assertEquals(Long.valueOf(11L), dto.getId());
-        assertEquals(LocalDate.of(2024,6,1), dto.getSaleDate());
+        assertEquals(java.time.LocalDate.of(2024,6,1).atStartOfDay(), dto.getSaleDate());
         assertEquals("Seller", dto.getSalesmanName());
         assertEquals(1, dto.getItems().size());
     }
