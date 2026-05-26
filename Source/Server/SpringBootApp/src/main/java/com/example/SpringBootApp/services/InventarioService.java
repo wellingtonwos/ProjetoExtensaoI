@@ -133,6 +133,11 @@ public class InventarioService {
                                     .map(Movimentacao::getQuantidade)
                                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+                    // Exclude fully-sold lots (net quantity <= 0)
+                    if (totalQuantity.compareTo(BigDecimal.ZERO) <= 0) {
+                        return null;
+                    }
+
                     CompraEmEstoqueDTO dto = new CompraEmEstoqueDTO();
                     dto.setPurchase_id(purchaseId);
                     dto.setPurchase_date(purchaseDate);
@@ -142,6 +147,7 @@ public class InventarioService {
 
                     return dto;
                 })
+                .filter(Objects::nonNull)
                 .toList();
     }
 
