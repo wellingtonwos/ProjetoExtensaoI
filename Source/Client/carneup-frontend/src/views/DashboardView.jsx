@@ -318,7 +318,10 @@ export const DashboardView = ({ navigate }) => {
 				const ann = String(c.aniversario || c.aniversario_date || c.birthday || '')
 				if (!ann) return false
 				const md = ann.slice(-5)
-				const optedIn = Boolean(c.receberPromocoes || c.receber_promocoes || c.receber_promocao || c.receivePromocao)
+				const optedIn = Boolean(
+					c.receberPromocoes || c.receber_promocoes || c.receber_promocao || c.receivePromocao ||
+					(Array.isArray(c.permissoes) && c.permissoes.includes("RECEBER_PROMOCOES"))
+				)
 				return md === todayMD && optedIn
 			})
 			setBirthdayClients(bdays)
