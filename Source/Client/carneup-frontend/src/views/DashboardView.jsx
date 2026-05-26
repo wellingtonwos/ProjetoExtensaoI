@@ -265,6 +265,18 @@ const MASK = '••••••'
 const DAYS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
 const MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
 
+const formatISODate = (s) => {
+	if (!s) return null
+	if (typeof s === 'string') {
+		const iso = s.slice(0,10)
+		const parts = iso.split('-')
+		if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`
+		return s
+	}
+	if (s instanceof Date) return s.toLocaleDateString('pt-BR')
+	return String(s)
+}
+
 const ACTIONS = [
 	{ icon: 'point_of_sale', label: 'Nova Venda', desc: 'Iniciar atendimento', view: 'sales', primary: true },
 	{ icon: 'add_shopping_cart', label: 'Entrada', desc: 'Registrar compra', view: 'purchases', primary: false },
@@ -439,36 +451,54 @@ export const DashboardView = ({ navigate }) => {
 								{!loading && (alerts.expiryAlerts?.length > 0) && (
 									<div>
 										<SectionLabel style={{ padding: '12px 16px 0' }}>Vencimentos Próximos</SectionLabel>
-										{alerts.expiryAlerts.map((a, idx) => (
-											<SaleRow key={`exp-${idx}`}>
-												<SaleIcon><span className='material-symbols-outlined'>inventory_2</span></SaleIcon>
-												<SaleInfo>
-													<p className='id'>{a.title || a.productName}</p>
-													<p className='date'>{a.message || `Vence em ${a.daysToExpiry} dia(s) — ${a.expiringDate}`}</p>
-												</SaleInfo>
-												<SaleRight>
-													<p className='value'>{a.quantity}</p>
-												</SaleRight>
-											</SaleRow>
-										))}
+										{alerts.expiryAlerts.map((a, idx) => {
+											const product = a.productName || ''
+											const brand = a.brandName ? ` (${a.brandName})` : ''
+											const title = `${product}${brand}`
+											const expDate = formatISODate(a.expiringDate)
+											const daysTxt = a.daysToExpiry != null ? `${a.daysToExpiry} dia(s)` : ''
+											const qtyTxt = a.quantity != null ? String(a.quantity) : ''
+											const purchaseId = a.purchaseId ?? a.purchase_id ?? ''
+											return (
+												<SaleRow key={`exp-${idx}`}>
+													<SaleIcon><span className='material-symbols-outlined'>inventory_2</span></SaleIcon>
+													<SaleInfo>
+														<p className='id'>{title}</p>
+														<p className='date'>
+															Lote <strong>{purchaseId}</strong> vence em <strong>{daysTxt}</strong>{expDate ? <> — <strong>{expDate}</strong></> : null}{qtyTxt ? <> · Quantidade: <strong>{qtyTxt}</strong></> : null}
+														</p>
+													</SaleInfo>
+													<SaleRight>
+														<p className='value'>{a.quantity}</p>
+													</SaleRight>
+												</SaleRow>
+											)
+										})}
 									</div>
 								)}
 
 								{!loading && (alerts.lowStockAlerts?.length > 0) && (
 									<div>
 										<SectionLabel style={{ padding: '12px 16px 0' }}>Estoque Baixo</SectionLabel>
-										{alerts.lowStockAlerts.map((a, idx) => (
-											<SaleRow key={`low-${idx}`}>
-												<SaleIcon><span className='material-symbols-outlined'>warning</span></SaleIcon>
-												<SaleInfo>
-													<p className='id'>{a.title || a.productName}</p>
-													<p className='date'>{a.message || `Estoque atual: ${a.currentStock} — Min: ${a.minStock}`}</p>
-												</SaleInfo>
-												<SaleRight>
-													<p className='value'>{a.minStock}</p>
-												</SaleRight>
-											</SaleRow>
-										))}
+										{alerts.lowStockAlerts.map((a, idx) => {
+											const product = a.productName || ''
+											const brand = a.brandName ? ` (${a.brandName})` : ''
+											const title = `${product}${brand}`
+											const current = a.currentStock != null ? String(a.currentStock) : '0'
+											const min = a.minStock != null ? String(a.minStock) : '0'
+											return (
+												<SaleRow key={`low-${idx}`}>
+													<SaleIcon><span className='material-symbols-outlined'>warning</span></SaleIcon>
+													<SaleInfo>
+														<p className='id'>{title}</p>
+														<p className='date'>Estoque atual: <strong>{current}</strong> · Mínimo definido: <strong>{min}</strong></p>
+													</SaleInfo>
+													<SaleRight>
+														<p className='value'>{min}</p>
+													</SaleRight>
+												</SaleRow>
+											)
+										})}
 									</div>
 								)}
 
