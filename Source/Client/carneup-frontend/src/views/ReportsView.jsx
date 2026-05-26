@@ -151,6 +151,24 @@ const daysUntil = dateStr => {
 
 const PAY_COLORS = { PIX:{c:'#f0fdf4',t:'#15803d'}, DINHEIRO:{c:'#fffbeb',t:'#b45309'}, CREDITO:{c:'#eff6ff',t:'#1d4ed8'}, DEBITO:{c:'#faf5ff',t:'#7c3aed'} }
 
+const PAY_LABELS = { PIX:'PIX', DINHEIRO:'Dinheiro', CREDITO:'Crédito', DEBITO:'Débito' }
+const PAYMENT_ORDER = ['PIX','DINHEIRO','CREDITO','DEBITO']
+
+const normalizePaymentKeyFromSale = (s) => {
+  if (s?.payments && s.payments.length > 0) {
+    const methods = Array.from(new Set(s.payments.map(p => String(p.paymentMethod || '').trim().toUpperCase()).filter(Boolean)))
+    methods.sort((a,b) => {
+      const ia = PAYMENT_ORDER.indexOf(a), ib = PAYMENT_ORDER.indexOf(b)
+      if (ia === -1 && ib === -1) return a.localeCompare(b)
+      if (ia === -1) return 1
+      if (ib === -1) return -1
+      return ia - ib
+    })
+    return methods.join(' + ')
+  }
+  return String(s.paymentMethod || '').trim().toUpperCase()
+}
+
 const TABS = [
   { id:'vendas',   label:'Vendas',          icon:'point_of_sale' },
   { id:'estoque',  label:'Estoque Atual',   icon:'inventory_2' },
@@ -395,7 +413,11 @@ export const ReportsView = ({ navigate }) => {
       const margin  = revenue > 0 ? (profit/revenue)*100 : 0
       const avg     = sales.length > 0 ? revenue/sales.length : 0
 
-      const byPayment = sales.reduce((acc,s) => { acc[s.paymentMethod]=(acc[s.paymentMethod]||0)+1; return acc }, {})
+      const byPayment = sales.reduce((acc, s) => {
+          const key = normalizePaymentKeyFromSale(s)
+          acc[key] = (acc[key] || 0) + 1
+          return acc
+        }, {})
 
       return (
         <>
@@ -409,13 +431,13 @@ export const ReportsView = ({ navigate }) => {
           {Object.keys(byPayment).length > 0 && (
             <SumGrid>
               {Object.entries(byPayment).map(([m,c]) => {
-                const parts = String(m).split(/\s*\+\s*/)
+                const parts = String(m).split(/\s*\+\s*/).map(p => p.trim()).filter(Boolean)
                 return (
                   <SumCard key={m} $c='#e7e5e4'>
                     <p className='lbl'>Pagamento</p>
                     <p className='val' style={{ fontSize:16 }}>
                       {parts.map((t, idx) => (
-                        <span key={idx} style={{ display: 'inline-block', whiteSpace: 'nowrap', marginRight: 8 }}>{t}{idx < parts.length - 1 && <span style={{ marginLeft: 6, marginRight: 6 }}>+</span>}</span>
+                        <span key={idx} style={{ display: 'inline-block', whiteSpace: 'nowrap', marginRight: 8 }}>{PAY_LABELS[t] || t}{idx < parts.length - 1 && <span style={{ marginLeft: 6, marginRight: 6 }}>+</span>}</span>
                       ))}
                     </p>
                     <p className='sub'>{c} venda{c!==1?'s':''} · {pct((c/sales.length)*100)}</p>
