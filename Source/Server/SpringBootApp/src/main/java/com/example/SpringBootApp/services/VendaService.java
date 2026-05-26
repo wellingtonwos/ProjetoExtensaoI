@@ -46,7 +46,8 @@ public class VendaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario not found"));
 
         Venda venda = new Venda();
-        venda.setDataVenda(saleDTO.getSaleDate() != null ? saleDTO.getSaleDate().atStartOfDay() : java.time.LocalDateTime.now());
+        // Always use server time for the sale timestamp to avoid relying on client-provided date-only values
+        venda.setDataVenda(java.time.LocalDateTime.now());
         venda.setTemDesconto(saleDTO.getHasDiscount());
         venda.setUsuario(usuario);
         
