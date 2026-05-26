@@ -240,6 +240,11 @@ public class InventarioService {
                     map.put("expiringDate", c.getExpiring_date());
                     map.put("quantity", c.getQuantity());
                     map.put("daysToExpiry", daysToExpiry);
+                    // Human-friendly title and message
+                    String title = p.getNome() + (p.getMarca() != null && p.getMarca().getNome() != null ? " (" + p.getMarca().getNome() + ")" : "");
+                    map.put("title", title);
+                    String expDateStr = c.getExpiring_date() != null ? c.getExpiring_date().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) : null;
+                    map.put("message", "Lote " + c.getPurchase_id() + " vence em " + daysToExpiry + " dia(s) — " + expDateStr);
                     expiryAlerts.add(map);
                 }
             }
@@ -259,6 +264,10 @@ public class InventarioService {
                 map.put("brandName", p.getMarca() != null ? p.getMarca().getNome() : null);
                 map.put("currentStock", total);
                 map.put("minStock", minStock);
+                // Human-friendly title and message
+                String title = p.getNome() + (p.getMarca() != null && p.getMarca().getNome() != null ? " (" + p.getMarca().getNome() + ")" : "");
+                map.put("title", title);
+                map.put("message", "Estoque atual: " + total + " — Mínimo definido: " + minStock);
                 lowStockAlerts.add(map);
             }
         }

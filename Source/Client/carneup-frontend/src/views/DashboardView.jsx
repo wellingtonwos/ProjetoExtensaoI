@@ -443,8 +443,8 @@ export const DashboardView = ({ navigate }) => {
 											<SaleRow key={`exp-${idx}`}>
 												<SaleIcon><span className='material-symbols-outlined'>inventory_2</span></SaleIcon>
 												<SaleInfo>
-													<p className='id'>{a.productName}</p>
-													<p className='date'>Vence em {a.daysToExpiry} dia(s) — {a.expiringDate}</p>
+													<p className='id'>{a.title || a.productName}</p>
+													<p className='date'>{a.message || `Vence em ${a.daysToExpiry} dia(s) — ${a.expiringDate}`}</p>
 												</SaleInfo>
 												<SaleRight>
 													<p className='value'>{a.quantity}</p>
@@ -461,11 +461,11 @@ export const DashboardView = ({ navigate }) => {
 											<SaleRow key={`low-${idx}`}>
 												<SaleIcon><span className='material-symbols-outlined'>warning</span></SaleIcon>
 												<SaleInfo>
-													<p className='id'>{a.productName}</p>
-													<p className='date'>Estoque atual: {a.currentStock}</p>
+													<p className='id'>{a.title || a.productName}</p>
+													<p className='date'>{a.message || `Estoque atual: ${a.currentStock} — Min: ${a.minStock}`}</p>
 												</SaleInfo>
 												<SaleRight>
-													<p className='value'>Min: {a.minStock}</p>
+													<p className='value'>{a.minStock}</p>
 												</SaleRight>
 											</SaleRow>
 										))}
