@@ -255,6 +255,8 @@ export const ReportsView = ({ navigate, initialTab }) => {
   // Filters
   const [startDate, setStartDate] = useState(firstOfMonth())
   const [endDate,   setEndDate]   = useState(today())
+  const [startTime, setStartTime] = useState('')
+  const [endTime, setEndTime] = useState('')
   const [expiryDays, setExpiryDays] = useState('30')
 
   // Data
@@ -328,8 +330,14 @@ export const ReportsView = ({ navigate, initialTab }) => {
   }
   const openHistory = async (c) => {
     setHistoryClient(c); setHistoryLoading(true); setHistoryData([])
-    try { setHistoryData(await getClientSales(c.id)) }
-    catch { toast.error('Erro ao carregar histórico.') }
+    try {
+      const raw = await getClientSales(c.id)
+      const processed = (raw || []).map(s => {
+        const dt = parseSaleDate(s)
+        return { ...s, saleDateObj: dt, saleDateDisplay: formatDateTime(dt) }
+      })
+      setHistoryData(processed)
+    } catch { toast.error('Erro ao carregar histórico.') }
     finally { setHistoryLoading(false) }
   }
 
@@ -341,6 +349,42 @@ export const ReportsView = ({ navigate, initialTab }) => {
       .then(setClients)
       .catch(() => toast.error('Erro ao carregar clientes.'))
       .finally(() => setClientsLoading(false))
+  }
+
+  const parseSaleDate = (s) => {
+    const raw = s?.saleDate ?? s?.dataVenda ?? s?.data_venda ?? s?.sale_date ?? null
+    if (!raw) return null
+    const d = new Date(raw)
+    return isNaN(d.getTime()) ? null : d
+  }
+
+  const pad2 = (n) => String(n).padStart(2, '0')
+
+  const formatDateTime = (d) => {
+    if (!d) return '—'
+    return `${pad2(d.getDate())}/${pad2(d.getMonth()+1)}/${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`
+  }
+
+  const timeToMinutes = (t) => {
+    if (!t) return null
+    const parts = String(t).split(':')
+    if (parts.length < 2) return null
+    return Number(parts[0]) * 60 + Number(parts[1])
+  }
+
+  const isWithinTimeRange = (dateObj, startTime, endTime) => {
+    if (!dateObj) return true
+    if (!startTime && !endTime) return true
+    const mins = dateObj.getHours() * 60 + dateObj.getMinutes()
+    const s = timeToMinutes(startTime)
+    const e = timeToMinutes(endTime)
+    if (s != null && e != null) {
+      if (s <= e) return mins >= s && mins <= e
+      return mins >= s || mins <= e
+    }
+    if (s != null) return mins >= s
+    if (e != null) return mins <= e
+    return true
   }
 
   const renderFilters = () => {
@@ -386,6 +430,14 @@ export const ReportsView = ({ navigate, initialTab }) => {
           <FLabel>Data Final</FLabel>
           <FInput type='date' value={endDate} onChange={e => setEndDate(e.target.value)} />
         </FField>
+        <FField>
+          <FLabel>Hora Inicial</FLabel>
+          <FInput type='time' value={startTime} onChange={e => setStartTime(e.target.value)} />
+        </FField>
+        <FField>
+          <FLabel>Hora Final</FLabel>
+          <FInput type='time' value={endTime} onChange={e => setEndTime(e.target.value)} />
+        </FField>
         <GenBtn onClick={load} disabled={loading}>{loading ? 'Carregando...' : 'Gerar Relatório'}</GenBtn>
       </FilterBar>
     )
@@ -407,7 +459,11 @@ export const ReportsView = ({ navigate, initialTab }) => {
 
     // ── VENDAS ──────────────────────────────────────────────────────────────────
     if (activeTab === 'vendas') {
-      const sales = data
+      const salesRaw = data || []
+      const sales = salesRaw.map(s => {
+        const dt = parseSaleDate(s)
+        return { ...s, saleDateObj: dt, saleDateDisplay: formatDateTime(dt) }
+      }).filter(s => isWithinTimeRange(s.saleDateObj, startTime, endTime))
       const revenue = sales.reduce((a,s) => a + ((s.totalPrice||0) + (s.surchargeTotal||0)), 0)
       const cost    = sales.reduce((a,s) => a+(s.totalCost||0), 0)
       const profit  = revenue - cost
@@ -462,7 +518,7 @@ export const ReportsView = ({ navigate, initialTab }) => {
                 const m=r>0?((r-c)/r*100):0
                             return (<tr key={s.id}>
                               <td style={{color:'var(--muted)'}}>#{s.id}</td>
-                              <td>{s.saleDate}</td>
+                              <td>{s.saleDateDisplay}</td>
                               <td>{s.salesmanName||'—'}</td>
                               <td>
                                 {s.payments && s.payments.length > 0 ? (
@@ -827,7 +883,7 @@ export const ReportsView = ({ navigate, initialTab }) => {
                   <div className='top'>
                     <div>
                       <span className='id'>Venda #{s.id}</span>
-                      <span className='date' style={{marginLeft:10}}>📅 {s.dataVenda}</span>
+                      <span className='date' style={{marginLeft:10}}>📅 {s.saleDateDisplay || s.dataVenda || s.saleDate}</span>
                     </div>
                     <span className='total'>{fmt(s.totalValue)}</span>
                   </div>
