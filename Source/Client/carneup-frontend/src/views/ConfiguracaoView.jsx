@@ -152,6 +152,60 @@ export const ConfiguracaoView = ({ navigate }) => {
     center(form.footerMsg),
   ].filter(Boolean).join('\n')
 
+  // Finance configurations state
+  const [financeConfig, setFinanceConfig] = useState({ lucroEsperado: '20.00', taxaDebito: '2.50', taxaCredito: '3.50' })
+  const [financeLoading, setFinanceLoading] = useState(false)
+  const [savingFinance, setSavingFinance] = useState(false)
+  const [financeCreatedAt, setFinanceCreatedAt] = useState(null)
+  const [financeConfirmOpen, setFinanceConfirmOpen] = useState(false)
+
+  useEffect(() => {
+    let mounted = true
+    setFinanceLoading(true)
+    api.get('/configuracoes/latest').then(r => {
+      if (!mounted) return
+      const d = r.data
+      if (d) {
+        setFinanceConfig({
+          lucroEsperado: d.lucroEsperado != null ? String(d.lucroEsperado) : '',
+          taxaDebito: d.taxaDebito != null ? String(d.taxaDebito) : '',
+          taxaCredito: d.taxaCredito != null ? String(d.taxaCredito) : ''
+        })
+        setFinanceCreatedAt(d.createdAt || d.criadoEm || d.created_at || null)
+      }
+    }).catch(() => {
+      // ignore
+    }).finally(() => { if (mounted) setFinanceLoading(false) })
+    return () => { mounted = false }
+  }, [])
+
+  const saveFinance = async (e) => {
+    e?.preventDefault()
+    setSavingFinance(true)
+    try {
+      await api.post('/configuracoes', {
+        lucroEsperado: financeConfig.lucroEsperado === '' ? null : Number(financeConfig.lucroEsperado),
+        taxaDebito: financeConfig.taxaDebito === '' ? null : Number(financeConfig.taxaDebito),
+        taxaCredito: financeConfig.taxaCredito === '' ? null : Number(financeConfig.taxaCredito),
+      })
+      const latest = await api.get('/configuracoes/latest').then(r => r.data).catch(() => null)
+      if (latest) {
+        setFinanceConfig({
+          lucroEsperado: latest.lucroEsperado != null ? String(latest.lucroEsperado) : '',
+          taxaDebito: latest.taxaDebito != null ? String(latest.taxaDebito) : '',
+          taxaCredito: latest.taxaCredito != null ? String(latest.taxaCredito) : '',
+        })
+        setFinanceCreatedAt(latest.createdAt || latest.criado_em || latest.criadoEm || null)
+      }
+      toast.success('Configurações financeiras salvas (nova versão)')
+    } catch (err) {
+      console.error(err)
+      toast.error('Erro ao salvar configurações')
+    } finally {
+      setSavingFinance(false)
+    }
+  }
+
   // Termos state
   const [termoConteudo, setTermoConteudo] = useState('')
   const [termoId, setTermoId] = useState(null)
@@ -263,6 +317,50 @@ export const ConfiguracaoView = ({ navigate }) => {
               </CardBody>
             </Card>
           </form>
+
+          <Card style={{ marginBottom: 20 }}>
+            <CardHead>
+              <span className='material-symbols-outlined'>settings</span>
+              <h2>Parâmetros Financeiros</h2>
+            </CardHead>
+            <CardBody>
+              {financeLoading ? <div>Carregando...</div> : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <Grid $cols='1fr 1fr 1fr' style={{ marginBottom: 8 }}>
+                    <Field>
+                      <Label>Lucro Esperado (%)</Label>
+                      <Input value={financeConfig.lucroEsperado} onChange={e => setFinanceConfig(f => ({ ...f, lucroEsperado: e.target.value }))} placeholder='20.00' />
+                    </Field>
+                    <Field>
+                      <Label>Taxa Débito (%)</Label>
+                      <Input value={financeConfig.taxaDebito} onChange={e => setFinanceConfig(f => ({ ...f, taxaDebito: e.target.value }))} placeholder='2.50' />
+                    </Field>
+                    <Field>
+                      <Label>Taxa Crédito (%)</Label>
+                      <Input value={financeConfig.taxaCredito} onChange={e => setFinanceConfig(f => ({ ...f, taxaCredito: e.target.value }))} placeholder='3.50' />
+                    </Field>
+                  </Grid>
+                  <div style={{ fontSize: 12, color: 'var(--muted)' }}>
+                    {financeCreatedAt ? `Última versão criada em: ${financeCreatedAt ? new Date(financeCreatedAt).toLocaleString('pt-BR') : ''}` : 'Nenhuma versão registrada.'}
+                  </div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <SaveBtn onClick={() => setFinanceConfirmOpen(true)} disabled={savingFinance || financeLoading}>
+                      {savingFinance ? 'Salvando...' : 'Salvar Parâmetros (nova versão)'}
+                    </SaveBtn>
+                  </div>
+                </div>
+              )}
+              <ConfirmModal
+                open={financeConfirmOpen}
+                title='Criar nova versão das configurações financeiras'
+                message='Deseja criar uma nova versão destas configurações? Isso salvará os valores como uma nova linha para histórico.'
+                onCancel={() => setFinanceConfirmOpen(false)}
+                onConfirm={async () => { await saveFinance(); setFinanceConfirmOpen(false) }}
+                confirmLabel='Criar versão'
+                loading={savingFinance}
+              />
+            </CardBody>
+          </Card>
 
           <Card>
             <CardHead>
