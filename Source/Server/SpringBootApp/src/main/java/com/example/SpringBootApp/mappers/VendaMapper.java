@@ -34,17 +34,30 @@ public class VendaMapper {
             String pm = pagamentos.get(0).getMetodoPagamento() != null ? pagamentos.get(0).getMetodoPagamento().name() : null;
             dto.setPaymentMethod(pm);
 
-            List<com.example.SpringBootApp.DTOs.VendaPagamentoDTO> payDTOs = pagamentos.stream().map(p -> {
-                com.example.SpringBootApp.DTOs.VendaPagamentoDTO pd = new com.example.SpringBootApp.DTOs.VendaPagamentoDTO();
-                pd.setPaymentMethod(p.getMetodoPagamento() != null ? p.getMetodoPagamento().name() : null);
-                pd.setValor(p.getValor());
-                pd.setAcrescimoPercent(p.getAcrescimoPercent());
-                pd.setAcrescimoValor(p.getAcrescimoValor());
-                pd.setValorPago(p.getValorPago());
-                pd.setParcelas(p.getParcelas());
-                pd.setReferencia(p.getReferencia());
-                return pd;
-            }).collect(Collectors.toList());
+            // aggregate payments by method to avoid duplicate labels (e.g., DEBITO DEBITO)
+            java.util.LinkedHashMap<String, com.example.SpringBootApp.DTOs.VendaPagamentoDTO> agg = new java.util.LinkedHashMap<>();
+            for (VendaPagamento p : pagamentos) {
+                String methodName = p.getMetodoPagamento() != null ? p.getMetodoPagamento().name() : null;
+                com.example.SpringBootApp.DTOs.VendaPagamentoDTO pd = agg.get(methodName);
+                if (pd == null) {
+                    pd = new com.example.SpringBootApp.DTOs.VendaPagamentoDTO();
+                    pd.setPaymentMethod(methodName);
+                    pd.setValor(p.getValor());
+                    pd.setAcrescimoPercent(p.getAcrescimoPercent());
+                    pd.setAcrescimoValor(p.getAcrescimoValor());
+                    pd.setValorPago(p.getValorPago());
+                    pd.setParcelas(p.getParcelas());
+                    pd.setReferencia(p.getReferencia());
+                    agg.put(methodName, pd);
+                } else {
+                    pd.setValor((pd.getValor() != null ? pd.getValor() : BigDecimal.ZERO).add(p.getValor() != null ? p.getValor() : BigDecimal.ZERO));
+                    pd.setAcrescimoValor((pd.getAcrescimoValor() != null ? pd.getAcrescimoValor() : BigDecimal.ZERO).add(p.getAcrescimoValor() != null ? p.getAcrescimoValor() : BigDecimal.ZERO));
+                    pd.setValorPago((pd.getValorPago() != null ? pd.getValorPago() : BigDecimal.ZERO).add(p.getValorPago() != null ? p.getValorPago() : BigDecimal.ZERO));
+                    // keep parcelas and referencia from first occurrence
+                }
+            }
+
+            List<com.example.SpringBootApp.DTOs.VendaPagamentoDTO> payDTOs = new java.util.ArrayList<>(agg.values());
             dto.setPayments(payDTOs);
 
             BigDecimal surcharge = pagamentos.stream()
