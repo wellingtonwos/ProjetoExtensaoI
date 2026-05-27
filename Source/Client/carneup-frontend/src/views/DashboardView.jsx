@@ -371,6 +371,10 @@ export const DashboardView = ({ navigate }) => {
 							<h1>🥩 CarneUp</h1>
 							<p>Painel Operacional · {userName}</p>
 						</Brand>
+						<Clock>
+							<p className="time">{timeStr}</p>
+							<p className="date">{dateStr}</p>
+						</Clock>
 					</HeroTop>
 
 				</Hero>
