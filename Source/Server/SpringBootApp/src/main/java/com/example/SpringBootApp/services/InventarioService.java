@@ -317,7 +317,7 @@ public class InventarioService {
                 map.put("type", "low_profit");
                 map.put("saleId", v.getId());
                 map.put("date", v.getDataVenda());
-                map.put("cliente", v.getCliente() != null ? v.getCliente().getNome() : null);
+                    map.put("cliente", v.getCliente() != null ? v.getCliente().getNickname() : null);
                 map.put("profit", profit);
                 map.put("profitPercent", profitPct.setScale(2, java.math.RoundingMode.HALF_UP));
                 map.put("expectedPercent", expected);
