@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import styled from 'styled-components'
 import { Sidebar } from '../components/Sidebar'
 import api from '../services/apiClient'
-import { getAllClients, updateClient, getClientSales } from '../services/salesApi'
+import { getAllClients, updateClient, getClientSales, getClientSpending, getSale } from '../services/salesApi'
 import { toast } from 'react-toastify'
 import { toTitleCase, titleCaseHandler } from '../services/textUtils'
 import PaginationBar from '../components/PaginationBar'
@@ -275,6 +275,13 @@ export const ReportsView = ({ navigate, initialTab }) => {
   const [historyClient, setHistoryClient] = useState(null) // null = closed
   const [historyData, setHistoryData]   = useState([])
   const [historyLoading, setHistoryLoading] = useState(false)
+  // Client spending view
+  const [clientsSpend, setClientsSpend] = useState([])
+  const [clientsSpendLoading, setClientsSpendLoading] = useState(false)
+  const [showClientSpend, setShowClientSpend] = useState(false)
+  // Sale detail modal
+  const [saleDetail, setSaleDetail] = useState(null) // null = closed
+  const [saleLoading, setSaleLoading] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true); setError(''); setData(null)
@@ -381,6 +388,37 @@ export const ReportsView = ({ navigate, initialTab }) => {
     finally { setHistoryLoading(false) }
   }
 
+  const openSale = async (id) => {
+    setSaleDetail(null); setSaleLoading(true)
+    try {
+      const raw = await getSale(id)
+      const dt = parseSaleDate(raw)
+
+      // Build payment summary (sum amounts per method when available)
+      let paymentSummary = []
+      try {
+        const payments = raw?.payments || []
+        const map = {}
+        payments.forEach(p => {
+          const key = String(p.paymentMethod || p.method || p.type || '').trim().toUpperCase() || 'OUTRO'
+          const amt = Number(p.amount ?? p.value ?? p.paidAmount ?? p.total ?? p.valor ?? 0)
+          map[key] = (map[key] || 0) + (isNaN(amt) ? 0 : amt)
+        })
+        // fallback: if no payments array but sale has paymentMethod
+        if (Object.keys(map).length === 0 && raw?.paymentMethod) {
+          const key = String(raw.paymentMethod).trim().toUpperCase()
+          const amt = Number(raw.totalValue ?? ((raw.totalPrice || 0) + (raw.surchargeTotal || 0)))
+          map[key] = (map[key] || 0) + (isNaN(amt) ? 0 : amt)
+        }
+        paymentSummary = Object.entries(map).map(([method, amount]) => ({ method, amount }))
+      } catch (e) { paymentSummary = [] }
+
+      const hasCredit = paymentSummary.some(p => p.method.includes('CREDITO') || p.method.includes('CREDIT'))
+      setSaleDetail({ ...raw, saleDateObj: dt, saleDateDisplay: formatDateTime(dt), paymentSummary, hasCreditSurcharge: hasCredit && (raw?.surchargeTotal || 0) > 0 })
+    } catch { toast.error('Erro ao carregar venda.') }
+    finally { setSaleLoading(false) }
+  }
+
   // ── Render helpers ─────────────────────────────────────────────────────────
 
   const reloadClients = () => {
@@ -389,6 +427,20 @@ export const ReportsView = ({ navigate, initialTab }) => {
       .then(setClients)
       .catch(() => toast.error('Erro ao carregar clientes.'))
       .finally(() => setClientsLoading(false))
+  }
+
+  const handleShowClientSpend = async () => {
+    if (showClientSpend) { setShowClientSpend(false); setClientsSpend([]); return }
+    setClientsSpendLoading(true)
+    try {
+      const list = await getClientSpending(startDate, endDate)
+      setClientsSpend(list || [])
+      setShowClientSpend(true)
+    } catch {
+      toast.error('Erro ao carregar gastos por cliente.')
+    } finally {
+      setClientsSpendLoading(false)
+    }
   }
 
   const parseSaleDate = (s) => {
@@ -438,9 +490,30 @@ export const ReportsView = ({ navigate, initialTab }) => {
             onChange={e => setClientSearch(e.target.value)}
           />
         </FField>
-        <GenBtn onClick={reloadClients} disabled={clientsLoading}>
-          {clientsLoading ? 'Carregando...' : 'Atualizar Lista'}
-        </GenBtn>
+        <FField>
+          <FLabel>Data Inicial</FLabel>
+          <FInput type='date' value={startDate} onChange={e => setStartDate(e.target.value)} />
+        </FField>
+        <FField>
+          <FLabel>Data Final</FLabel>
+          <FInput type='date' value={endDate} onChange={e => setEndDate(e.target.value)} />
+        </FField>
+        <FField>
+          <FLabel>Hora Inicial</FLabel>
+          <FInput type='time' value={startTime} onChange={e => setStartTime(e.target.value)} />
+        </FField>
+        <FField>
+          <FLabel>Hora Final</FLabel>
+          <FInput type='time' value={endTime} onChange={e => setEndTime(e.target.value)} />
+        </FField>
+        <div style={{display:'flex',gap:8,alignItems:'center'}}>
+          <GenBtn onClick={reloadClients} disabled={clientsLoading}>
+            {clientsLoading ? 'Carregando...' : 'Atualizar Lista'}
+          </GenBtn>
+          <GenBtn onClick={handleShowClientSpend} disabled={clientsSpendLoading}>
+            {clientsSpendLoading ? 'Carregando...' : (showClientSpend ? 'Voltar à lista' : 'Clientes por gasto')}
+          </GenBtn>
+        </div>
       </FilterBar>
     )
     if (['estoque','validade','descartes'].includes(activeTab)) {
@@ -486,6 +559,9 @@ export const ReportsView = ({ navigate, initialTab }) => {
   const renderContent = () => {
     // Clientes tem fluxo próprio — verificar antes do guard de `data`
     if (activeTab === 'clientes') {
+      if (showClientSpend) {
+        return renderClientsSpend(clientsSpend)
+      }
       const filtered = clients.filter(c =>
         !clientSearch || c.nickname?.toLowerCase().includes(clientSearch.toLowerCase()) ||
         c.telefone?.includes(clientSearch)
@@ -556,7 +632,7 @@ export const ReportsView = ({ navigate, initialTab }) => {
               <tbody>{sales.slice((tablePage-1)*PAGE_SIZE, tablePage*PAGE_SIZE).map(s => {
                             const r=(s.totalPrice||0) + (s.surchargeTotal||0), c=s.totalCost||0
                 const m=r>0?((r-c)/r*100):0
-                            return (<tr key={s.id}>
+                            return (<tr key={s.id} style={{cursor:'pointer'}} onClick={() => openSale(s.id)}>
                               <td style={{color:'var(--muted)'}}>#{s.id}</td>
                               <td>{s.saleDateDisplay}</td>
                               <td>{s.salesmanName||'—'}</td>
@@ -778,6 +854,57 @@ export const ReportsView = ({ navigate, initialTab }) => {
     return null
   }
 
+  const renderClientsSpend = (list) => (
+    <>
+      <SumGrid>
+        <SumCard $c='var(--brand)'><p className='lbl'>Clientes</p><p className='val'>{list.length}</p><p className='sub'>Ordenado por gasto</p></SumCard>
+      </SumGrid>
+
+      {clientsSpendLoading ? <Loading>Carregando clientes por gasto...</Loading> : (
+        <TableWrap>
+          <TableHead>
+            <h3>Clientes por gasto</h3>
+            <span className='cnt'>{list.length} cliente{list.length!==1?'s':''}</span>
+          </TableHead>
+          {list.length === 0
+            ? <Empty><span className='material-symbols-outlined'>group_off</span>Nenhum registro encontrado.</Empty>
+            : (
+              <Table>
+                <thead>
+                  <tr>
+                    <th>Cliente</th>
+                    <th>Telefone</th>
+                    <th style={{textAlign:'right'}}>Total Gasto</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {list.slice((tablePage-1)*PAGE_SIZE, tablePage*PAGE_SIZE).map(c => {
+                    const initials = c.nickname?.trim().split(' ').slice(0,2).map(w=>w[0]?.toUpperCase()).join('') || '?'
+                    const clientObj = clients.find(x => x.id === c.clienteId) || {}
+                    return (
+                      <tr key={c.clienteId}>
+                        <td>
+                          <div style={{display:'flex',alignItems:'center',gap:10}}>
+                            <div style={{width:32,height:32,borderRadius:'50%',background:'var(--brand)',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'Epilogue',fontWeight:900,fontSize:12,flexShrink:0}}>
+                              {initials}
+                            </div>
+                            <span style={{fontWeight:700}}>{c.nickname || clientObj.nickname || '—'}</span>
+                          </div>
+                        </td>
+                        <td>{clientObj.telefone || <span style={{color:'var(--muted)'}}>—</span>}</td>
+                        <td style={{textAlign:'right',fontWeight:700}}>{fmt(Number(c.totalSpent || 0))}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </Table>
+            )}
+          {list.length > 0 && <PaginationBar page={tablePage} totalPages={Math.ceil(list.length/PAGE_SIZE)} totalItems={list.length} onPageChange={setTablePage} />}
+        </TableWrap>
+      )}
+    </>
+  )
+
   // ── Renderiza lista de clientes (formato tabela) ───────────────────────────────
   const renderClientsList = (filtered) => (
     <>
@@ -943,6 +1070,65 @@ export const ReportsView = ({ navigate, initialTab }) => {
                 </HRow>
               )
             })}
+          </div>
+        </HistoryModal>
+      </EditModalOverlay>
+    )}
+
+    {/* ── MODAL VENDA ── */}
+    {saleDetail && (
+      <EditModalOverlay onClick={() => setSaleDetail(null)}>
+        <HistoryModal onClick={e => e.stopPropagation()}>
+          <EMHead>
+            <h2>Venda — #{saleDetail.id}</h2>
+            <button onClick={() => setSaleDetail(null)}><span className='material-symbols-outlined'>close</span></button>
+          </EMHead>
+          <div style={{padding:'0 0 8px'}}>
+            {saleLoading && <Loading>Carregando venda...</Loading>}
+            {!saleLoading && (
+              <div style={{border:'1px solid var(--border)', borderRadius:10, overflow:'hidden'}}>
+                <div style={{padding:'10px 14px', background:'var(--bg)', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                  <div style={{display:'flex', alignItems:'center', gap:10}}>
+                    <span style={{fontWeight:700, fontSize:13, color:'var(--text)'}}>Venda #{saleDetail.id}</span>
+                    {saleDetail.payments && saleDetail.payments.length > 0 ? (
+                      saleDetail.payments.map((p, idx) => (
+                        <Badge key={idx} $c={PAY_COLORS[String(p.paymentMethod || '').toUpperCase()]?.c} $t={PAY_COLORS[String(p.paymentMethod || '').toUpperCase()]?.t} style={{ marginRight:6 }}>{p.paymentMethod}</Badge>
+                      ))
+                    ) : (
+                      <Badge $c={PAY_COLORS[String(saleDetail.paymentMethod || '').toUpperCase()]?.c} $t={PAY_COLORS[String(saleDetail.paymentMethod || '').toUpperCase()]?.t}>{saleDetail.paymentMethod}</Badge>
+                    )}
+                    {saleDetail.hasDiscount && <Badge $c='#fffbeb' $t='#b45309' style={{ background:'#fffbeb', color:'#b45309', marginLeft:6 }}>5% OFF</Badge>}
+                    {saleDetail.surchargeTotal > 0 && <span style={{marginLeft:8,fontSize:12,color:'#1d4ed8'}}>+{fmt(saleDetail.surchargeTotal)} (taxa)</span>}
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{fontFamily:"'Epilogue',sans-serif",fontWeight:900,fontSize:16,color:'var(--brand)'}}>{fmt(Number(saleDetail.totalValue || 0) + Number(saleDetail.surchargeTotal || 0))}</div>
+                    <div style={{fontSize:11,color:'var(--muted)'}}>{saleDetail.saleDateDisplay || saleDetail.dataVenda || saleDetail.saleDate}</div>
+                  </div>
+                </div>
+                <div style={{padding:'8px 14px 12px'}}>
+                  {(saleDetail.items || []).map((it, i) => (
+                    <div key={i} style={{display:'flex', justifyContent:'space-between', alignItems:'center', padding:'5px 0', borderBottom:'1px solid #f9f8f8', fontSize:12}}>
+                      <div>
+                        <div style={{ color:'var(--text)', fontWeight:600 }}>{it.productName}</div>
+                        <div style={{ color:'var(--muted)', marginTop:1, fontSize:11 }}>{Number(it.quantity).toFixed(3).replace(/\.?0+$/,'')} × {fmt(it.precoUnitarioVenda)}</div>
+                      </div>
+                      <span style={{ fontWeight:700 }}>{fmt(Number(it.quantity || 0) * Number(it.precoUnitarioVenda || 0))}</span>
+                    </div>
+                  ))}
+
+                  {saleDetail.payments && saleDetail.payments.length > 0 && (
+                    <div style={{marginTop:8}}>
+                      {saleDetail.payments.map((p, i) => (
+                        <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',fontSize:13}}>
+                          <div>{p.paymentMethod}{p.parcelas ? ` • ${p.parcelas}x` : ''}</div>
+                          <div>{fmt(Number(p.valorPago != null ? p.valorPago : p.valor || p.amount || p.paidAmount || p.value || 0))}{p.acrescimoValor ? ` (+${fmt(p.acrescimoValor)})` : ''}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </HistoryModal>
       </EditModalOverlay>

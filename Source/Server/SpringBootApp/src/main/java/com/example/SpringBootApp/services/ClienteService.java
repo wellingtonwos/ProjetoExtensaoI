@@ -109,7 +109,9 @@ public class ClienteService {
     public Page<ClienteResponseDTO> searchClients(String q, int page) {
         var pageable = PageRequest.of(page, 10);
         if (q == null || q.trim().length() < 2) return Page.empty(pageable);
-        return clienteRepository.findByNicknameContainingIgnoreCase(q.trim(), pageable).map(this::toDTO);
+        String trimmed = q.trim();
+        return clienteRepository.findByNicknameContainingIgnoreCaseOrTelefoneContainingIgnoreCase(trimmed, trimmed, pageable)
+                .map(this::toDTO);
     }
 
     private ClienteResponseDTO toDTO(Cliente c) {

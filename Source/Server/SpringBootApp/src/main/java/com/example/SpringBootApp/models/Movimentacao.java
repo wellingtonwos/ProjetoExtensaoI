@@ -33,7 +33,7 @@ public class Movimentacao {
     @Column(name = "data_validade")
     private LocalDate dataValidade;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = MovementTypeConverter.class)
     @Column(name = "tipo_movimentacao")
     private MovementType tipoMovimentacao;
 

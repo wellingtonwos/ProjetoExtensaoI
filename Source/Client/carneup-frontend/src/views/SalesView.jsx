@@ -703,6 +703,13 @@ export const SalesView = ({ navigate }) => {
         paymentsPayload = [{ paymentMethod: payment, valor: Number((total).toFixed(2)) }]
       }
 
+      // Client-side validation: ensure sum of payments does not exceed total
+      const assigned = paymentsPayload.reduce((s, p) => s + Number(p.valor || 0), 0)
+      if (Math.round(assigned * 100) > Math.round(total * 100)) {
+        toast.error('A soma dos pagamentos excede o total. Ajuste os valores.')
+        return
+      }
+
       const payload = {
         userId,
         paymentMethod: payment, // legacy field kept for compatibility
@@ -996,7 +1003,14 @@ export const SalesView = ({ navigate }) => {
                     <input type='text' inputMode='numeric' placeholder='0,00' value={p.valor}
                       onChange={e => {
                         const digits = String(e.target.value || '').replace(/\D/g, '')
-                        const cents = parseInt(digits || '0', 10)
+                        let cents = parseInt(digits || '0', 10)
+                        const otherAssignedCents = paymentsList.reduce((s, it) => it.id === p.id ? s : s + Math.round(parseBRL(it.valor) * 100), 0)
+                        const totalCents = Math.round(total * 100)
+                        if (otherAssignedCents + cents > totalCents) {
+                          const cap = Math.max(0, totalCents - otherAssignedCents)
+                          cents = cap
+                          toast.error('Valor ajustado para o restante disponível.')
+                        }
                         const str = cents === 0 ? '' : (cents / 100).toFixed(2).replace('.', ',')
                         setPaymentsList(prev => prev.map(it => it.id === p.id ? {...it, valor: str} : it))
                       }}
@@ -1010,6 +1024,10 @@ export const SalesView = ({ navigate }) => {
                 {splitPayments && <div style={{marginTop:8}}><button type='button' onClick={() => {
                   const assigned = paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0)
                   const remaining = Math.max(0, total - assigned)
+                  if (remaining <= 0) {
+                    toast.error('Total já coberto. Não é possível adicionar mais formas.')
+                    return
+                  }
                   setPaymentsList(prev => [...prev, { id: Date.now()+Math.random(), paymentMethod: payment, valor: formatPriceDisplay(remaining) }])
                 }} style={{padding:'6px 10px', borderRadius:8, border:'1px solid #e7e5e4'}}>Adicionar forma</button></div>}
 

@@ -30,6 +30,33 @@ public class RelatorioService {
                 .collect(Collectors.toList());
     }
 
+    public List<com.example.SpringBootApp.DTOs.ClientSpendDTO> getClientSpending(LocalDate startDate, LocalDate endDate) {
+        java.time.LocalDateTime start = startDate.atStartOfDay();
+        java.time.LocalDateTime end = endDate.plusDays(1).atStartOfDay();
+        List<Venda> sales = vendaRepository.findByDatavendaBetweenWithMovements(start, end);
+
+        java.util.Map<Long, com.example.SpringBootApp.DTOs.ClientSpendDTO> map = new java.util.LinkedHashMap<>();
+        for (Venda v : sales) {
+            if (v.getCliente() == null) continue;
+            Long cid = v.getCliente().getId();
+            com.example.SpringBootApp.DTOs.ClientSpendDTO dto = map.get(cid);
+            java.math.BigDecimal valor = v.getValorTotal() != null ? v.getValorTotal() : java.math.BigDecimal.ZERO;
+            if (dto == null) {
+                dto = new com.example.SpringBootApp.DTOs.ClientSpendDTO();
+                dto.setClienteId(cid);
+                dto.setNickname(v.getCliente().getNickname());
+                dto.setTotalSpent(valor);
+                map.put(cid, dto);
+            } else {
+                dto.setTotalSpent(dto.getTotalSpent().add(valor));
+            }
+        }
+
+        return map.values().stream()
+                .sorted((a, b) -> b.getTotalSpent().compareTo(a.getTotalSpent()))
+                .collect(Collectors.toList());
+    }
+
     private VendReportDTO convertToVendReportDTO(Venda venda) {
         VendReportDTO reportDTO = new VendReportDTO();
 

@@ -7,6 +7,7 @@ import com.example.SpringBootApp.services.ConfiguracaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -21,7 +22,9 @@ public class ConfiguracaoController {
     private final ConfiguracaoService configuracaoService;
 
     @PostMapping
-    public ResponseEntity<?> createConfiguracao(@Valid @RequestBody ConfiguracaoCreateDTO dto) {
+    public ResponseEntity<?> createConfiguracao(@Valid @RequestBody ConfiguracaoCreateDTO dto, Authentication authentication) {
+        boolean isAdmin = authentication != null && authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADM"));
+        if (!isAdmin) return ResponseEntity.status(403).body(java.util.Map.of("message", "Forbidden"));
         Configuracao created = configuracaoService.createConfiguracao(dto);
         return ResponseEntity.created(URI.create("/configuracoes/" + created.getId())).build();
     }

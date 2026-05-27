@@ -173,9 +173,6 @@ public class VendaService {
     }
 
     private void persistPayments(com.example.SpringBootApp.DTOs.VendCreateDTO saleDTO, Venda savedSale, java.math.BigDecimal computedTotal) {
-        java.util.List<com.example.SpringBootApp.DTOs.VendPaymentDTO> payments = saleDTO.getPayments();
-        java.util.List<VendaPagamento> created = new java.util.ArrayList<>();
-
         com.example.SpringBootApp.models.Configuracao config = null;
         try {
             config = configuracaoService.getConfiguracaoForDate(savedSale.getDataVenda());
@@ -184,23 +181,45 @@ public class VendaService {
             try { config = configuracaoService.getLatestConfiguracao().orElse(null); } catch (Exception ex) { config = null; }
         }
 
+        java.math.BigDecimal expectedTotal = computedTotal != null ? computedTotal.setScale(2, java.math.RoundingMode.HALF_UP) : java.math.BigDecimal.ZERO;
+        applyPaymentsToSale(savedSale, saleDTO.getPayments(), saleDTO.getPaymentMethod(), expectedTotal, config);
+    }
+
+    public void updateSalePayments(Long saleId, java.util.List<com.example.SpringBootApp.DTOs.VendPaymentDTO> payments) {
+        Venda venda = vendaRepository.findById(saleId).orElseThrow(() -> new ResourceNotFoundException("Venda not found"));
+        java.util.List<VendaPagamento> existing = vendaPagamentoRepository != null ? vendaPagamentoRepository.findByVendaId(saleId) : java.util.List.of();
+        if (existing != null && !existing.isEmpty()) {
+            vendaPagamentoRepository.deleteAll(existing);
+        }
+
+        com.example.SpringBootApp.models.Configuracao config = null;
+        try {
+            config = configuracaoService.getConfiguracaoForDate(venda.getDataVenda());
+        } catch (Exception e) {
+            try { config = configuracaoService.getLatestConfiguracao().orElse(null); } catch (Exception ex) { config = null; }
+        }
+        java.math.BigDecimal expectedTotal = venda.getValorTotal() != null ? venda.getValorTotal().setScale(2, java.math.RoundingMode.HALF_UP) : java.math.BigDecimal.ZERO;
+        applyPaymentsToSale(venda, payments, null, expectedTotal, config);
+        vendaRepository.save(venda);
+    }
+
+    private void applyPaymentsToSale(Venda sale, java.util.List<com.example.SpringBootApp.DTOs.VendPaymentDTO> payments, com.example.SpringBootApp.models.PaymentMethod fallbackPm, java.math.BigDecimal expectedTotal, com.example.SpringBootApp.models.Configuracao config) {
+        java.util.List<VendaPagamento> created = new java.util.ArrayList<>();
+
         java.math.BigDecimal defaultCredit = new java.math.BigDecimal("5.00");
         java.math.BigDecimal defaultDebit = java.math.BigDecimal.ZERO;
         java.math.BigDecimal taxaCredito = config != null && config.getTaxaCredito() != null ? config.getTaxaCredito() : defaultCredit;
         java.math.BigDecimal taxaDebito = config != null && config.getTaxaDebito() != null ? config.getTaxaDebito() : defaultDebit;
 
-        java.math.BigDecimal expectedTotal = computedTotal != null ? computedTotal.setScale(2, java.math.RoundingMode.HALF_UP) : java.math.BigDecimal.ZERO;
-
         if (payments == null || payments.isEmpty()) {
-            // fallback to single payment from paymentMethod
-            com.example.SpringBootApp.models.PaymentMethod pm = saleDTO.getPaymentMethod();
+            com.example.SpringBootApp.models.PaymentMethod pm = fallbackPm;
             java.math.BigDecimal valor = expectedTotal;
             java.math.BigDecimal percent = (pm == com.example.SpringBootApp.models.PaymentMethod.CREDITO) ? taxaCredito : (pm == com.example.SpringBootApp.models.PaymentMethod.DEBITO ? taxaDebito : java.math.BigDecimal.ZERO);
             java.math.BigDecimal acrescimo = valor.multiply(percent).divide(new java.math.BigDecimal("100"), 4, java.math.RoundingMode.HALF_UP);
             java.math.BigDecimal valorPago = valor.add(acrescimo);
 
             VendaPagamento vp = new VendaPagamento();
-            vp.setVenda(savedSale);
+            vp.setVenda(sale);
             vp.setMetodoPagamento(pm);
             vp.setValor(valor);
             vp.setAcrescimoPercent(percent);
@@ -209,7 +228,6 @@ public class VendaService {
             created.add(vp);
             if (vendaPagamentoRepository != null) vendaPagamentoRepository.save(vp);
         } else {
-            // sum payments and adjust last payment by cent difference so totals match
             java.math.BigDecimal sum = java.math.BigDecimal.ZERO;
             for (com.example.SpringBootApp.DTOs.VendPaymentDTO p : payments) {
                 java.math.BigDecimal v = p.getValor() != null ? p.getValor() : java.math.BigDecimal.ZERO;
@@ -226,7 +244,6 @@ public class VendaService {
 
             long diffCents = expectedCents - sumCents;
             if (diffCents != 0 && !payments.isEmpty()) {
-                // add the cent difference to the last payment value
                 for (int i = payments.size() - 1; i >= 0; i--) {
                     com.example.SpringBootApp.DTOs.VendPaymentDTO last = payments.get(i);
                     if (last.getValor() == null) last.setValor(java.math.BigDecimal.ZERO);
@@ -243,7 +260,7 @@ public class VendaService {
                 java.math.BigDecimal valorPago = valor.add(acrescimo);
 
                 VendaPagamento vp = new VendaPagamento();
-                vp.setVenda(savedSale);
+                vp.setVenda(sale);
                 vp.setMetodoPagamento(pm);
                 vp.setValor(valor);
                 vp.setAcrescimoPercent(percent);
@@ -255,9 +272,22 @@ public class VendaService {
                 if (vendaPagamentoRepository != null) vendaPagamentoRepository.save(vp);
             }
         }
-        if (!created.isEmpty()) savedSale.setPagamentos(created);
+
+        if (!created.isEmpty()) sale.setPagamentos(created);
     }
-}
+
+    public static java.util.List<java.math.BigDecimal> equalSplit(java.math.BigDecimal total, int parts) {
+        if (parts <= 0) throw new IllegalArgumentException("parts must be > 0");
+        long totalCents = total.multiply(new java.math.BigDecimal("100")).setScale(0, java.math.RoundingMode.HALF_UP).longValue();
+        long base = totalCents / parts;
+        long remainder = totalCents - base * parts;
+        java.util.List<java.math.BigDecimal> result = new java.util.ArrayList<>();
+        for (int i = 0; i < parts; i++) {
+            long cents = base + (i == parts - 1 ? remainder : 0);
+            result.add(new java.math.BigDecimal(cents).divide(new java.math.BigDecimal("100")).setScale(2, java.math.RoundingMode.HALF_UP));
+        }
+        return result;
+    }}
 
 
 

@@ -19,6 +19,7 @@ import AttributesView from './views/AttributesView'
 import { ReportsView } from './views/ReportsView'
 import { ClienteHistoricoView } from './views/ClienteHistoricoView'
 import { ConfiguracaoView } from './views/ConfiguracaoView'
+import { DespesasView } from './views/DespesasView'
 
 const ADMIN_ONLY_VIEWS = new Set(['discard', 'attributes', 'reports', 'configuracoes', 'settings', 'config-loja'])
 
@@ -72,6 +73,8 @@ export default function App() {
 				return <DiscardView navigate={navigate} />
 			case 'purchases':
 				return <PurchaseView navigate={navigate} />
+			case 'despesas':
+				return <DespesasView navigate={navigate} />
 			case 'attributes':
 				return <AttributesView navigate={navigate} />
 			case 'configuracoes':

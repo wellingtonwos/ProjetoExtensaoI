@@ -24,7 +24,7 @@ public class VendaPagamento {
     @JoinColumn(name = "fk_venda_id")
     private Venda venda;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = PaymentMethodConverter.class)
     @Column(name = "metodo_pagamento")
     private PaymentMethod metodoPagamento;
 
