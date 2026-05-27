@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { Button } from './Button'
 import { Input } from './Input'
+import { toTitleCase, titleCaseHandler } from '../services/textUtils'
 
 const Backdrop = styled.div`
   position: fixed;
@@ -30,7 +31,7 @@ export default function QuickCreateModal({ open, type, onClose, onCreate, initia
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    setValue(initialValue ?? '')
+    setValue(initialValue ? toTitleCase(initialValue) : '')
     setConfirmStage(false)
     setError(null)
   }, [open, initialValue])
@@ -82,7 +83,7 @@ export default function QuickCreateModal({ open, type, onClose, onCreate, initia
               label={isEditMode ? 'Novo nome' : label}
               name='quick'
               value={value}
-              onChange={(e) => setValue(e.target.value)}
+              onChange={titleCaseHandler((val) => setValue(val))}
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handlePrimary() } }}
               placeholder={placeholder}
               autoFocus
