@@ -84,8 +84,8 @@ const SumCard = styled.div`
   border-left: 3px solid ${p => p.$c || 'var(--brand)'};
   border: 1px solid var(--border); border-left-width: 3px;
   p.lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin: 0 0 6px; }
-  p.val { font-family: 'Epilogue', sans-serif; font-size: 22px; font-weight: 900; color: var(--text); margin: 0; }
-  p.sub { font-size: 10px; color: var(--muted); margin: 3px 0 0; }
+  p.val { font-family: 'Epilogue', sans-serif; font-size: 22px; font-weight: 900; color: var(--text); margin: 0; white-space: normal; word-break: normal; overflow-wrap: break-word; display: block; line-height: 1.05; }
+  p.sub { font-size: 10px; color: var(--muted); margin: 3px 0 0; white-space: normal; word-break: normal; overflow-wrap: normal; }
 `
 
 // Table
@@ -114,7 +114,8 @@ const Loading = styled.div`
   padding: 32px; text-align: center; color: var(--muted); font-size: 13px;
 `
 const Badge = styled.span`
-  display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 700;
+  display: inline-flex; align-items:center; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 700;
+  white-space: nowrap; overflow: visible; word-break: normal;
   background: ${p => p.$c || '#f0f0f0'}; color: ${p => p.$t || '#374151'};
 `
 const AlertBadge = styled.span`
@@ -131,6 +132,15 @@ const pct  = v  => `${Number(v||0).toFixed(1)}%`
 const today = () => new Date().toISOString().slice(0,10)
 const daysAgo = n => { const d = new Date(); d.setDate(d.getDate()-n); return d.toISOString().slice(0,10) }
 const firstOfMonth = () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0,10) }
+const fmtDate = d => {
+  if (!d) return '—'
+  if (typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d)) {
+    const [y, m, day] = d.split('-')
+    return `${day}/${m}/${y}`
+  }
+  const date = new Date(d)
+  return isNaN(date) ? '—' : date.toLocaleDateString('pt-BR')
+}
 const daysUntil = dateStr => {
   if (!dateStr) return 999
   const [y, m, d] = dateStr.split('-').map(Number)
@@ -140,6 +150,24 @@ const daysUntil = dateStr => {
 }
 
 const PAY_COLORS = { PIX:{c:'#f0fdf4',t:'#15803d'}, DINHEIRO:{c:'#fffbeb',t:'#b45309'}, CREDITO:{c:'#eff6ff',t:'#1d4ed8'}, DEBITO:{c:'#faf5ff',t:'#7c3aed'} }
+
+const PAY_LABELS = { PIX:'PIX', DINHEIRO:'Dinheiro', CREDITO:'Crédito', DEBITO:'Débito' }
+const PAYMENT_ORDER = ['PIX','DINHEIRO','CREDITO','DEBITO']
+
+const normalizePaymentKeyFromSale = (s) => {
+  if (s?.payments && s.payments.length > 0) {
+    const methods = Array.from(new Set(s.payments.map(p => String(p.paymentMethod || '').trim().toUpperCase()).filter(Boolean)))
+    methods.sort((a,b) => {
+      const ia = PAYMENT_ORDER.indexOf(a), ib = PAYMENT_ORDER.indexOf(b)
+      if (ia === -1 && ib === -1) return a.localeCompare(b)
+      if (ia === -1) return 1
+      if (ib === -1) return -1
+      return ia - ib
+    })
+    return methods.join(' + ')
+  }
+  return String(s.paymentMethod || '').trim().toUpperCase()
+}
 
 const TABS = [
   { id:'vendas',   label:'Vendas',          icon:'point_of_sale' },
@@ -218,14 +246,17 @@ const HRow = styled.div`
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
-export const ReportsView = ({ navigate }) => {
-  const [activeTab, setActiveTab] = useState('vendas')
+export const ReportsView = ({ navigate, initialTab }) => {
+  const [activeTab, setActiveTab] = useState(initialTab || 'vendas')
+  useEffect(() => { if (initialTab) setActiveTab(initialTab) }, [initialTab])
   const [tablePage, setTablePage] = useState(1)
   const PAGE_SIZE = 10
 
   // Filters
   const [startDate, setStartDate] = useState(firstOfMonth())
   const [endDate,   setEndDate]   = useState(today())
+  const [startTime, setStartTime] = useState('')
+  const [endTime, setEndTime] = useState('')
   const [expiryDays, setExpiryDays] = useState('30')
 
   // Data
@@ -284,13 +315,13 @@ export const ReportsView = ({ navigate }) => {
   }, [activeTab])
 
   // Client handlers
-  const openEdit = (c) => { setEditClient(c); setEditForm({ nickname: c.nickname, telefone: c.telefone||'', documento: c.documento||'', email: c.email||'' }) }
+  const openEdit = (c) => { setEditClient(c); setEditForm({ nickname: c.nickname, telefone: c.telefone||'', aniversario: c.aniversario||'' }) }
   const handleEditSave = async (e) => {
     e.preventDefault()
     if (!editForm.nickname?.trim()) return
     setEditSaving(true)
     try {
-      await updateClient(editClient.id, { nickname: editForm.nickname.trim(), telefone: editForm.telefone||null, documento: editForm.documento||null, email: editForm.email||null })
+      await updateClient(editClient.id, { nickname: editForm.nickname.trim(), telefone: editForm.telefone||null, aniversario: editForm.aniversario||null })
       toast.success('Cliente atualizado!')
       setClients(prev => prev.map(c => c.id === editClient.id ? { ...c, ...editForm, nickname: editForm.nickname.trim() } : c))
       setEditClient(null)
@@ -299,8 +330,14 @@ export const ReportsView = ({ navigate }) => {
   }
   const openHistory = async (c) => {
     setHistoryClient(c); setHistoryLoading(true); setHistoryData([])
-    try { setHistoryData(await getClientSales(c.id)) }
-    catch { toast.error('Erro ao carregar histórico.') }
+    try {
+      const raw = await getClientSales(c.id)
+      const processed = (raw || []).map(s => {
+        const dt = parseSaleDate(s)
+        return { ...s, saleDateObj: dt, saleDateDisplay: formatDateTime(dt) }
+      })
+      setHistoryData(processed)
+    } catch { toast.error('Erro ao carregar histórico.') }
     finally { setHistoryLoading(false) }
   }
 
@@ -314,13 +351,49 @@ export const ReportsView = ({ navigate }) => {
       .finally(() => setClientsLoading(false))
   }
 
+  const parseSaleDate = (s) => {
+    const raw = s?.saleDate ?? s?.dataVenda ?? s?.data_venda ?? s?.sale_date ?? null
+    if (!raw) return null
+    const d = new Date(raw)
+    return isNaN(d.getTime()) ? null : d
+  }
+
+  const pad2 = (n) => String(n).padStart(2, '0')
+
+  const formatDateTime = (d) => {
+    if (!d) return '—'
+    return `${pad2(d.getDate())}/${pad2(d.getMonth()+1)}/${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`
+  }
+
+  const timeToMinutes = (t) => {
+    if (!t) return null
+    const parts = String(t).split(':')
+    if (parts.length < 2) return null
+    return Number(parts[0]) * 60 + Number(parts[1])
+  }
+
+  const isWithinTimeRange = (dateObj, startTime, endTime) => {
+    if (!dateObj) return true
+    if (!startTime && !endTime) return true
+    const mins = dateObj.getHours() * 60 + dateObj.getMinutes()
+    const s = timeToMinutes(startTime)
+    const e = timeToMinutes(endTime)
+    if (s != null && e != null) {
+      if (s <= e) return mins >= s && mins <= e
+      return mins >= s || mins <= e
+    }
+    if (s != null) return mins >= s
+    if (e != null) return mins <= e
+    return true
+  }
+
   const renderFilters = () => {
     if (activeTab === 'clientes') return (
       <FilterBar>
         <FField style={{ flex: 1 }}>
           <FLabel>Buscar cliente</FLabel>
           <FInput
-            placeholder='Nome, telefone ou documento...'
+            placeholder='Nome ou telefone...'
             value={clientSearch}
             onChange={e => setClientSearch(e.target.value)}
           />
@@ -357,6 +430,14 @@ export const ReportsView = ({ navigate }) => {
           <FLabel>Data Final</FLabel>
           <FInput type='date' value={endDate} onChange={e => setEndDate(e.target.value)} />
         </FField>
+        <FField>
+          <FLabel>Hora Inicial</FLabel>
+          <FInput type='time' value={startTime} onChange={e => setStartTime(e.target.value)} />
+        </FField>
+        <FField>
+          <FLabel>Hora Final</FLabel>
+          <FInput type='time' value={endTime} onChange={e => setEndTime(e.target.value)} />
+        </FField>
         <GenBtn onClick={load} disabled={loading}>{loading ? 'Carregando...' : 'Gerar Relatório'}</GenBtn>
       </FilterBar>
     )
@@ -367,7 +448,7 @@ export const ReportsView = ({ navigate }) => {
     if (activeTab === 'clientes') {
       const filtered = clients.filter(c =>
         !clientSearch || c.nickname?.toLowerCase().includes(clientSearch.toLowerCase()) ||
-        c.telefone?.includes(clientSearch) || c.documento?.includes(clientSearch)
+        c.telefone?.includes(clientSearch)
       )
       return renderClientsList(filtered)
     }
@@ -378,14 +459,22 @@ export const ReportsView = ({ navigate }) => {
 
     // ── VENDAS ──────────────────────────────────────────────────────────────────
     if (activeTab === 'vendas') {
-      const sales = data
-      const revenue = sales.reduce((a,s) => a+(s.totalPrice||0), 0)
+      const salesRaw = data || []
+      const sales = salesRaw.map(s => {
+        const dt = parseSaleDate(s)
+        return { ...s, saleDateObj: dt, saleDateDisplay: formatDateTime(dt) }
+      }).filter(s => isWithinTimeRange(s.saleDateObj, startTime, endTime))
+      const revenue = sales.reduce((a,s) => a + ((s.totalPrice||0) + (s.surchargeTotal||0)), 0)
       const cost    = sales.reduce((a,s) => a+(s.totalCost||0), 0)
       const profit  = revenue - cost
       const margin  = revenue > 0 ? (profit/revenue)*100 : 0
       const avg     = sales.length > 0 ? revenue/sales.length : 0
 
-      const byPayment = sales.reduce((acc,s) => { acc[s.paymentMethod]=(acc[s.paymentMethod]||0)+1; return acc }, {})
+      const byPayment = sales.reduce((acc, s) => {
+          const key = normalizePaymentKeyFromSale(s)
+          acc[key] = (acc[key] || 0) + 1
+          return acc
+        }, {})
 
       return (
         <>
@@ -398,13 +487,20 @@ export const ReportsView = ({ navigate }) => {
 
           {Object.keys(byPayment).length > 0 && (
             <SumGrid>
-              {Object.entries(byPayment).map(([m,c]) => (
-                <SumCard key={m} $c='#e7e5e4'>
-                  <p className='lbl'>Pagamento</p>
-                  <p className='val' style={{ fontSize:16 }}>{m}</p>
-                  <p className='sub'>{c} venda{c!==1?'s':''} · {pct((c/sales.length)*100)}</p>
-                </SumCard>
-              ))}
+              {Object.entries(byPayment).map(([m,c]) => {
+                const parts = String(m).split(/\s*\+\s*/).map(p => p.trim()).filter(Boolean)
+                return (
+                  <SumCard key={m} $c='#e7e5e4'>
+                    <p className='lbl'>Pagamento</p>
+                    <p className='val' style={{ fontSize:16 }}>
+                      {parts.map((t, idx) => (
+                        <span key={idx} style={{ display: 'inline-block', whiteSpace: 'nowrap', marginRight: 8 }}>{PAY_LABELS[t] || t}{idx < parts.length - 1 && <span style={{ marginLeft: 6, marginRight: 6 }}>+</span>}</span>
+                      ))}
+                    </p>
+                    <p className='sub'>{c} venda{c!==1?'s':''} · {pct((c/sales.length)*100)}</p>
+                  </SumCard>
+                )
+              })}
             </SumGrid>
           )}
 
@@ -412,25 +508,34 @@ export const ReportsView = ({ navigate }) => {
             <TableHead><h3>Detalhamento</h3><span className='cnt'>{sales.length} registros</span></TableHead>
             {sales.length === 0 && <Empty><span className='material-symbols-outlined'>receipt_long</span>Nenhuma venda no período.</Empty>}
             {sales.length > 0 && <Table><thead><tr>
-                <th>#</th><th>Data</th><th>Vendedor</th><th>Pagamento</th>
+                            <th>#</th><th>Data</th><th>Vendedor</th><th>Pagamento</th><th style={{textAlign:'right'}}>Acréscimo</th>
                 <th style={{textAlign:'right'}}>Custo</th>
                 <th style={{textAlign:'right'}}>Faturamento</th>
                 <th style={{textAlign:'right'}}>Margem</th>
               </tr></thead>
               <tbody>{sales.slice((tablePage-1)*PAGE_SIZE, tablePage*PAGE_SIZE).map(s => {
-                const r=s.totalPrice||0, c=s.totalCost||0
+                            const r=(s.totalPrice||0) + (s.surchargeTotal||0), c=s.totalCost||0
                 const m=r>0?((r-c)/r*100):0
-                const pc=PAY_COLORS[s.paymentMethod]||{}
-                return (<tr key={s.id}>
-                  <td style={{color:'var(--muted)'}}>#{s.id}</td>
-                  <td>{s.saleDate}</td>
-                  <td>{s.salesmanName||'—'}</td>
-                  <td><Badge $c={pc.c} $t={pc.t}>{s.paymentMethod}</Badge></td>
-                  <td style={{textAlign:'right'}}>{fmt(c)}</td>
-                  <td style={{textAlign:'right',fontWeight:700}}>{fmt(r)}</td>
-                  <td style={{textAlign:'right',color:m>=20?'var(--success)':m>=10?'var(--warning)':'var(--danger)'}}>{pct(m)}</td>
-                </tr>)
-              })}</tbody></Table>}
+                            return (<tr key={s.id}>
+                              <td style={{color:'var(--muted)'}}>#{s.id}</td>
+                              <td>{s.saleDateDisplay}</td>
+                              <td>{s.salesmanName||'—'}</td>
+                              <td>
+                                {s.payments && s.payments.length > 0 ? (
+                                  s.payments.map((p, i) => {
+                                    const pc = PAY_COLORS[p.paymentMethod] || {}
+                                    return <Badge key={i} $c={pc.c} $t={pc.t} style={{marginRight:6}}>{p.paymentMethod}</Badge>
+                                  })
+                                ) : (
+                                  (() => { const pc = PAY_COLORS[s.paymentMethod]||{}; return <Badge $c={pc.c} $t={pc.t}>{s.paymentMethod}</Badge> })()
+                                )}
+                              </td>
+                              <td style={{textAlign:'right'}}>{fmt(s.surchargeTotal || 0)}</td>
+                              <td style={{textAlign:'right'}}>{fmt(c)}</td>
+                              <td style={{textAlign:'right',fontWeight:700}}>{fmt(r)}</td>
+                              <td style={{textAlign:'right',color:m>=20?'var(--success)':m>=10?'var(--warning)':'var(--danger)'}}>{pct(m)}</td>
+                            </tr>)
+                          })}</tbody></Table>}
             {sales.length > 0 && <PaginationBar page={tablePage} totalPages={Math.ceil(sales.length/PAGE_SIZE)} totalItems={sales.length} onPageChange={setTablePage} />}
           </TableWrap>
         </>
@@ -654,8 +759,7 @@ export const ReportsView = ({ navigate }) => {
                   <tr>
                     <th>Cliente</th>
                     <th>Telefone</th>
-                    <th>CPF / CNPJ</th>
-                    <th>E-mail</th>
+                    <th>Aniversário</th>
                     <th>Cadastrado em</th>
                     <th style={{textAlign:'right'}}>Ações</th>
                   </tr>
@@ -675,8 +779,7 @@ export const ReportsView = ({ navigate }) => {
                           </div>
                         </td>
                         <td>{c.telefone || <span style={{color:'var(--muted)'}}>—</span>}</td>
-                        <td>{c.documento || <span style={{color:'var(--muted)'}}>—</span>}</td>
-                        <td>{c.email || <span style={{color:'var(--muted)'}}>—</span>}</td>
+                        <td>{c.aniversario ? fmtDate(c.aniversario) : <span style={{color:'var(--muted)'}}>—</span>}</td>
                         <td style={{color:'var(--muted)'}}>{dtCad}</td>
                         <td style={{textAlign:'right'}}>
                           <div style={{display:'flex',gap:6,justifyContent:'flex-end'}}>
@@ -746,12 +849,8 @@ export const ReportsView = ({ navigate }) => {
                 <input value={editForm.telefone} onChange={e => setEditForm(f=>({...f,telefone:e.target.value}))} placeholder='(11) 99999-9999' />
               </EMField>
               <EMField>
-                <label>CPF / CNPJ</label>
-                <input value={editForm.documento} onChange={e => setEditForm(f=>({...f,documento:e.target.value}))} placeholder='000.000.000-00' />
-              </EMField>
-              <EMField>
-                <label>E-mail</label>
-                <input type='email' value={editForm.email} onChange={e => setEditForm(f=>({...f,email:e.target.value}))} placeholder='cliente@email.com' />
+                <label>Aniversário</label>
+                <input type='date' value={editForm.aniversario} onChange={e => setEditForm(f=>({...f,aniversario:e.target.value}))} />
                 <small>Todos os campos exceto o apelido são opcionais.</small>
               </EMField>
             </EMBody>
@@ -784,7 +883,7 @@ export const ReportsView = ({ navigate }) => {
                   <div className='top'>
                     <div>
                       <span className='id'>Venda #{s.id}</span>
-                      <span className='date' style={{marginLeft:10}}>📅 {s.dataVenda}</span>
+                      <span className='date' style={{marginLeft:10}}>📅 {s.saleDateDisplay || s.dataVenda || s.saleDate}</span>
                     </div>
                     <span className='total'>{fmt(s.totalValue)}</span>
                   </div>

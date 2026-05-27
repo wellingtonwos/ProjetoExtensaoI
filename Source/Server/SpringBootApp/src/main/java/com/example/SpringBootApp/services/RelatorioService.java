@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,7 +21,9 @@ public class RelatorioService {
     private final VendaRepository vendaRepository;
 
     public List<VendReportDTO> getSalesReport(LocalDate startDate, LocalDate endDate) {
-        List<Venda> sales = vendaRepository.findByDatavendaBetweenWithMovements(startDate, endDate);
+        java.time.LocalDateTime start = startDate.atStartOfDay();
+        java.time.LocalDateTime end = endDate.plusDays(1).atStartOfDay();
+        List<Venda> sales = vendaRepository.findByDatavendaBetweenWithMovements(start, end);
 
         return sales.stream()
                 .map(this::convertToVendReportDTO)
@@ -32,7 +35,37 @@ public class RelatorioService {
 
         reportDTO.setId(venda.getId());
         reportDTO.setSaleDate(venda.getDataVenda());
-        reportDTO.setPaymentMethod(venda.getMetodoPagamento().name());
+        String pm = null;
+        List<com.example.SpringBootApp.models.VendaPagamento> pagamentos = venda.getPagamentos();
+        if (pagamentos != null && !pagamentos.isEmpty()) {
+            // build combined payment method (first or concat of distinct)
+            java.util.Set<String> methods = pagamentos.stream()
+                    .map(p -> p.getMetodoPagamento() != null ? p.getMetodoPagamento().name() : null)
+                    .filter(java.util.Objects::nonNull)
+                    .collect(Collectors.toCollection(java.util.LinkedHashSet::new));
+            pm = String.join("+", methods);
+
+            // map payments to DTO
+            List<com.example.SpringBootApp.DTOs.VendaPagamentoDTO> payDTOs = pagamentos.stream().map(p -> {
+                com.example.SpringBootApp.DTOs.VendaPagamentoDTO pd = new com.example.SpringBootApp.DTOs.VendaPagamentoDTO();
+                pd.setPaymentMethod(p.getMetodoPagamento() != null ? p.getMetodoPagamento().name() : null);
+                pd.setValor(p.getValor());
+                pd.setAcrescimoPercent(p.getAcrescimoPercent());
+                pd.setAcrescimoValor(p.getAcrescimoValor());
+                pd.setValorPago(p.getValorPago());
+                pd.setParcelas(p.getParcelas());
+                pd.setReferencia(p.getReferencia());
+                return pd;
+            }).collect(Collectors.toList());
+            reportDTO.setPayments(payDTOs);
+
+            java.math.BigDecimal surcharge = pagamentos.stream()
+                    .map(com.example.SpringBootApp.models.VendaPagamento::getAcrescimoValor)
+                    .filter(v -> v != null)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            reportDTO.setSurchargeTotal(surcharge);
+        }
+        reportDTO.setPaymentMethod(pm);
         reportDTO.setSalesmanName(venda.getUsuario().getNome());
         reportDTO.setHasDiscount(venda.getTemDesconto());
 

@@ -2,7 +2,8 @@ import styled, { keyframes } from 'styled-components'
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { Sidebar } from '../components/Sidebar'
 import productsApi, { getAllProductsUnpaged } from '../services/productsApi'
-import { createSale, getSale, searchClients, createClient } from '../services/salesApi'
+import { createSale, getSale, searchClients, createClient, getAllClients } from '../services/salesApi'
+import api from '../services/apiClient'
 import { toast } from 'react-toastify'
 import { loadStoreConfig } from './ConfiguracaoView'
 
@@ -185,8 +186,8 @@ const QCtrl = styled.div`
     color:#57534e; span{font-size:13px;} &:hover{background:#f5f5f4;}}
 `
 const QIn = styled.input`
-  width:44px;text-align:center;border:1px solid #e7e5e4;border-radius:4px;
-  padding:1px 3px;font-size:11px;font-family:'Work Sans',sans-serif;
+  width:72px; text-align:center; border:1px solid #e7e5e4; border-radius:4px;
+  padding:1px 6px; font-size:11px; font-family:'Work Sans',sans-serif;
   &:focus{outline:none;border-color:#610005;}
 `
 const RmBtn = styled.button`
@@ -420,6 +421,25 @@ export const SalesView = ({ navigate }) => {
   const [inlineQty, setInlineQty] = useState('')
   const [inlinePrice, setInlinePrice] = useState('')
 
+  // Price helpers (mask like PurchaseView): format display and accept digits-only input
+  const formatPriceDisplay = (value) => {
+    if (value == null || value === '') return ''
+    const num = typeof value === 'number' ? value : parseFloat(String(value).replace(',', '.'))
+    if (isNaN(num)) return ''
+    return num.toFixed(2).replace('.', ',')
+  }
+  const parseBRL = (v) => {
+    if (v == null || v === '') return 0
+    const digits = String(v).replace(/\D/g, '')
+    const cents = parseInt(digits || '0', 10)
+    return cents / 100
+  }
+  const handleInlinePriceChange = (e) => {
+    const digits = String(e.target.value || '').replace(/\D/g, '')
+    const cents = parseInt(digits || '0', 10)
+    setInlinePrice(cents === 0 ? '' : (cents / 100).toFixed(2).replace('.', ','))
+  }
+
   // Cart
   const [cart, setCart] = useState([])
 
@@ -432,11 +452,20 @@ export const SalesView = ({ navigate }) => {
   const [clientModal, setClientModal] = useState(false)
   const [clientForm, setClientForm] = useState({ nickname: '' })
   const [clientSaving, setClientSaving] = useState(false)
+  // Terms modal for client creation
+  const [showTermosModal, setShowTermosModal] = useState(false)
+  const [latestTermo, setLatestTermo] = useState(null)
+  const [termosLoading, setTermosLoading] = useState(false)
+  const [aceitaTermos, setAceitaTermos] = useState(false)
+  const [receberPromocoes, setReceberPromocoes] = useState(false)
 
   // Payment & options
   const [payment, setPayment] = useState('DINHEIRO')
   const [advOpen, setAdvOpen] = useState(false)
   const [hasDiscount, setHasDiscount] = useState(false)
+  // Split payments support
+  const [splitPayments, setSplitPayments] = useState(false)
+  const [paymentsList, setPaymentsList] = useState([])
 
   // Sale state
   const [submitting, setSubmitting] = useState(false)
@@ -497,9 +526,11 @@ export const SalesView = ({ navigate }) => {
   const selectProduct = (p) => {
     if (selectedId === p.id) { setSelectedId(null); return }
     setSelectedId(p.id)
-    setInlineQty(p.unit === 'UN' ? '1' : '0.500')
-    setInlinePrice(p.price > 0 ? String(p.price) : '')
-  }
+      // Do not prefill quantity; user must type desired amount
+      setInlineQty('')
+      // Prefill price formatted with two decimals (comma as decimal separator)
+      setInlinePrice(formatPriceDisplay(p.price > 0 ? p.price : ''))
+    }
 
   // Add to cart
   const addToCart = (p) => {
@@ -536,6 +567,11 @@ export const SalesView = ({ navigate }) => {
   const subtotal = cart.reduce((s, it) => s + it.qty * it.price, 0)
   const total = hasDiscount ? subtotal * 0.95 : subtotal
   const discount = subtotal - total
+  // surcharge calculations: sum of 5% over credit parts (frontend-visible only)
+  const surchargeTotal = (splitPayments && paymentsList && paymentsList.length > 0)
+    ? paymentsList.reduce((s, p) => s + ((p.paymentMethod === 'CREDITO') ? (parseBRL(p.valor) * 0.05) : 0), 0)
+    : (payment === 'CREDITO' ? total * 0.05 : 0)
+  const totalWithSurcharge = total + surchargeTotal
 
   // Client ops
   const handleSelectClient = (c) => {
@@ -543,7 +579,7 @@ export const SalesView = ({ navigate }) => {
   }
 
   const openClientModal = () => {
-    setClientForm({ nickname: clientSearch.trim() })
+    setClientForm({ nickname: clientSearch.trim(), aniversario: '' })
     setShowClientDrop(false)
     setClientModal(true)
   }
@@ -552,19 +588,59 @@ export const SalesView = ({ navigate }) => {
     e.preventDefault()
     const nickname = clientForm.nickname.trim()
     if (!nickname) return
+    // fetch latest termo and show terms modal
+    setTermosLoading(true)
+    try {
+      const data = await api.get('/termos/latest').then(r => r.data).catch(() => null)
+      setLatestTermo(data)
+      setAceitaTermos(false)
+      setReceberPromocoes(false)
+      setShowTermosModal(true)
+    } catch (err) {
+      console.error(err)
+      toast.error('Erro ao carregar termos. Tente novamente.')
+    } finally {
+      setTermosLoading(false)
+    }
+  }
+
+  const handleConfirmTermos = async (e) => {
+    e?.preventDefault()
+    if (!aceitaTermos) { toast.warning('É necessário aceitar os Termos de Serviço para cadastrar o cliente.'); return }
     setClientSaving(true)
     try {
+      const nickname = clientForm.nickname.trim()
       const id = await createClient({
         nickname,
         telefone: clientForm.telefone?.trim() || null,
-        documento: clientForm.documento?.trim() || null,
-        email:    clientForm.email?.trim()    || null,
+        aniversario: clientForm.aniversario || null,
+        aceitaTermosServico: true,
+        receberPromocoes: receberPromocoes ? true : false,
       })
-      setSelectedClient({ id: Number(id), nickname })
-      setClientSearch(''); setClientModal(false); setAnonymous(false)
-      toast.success(`Cliente "${nickname}" identificado!`)
-    } catch { toast.error('Erro ao cadastrar cliente.') }
-    finally { setClientSaving(false) }
+
+      if (id) {
+        setSelectedClient({ id: Number(id), nickname })
+        setClientSearch(''); setClientModal(false); setShowTermosModal(false); setAnonymous(false)
+        toast.success(`Cliente "${nickname}" identificado!`)
+      } else {
+        // fallback: try to find the created client by nickname
+        const all = await getAllClients().catch(() => [])
+        const found = (all || []).find(c => (c.nickname || '').trim() === nickname)
+        if (found) {
+          setSelectedClient(found)
+          setClientSearch(''); setClientModal(false); setShowTermosModal(false); setAnonymous(false)
+          toast.success(`Cliente "${nickname}" identificado!`)
+        } else {
+          setClientModal(false); setShowTermosModal(false); setAnonymous(false)
+          toast.warn('Cliente cadastrado, mas não foi possível obter o id automaticamente. Atualize a lista para selecioná-lo.')
+        }
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error('Erro ao cadastrar cliente.')
+    } finally {
+      setClientSaving(false)
+    }
   }
 
   // Finalize
@@ -574,11 +650,22 @@ export const SalesView = ({ navigate }) => {
     if (!userId) { toast.error('Sessão expirada. Faça login novamente.'); return }
     setSubmitting(true)
     try {
+      // build payments payload
+      let paymentsPayload = null
+      if (splitPayments && paymentsList && paymentsList.length > 0) {
+        paymentsPayload = paymentsList.map(p => ({
+          paymentMethod: p.paymentMethod,
+          valor: parseBRL(p.valor)
+        }))
+      } else {
+        paymentsPayload = [{ paymentMethod: payment, valor: Number((total).toFixed(2)) }]
+      }
+
       const payload = {
         userId,
-        paymentMethod: payment,
+        paymentMethod: payment, // legacy field kept for compatibility
+        payments: paymentsPayload,
         hasDiscount,
-        saleDate: new Date().toISOString().slice(0, 10),
         clienteId: (!anonymous && selectedClient) ? selectedClient.id : null,
         items: cart.map(it => ({ productId: it.productId, quantity: it.qty, precoUnitarioVenda: it.price })),
       }
@@ -586,7 +673,7 @@ export const SalesView = ({ navigate }) => {
       // Fetch full receipt
       let saleData = null
       if (saleId) saleData = await getSale(saleId).catch(() => null)
-      setReceipt({ saleId, saleData, cart: [...cart], total, payment, discount: hasDiscount ? discount : 0, client: !anonymous && selectedClient ? selectedClient : null })
+      setReceipt({ saleId, saleData, cart: [...cart], total, payment, discount: hasDiscount ? discount : 0, client: !anonymous && selectedClient ? selectedClient : null, paymentsSent: paymentsPayload })
       setCart([]); setHasDiscount(false); setSelectedClient(null); setAnonymous(true)
     } catch (e) {
       const msg = e?.response?.data?.message || ''
@@ -595,7 +682,35 @@ export const SalesView = ({ navigate }) => {
     } finally { setSubmitting(false) }
   }
 
-  const handleNewSale = () => { setReceipt(null); searchRef.current?.focus() }
+  const handleNewSale = () => {
+    setReceipt(null)
+    setCart([])
+    setHasDiscount(false)
+    setSelectedClient(null)
+    setAnonymous(true)
+    setPayment('DINHEIRO')
+    setSplitPayments(false)
+    setPaymentsList([])
+    setInlineQty('')
+    setInlinePrice('')
+    setSearch('')
+    searchRef.current?.focus()
+  }
+
+  const equalSplit = (n) => {
+    if (!n || n < 1) return
+    const per = Number((total / n).toFixed(2))
+    const arr = Array.from({ length: n }).map((_, i) => {
+      let v = per
+      if (i === n - 1) {
+        const sum = per * (n - 1)
+        v = Number((total - sum).toFixed(2))
+      }
+      return { id: Date.now() + i, paymentMethod: PAYMENTS[i % PAYMENTS.length].id, valor: formatPriceDisplay(v) }
+    })
+    setPaymentsList(arr)
+    setSplitPayments(true)
+  }
 
   const handlePrint = () => window.print()
 
@@ -670,9 +785,11 @@ export const SalesView = ({ navigate }) => {
                         onFocus={e => e.target.select()}
                         onKeyDown={e => e.key === 'Enter' && addToCart(p)} />
                       <ILabel>Preço R$</ILabel>
-                      <IInput type='number' min='0' step='0.01'
-                        value={inlinePrice} onChange={e => setInlinePrice(e.target.value)}
-                        onFocus={e => e.target.select()}
+                      <IInput type='text' inputMode='numeric' placeholder='0,00'
+                        value={inlinePrice}
+                        onChange={handleInlinePriceChange}
+                        onFocus={e => { e.target.select(); }}
+                        onBlur={() => setInlinePrice(formatPriceDisplay(inlinePrice))}
                         onKeyDown={e => e.key === 'Enter' && addToCart(p)} />
                       <IAdd onClick={() => addToCart(p)}>
                         <span className='material-symbols-outlined' style={{ fontSize:15 }}>add_shopping_cart</span>
@@ -784,15 +901,76 @@ export const SalesView = ({ navigate }) => {
               {/* Pagamento */}
               <Section>
                 <SLabel>Forma de Pagamento</SLabel>
-                <PayGrid>
-                  {PAYMENTS.map(opt => (
-                    <PayBtn key={opt.id} $a={payment === opt.id} onClick={() => setPayment(opt.id)}>
-                      <span className={`material-symbols-outlined icon${payment===opt.id?" fill":""}`}
-                        style={payment===opt.id?{fontVariationSettings:"'FILL' 1"}:{}}>{opt.icon}</span>
-                      <span className='txt'>{opt.label}</span>
-                    </PayBtn>
-                  ))}
-                </PayGrid>
+                {!splitPayments && (
+                  <PayGrid>
+                    {PAYMENTS.map(opt => (
+                      <PayBtn key={opt.id} $a={payment === opt.id} onClick={() => setPayment(opt.id)}>
+                        <span className={`material-symbols-outlined icon${payment===opt.id?" fill":""}`}
+                          style={payment===opt.id?{fontVariationSettings:"'FILL' 1"}:{}}>{opt.icon}</span>
+                        <span className='txt'>{opt.label}</span>
+                      </PayBtn>
+                    ))}
+                  </PayGrid>
+                )}
+
+                <div style={{marginTop:10, display:'flex', gap:8, alignItems:'center'}}>
+                  <button type='button' style={{padding:'6px 10px',borderRadius:8,border:'1px solid #e7e5e4',background:splitPayments ? '#fff8f8':'#fff'}} onClick={() => {
+                    if (!splitPayments) {
+                      setSplitPayments(true)
+                      setPaymentsList([{ id: Date.now(), paymentMethod: payment, valor: formatPriceDisplay(total) }])
+                    } else {
+                      setSplitPayments(false)
+                      setPaymentsList([])
+                    }
+                  }}>{splitPayments ? 'Cancelar divisão' : 'Dividir pagamento'}</button>
+
+                  {splitPayments && (
+                    <div style={{display:'flex', gap:8, alignItems:'center'}}>
+                      <div style={{fontSize:12,color:'#78716c'}}>Dividir igualmente</div>
+                      {[2,3,4].map(n => (
+                        <button key={n} type='button' style={{padding:'6px 8px',borderRadius:6,border:'1px solid #e7e5e4'}} onClick={() => equalSplit(n)}>{n}x</button>
+                      ))}
+                    </div>
+                  )}
+
+                  { (splitPayments || payment === 'CREDITO') && (
+                    <div style={{fontSize:12,color:'#78716c'}}>
+                      {splitPayments
+                        ? `Atribuído: ${fmt(paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0))} — Restante: ${fmt(Math.max(0, total - paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0)))}`
+                        : payment === 'CREDITO' ? `Acréscimo no crédito: ${fmt(total * 0.05)}` : null
+                      }
+                    </div>
+                  )}
+                </div>
+
+                {splitPayments && paymentsList.map((p, idx) => (
+                  <div key={p.id} style={{marginTop:8, display:'flex', gap:8, alignItems:'center'}}>
+                    <select value={p.paymentMethod} onChange={e => {
+                      const v = e.target.value
+                      setPaymentsList(prev => prev.map(it => it.id === p.id ? {...it, paymentMethod: v} : it))
+                    }}>
+                      {PAYMENTS.map(opt => <option key={opt.id} value={opt.id}>{opt.label}</option>)}
+                    </select>
+                    <input type='text' inputMode='numeric' placeholder='0,00' value={p.valor}
+                      onChange={e => {
+                        const digits = String(e.target.value || '').replace(/\D/g, '')
+                        const cents = parseInt(digits || '0', 10)
+                        const str = cents === 0 ? '' : (cents / 100).toFixed(2).replace('.', ',')
+                        setPaymentsList(prev => prev.map(it => it.id === p.id ? {...it, valor: str} : it))
+                      }}
+                      style={{padding:'8px 10px', border:'1px solid #e7e5e4', borderRadius:6, width:120}}
+                    />
+                    {p.paymentMethod === 'CREDITO' && <span style={{fontSize:12,color:'#1d4ed8'}}>{`+${fmt(parseBRL(p.valor)*0.05)} (5%)`}</span>}
+                    <button type='button' onClick={() => setPaymentsList(prev => prev.filter(it => it.id !== p.id))} style={{border:'none',background:'none',color:'#dc2626',cursor:'pointer'}}>Remover</button>
+                  </div>
+                ))}
+
+                {splitPayments && <div style={{marginTop:8}}><button type='button' onClick={() => {
+                  const assigned = paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0)
+                  const remaining = Math.max(0, total - assigned)
+                  setPaymentsList(prev => [...prev, { id: Date.now()+Math.random(), paymentMethod: payment, valor: formatPriceDisplay(remaining) }])
+                }} style={{padding:'6px 10px', borderRadius:8, border:'1px solid #e7e5e4'}}>Adicionar forma</button></div>}
+
               </Section>
 
               {/* Opções avançadas (desconto escondido) */}
@@ -817,8 +995,10 @@ export const SalesView = ({ navigate }) => {
                 <div>
                   <p className='lbl'>Total</p>
                   {hasDiscount && <p className='disc'>Com desconto de {fmt(discount)}</p>}
+                  {surchargeTotal > 0 && <p style={{fontSize:11,color:'#1d4ed8',margin:0}}>Acréscimos no cartão: {fmt(surchargeTotal)}</p>}
                 </div>
                 <p className='val'>{fmt(total)}</p>
+                {surchargeTotal > 0 && <p style={{fontSize:11,color:'#fff',opacity:0.95,marginTop:6}}>A pagar (com acréscimos): {fmt(totalWithSurcharge)}</p>}
               </TotalBox>
 
               <FinalBtn $empty={cart.length === 0} onClick={handleFinalize}
@@ -867,20 +1047,11 @@ export const SalesView = ({ navigate }) => {
                   />
                 </CModalField>
                 <CModalField>
-                  <label>CPF / CNPJ</label>
+                  <label>Aniversário</label>
                   <input
-                    placeholder='Ex: 000.000.000-00 ou 00.000.000/0001-00'
-                    value={clientForm.documento || ''}
-                    onChange={e => setClientForm(f => ({ ...f, documento: e.target.value }))}
-                  />
-                </CModalField>
-                <CModalField>
-                  <label>E-mail</label>
-                  <input
-                    type='email'
-                    placeholder='Ex: cliente@email.com'
-                    value={clientForm.email || ''}
-                    onChange={e => setClientForm(f => ({ ...f, email: e.target.value }))}
+                    type='date'
+                    value={clientForm.aniversario || ''}
+                    onChange={e => setClientForm(f => ({ ...f, aniversario: e.target.value }))}
                   />
                   <small>Todos os campos acima são opcionais, exceto o apelido.</small>
                 </CModalField>
@@ -896,12 +1067,59 @@ export const SalesView = ({ navigate }) => {
         </Overlay>
       )}
 
+      {showTermosModal && (
+        <Overlay onClick={() => setShowTermosModal(false)}>
+          <CModal onClick={e => e.stopPropagation()}>
+            <CModalHead>
+              <div>
+                <h2>Termos e Condições</h2>
+                <p style={{margin:0,fontSize:12,color:'#78716c'}}>Revise e aceite os Termos de Serviço para prosseguir com o cadastro do cliente.</p>
+              </div>
+              <button onClick={() => setShowTermosModal(false)}>
+                <span className='material-symbols-outlined'>close</span>
+              </button>
+            </CModalHead>
+
+            <form onSubmit={handleConfirmTermos}>
+              <CModalBody>
+                <div style={{maxHeight:220, overflowY:'auto', padding:12, border:'1px solid #f0f0f0', borderRadius:8, whiteSpace:'pre-wrap', fontSize:13, color:'#333'}}>
+                  {termosLoading ? 'Carregando termo...' : (latestTermo?.conteudo || 'Nenhum termo cadastrado.')}
+                </div>
+
+                <div style={{marginTop:12}}>
+                  <label style={{display:'flex', alignItems:'center', gap:8}}>
+                    <input type='checkbox' checked={aceitaTermos} onChange={e => setAceitaTermos(e.target.checked)} />
+                    Estou de acordo com os Termos de Serviço (obrigatório)
+                  </label>
+                  <label style={{display:'flex', alignItems:'center', gap:8, marginTop:8}}>
+                    <input type='checkbox' checked={receberPromocoes} onChange={e => setReceberPromocoes(e.target.checked)} />
+                    Desejo receber promoções e marketing (opcional)
+                  </label>
+                </div>
+
+              </CModalBody>
+
+              <CModalActions>
+                <CModalCancel type='button' onClick={() => setShowTermosModal(false)}>Cancelar</CModalCancel>
+                <CModalConfirm type='submit' disabled={!aceitaTermos || clientSaving}>
+                  {clientSaving ? 'Salvando...' : 'Aceitar e Salvar'}
+                </CModalConfirm>
+              </CModalActions>
+            </form>
+          </CModal>
+        </Overlay>
+      )}
+
       {/* ── RECIBO TÉRMICO 80mm ── */}
       {receipt && (() => {
         const cfg = loadStoreConfig()
-        const items = receipt.saleData?.items || receipt.cart
+        const saleData = receipt.saleData || null
+        const items = saleData?.items || receipt.cart
         const subtotal = items.reduce((a,it) => a + (it.quantity||it.qty)*(it.precoUnitarioVenda||it.price), 0)
+        const surchargeFromPayments = saleData?.payments ? saleData.payments.reduce((s,p) => s + Number(p.acrescimoValor || 0), 0) : 0
         const now = new Date().toLocaleString('pt-BR')
+        const baseTotal = saleData?.totalValue != null ? Number(saleData.totalValue) : Number(receipt.total || 0)
+        const totalWithSurcharge = baseTotal + surchargeFromPayments
         return (
         <Overlay>
           <ReceiptWrap>
@@ -911,6 +1129,7 @@ export const SalesView = ({ navigate }) => {
               {cfg.city    && <TCenter>{cfg.city}</TCenter>}
               {cfg.phone   && <TCenter>Tel: {cfg.phone}</TCenter>}
               <TDash />
+              {cfg.instagram && <TCenter>Instagram: {cfg.instagram}</TCenter>}
               <TCenter>{now}</TCenter>
               {receipt.saleId && <TCenter>Venda #{receipt.saleId}</TCenter>}
               <TDash />
@@ -939,9 +1158,28 @@ export const SalesView = ({ navigate }) => {
               )}
               <TTotalRow>
                 <span>TOTAL</span>
-                <span>{fmt(receipt.total)}</span>
+                <span>{fmt(totalWithSurcharge)}</span>
               </TTotalRow>
-              <TRow><span>PAGAMENTO</span><span>{PAY_LABELS[receipt.payment] || receipt.payment}</span></TRow>
+
+              {/* Payments breakdown (prefer server-provided payments) */}
+              {saleData?.payments && saleData.payments.length > 0 ? (
+                saleData.payments.map((p, i) => (
+                  <div key={i}>
+                    <TRow><span>{PAY_LABELS[p.paymentMethod] || p.paymentMethod}</span><span>{fmt(Number(p.valorPago != null ? p.valorPago : p.valor))}</span></TRow>
+                    {Number(p.acrescimoValor || 0) > 0 && <TSubRow>Taxa financeira: +{fmt(Number(p.acrescimoValor || 0))}</TSubRow>}
+                  </div>
+                ))
+              ) : receipt.paymentsSent && receipt.paymentsSent.length > 0 ? (
+                receipt.paymentsSent.map((p, i) => (
+                  <div key={i}>
+                    <TRow><span>{PAY_LABELS[p.paymentMethod] || p.paymentMethod}</span><span>{fmt(Number(p.valor != null ? p.valor : p.valorPago || 0))}</span></TRow>
+                    {(p.paymentMethod === 'CREDITO') && <TSubRow>Taxa financeira: +{fmt(Number(p.valor != null ? p.valor : p.valorPago || 0) * 0.05)}</TSubRow>}
+                  </div>
+                ))
+              ) : (
+                <TRow><span>PAGAMENTO</span><span>{PAY_LABELS[receipt.payment] || receipt.payment}</span></TRow>
+              )}
+
               {receipt.client && <TRow><span>CLIENTE</span><span>{receipt.client.nickname}</span></TRow>}
               <TDash />
               <TFooter>{cfg.footerMsg}</TFooter>

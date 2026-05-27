@@ -133,6 +133,11 @@ public class InventarioService {
                                     .map(Movimentacao::getQuantidade)
                                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+                    // Exclude fully-sold lots (net quantity <= 0)
+                    if (totalQuantity.compareTo(BigDecimal.ZERO) <= 0) {
+                        return null;
+                    }
+
                     CompraEmEstoqueDTO dto = new CompraEmEstoqueDTO();
                     dto.setPurchase_id(purchaseId);
                     dto.setPurchase_date(purchaseDate);
@@ -142,6 +147,7 @@ public class InventarioService {
 
                     return dto;
                 })
+                .filter(Objects::nonNull)
                 .toList();
     }
 
@@ -188,7 +194,7 @@ public class InventarioService {
             }
             for (Movimentacao m : group) {
                 if (m.getVenda() != null && m.getVenda().getDataVenda() != null) {
-                    LocalDate saleDate = m.getVenda().getDataVenda();
+                    java.time.LocalDate saleDate = m.getVenda().getDataVenda().toLocalDate();
                     if (newExpiringDate.isBefore(saleDate)) {
                         throw new BusinessException("Cannot set expiration date before existing sale date: " + saleDate);
                     }
@@ -207,6 +213,71 @@ public class InventarioService {
         purchaseMov.setQuantidade(newQuantity);
         if (newExpiringDate != null) purchaseMov.setDataValidade(newExpiringDate);
         return movimentacaoRepository.save(purchaseMov);
+    }
+
+    public java.util.Map<String, java.util.List<java.util.Map<String, Object>>> getAlerts(Integer expiryDays) {
+        int days = expiryDays != null ? expiryDays : 7;
+        java.time.LocalDate now = java.time.LocalDate.now();
+        java.time.LocalDate limit = now.plusDays(days);
+
+        java.util.List<java.util.Map<String, Object>> expiryAlerts = new java.util.ArrayList<>();
+        java.util.List<java.util.Map<String, Object>> lowStockAlerts = new java.util.ArrayList<>();
+
+        // Expiry alerts: iterate products with items in stock and use grouped purchases
+        java.util.List<Produto> productsWithItems = ProdutoRepository.findAllWithItems();
+        for (Produto p : productsWithItems) {
+            if (p.getItens() == null || p.getItens().isEmpty()) continue;
+            java.util.List<CompraEmEstoqueDTO> grouped = groupItemsByPurchase(p.getItens());
+            for (CompraEmEstoqueDTO c : grouped) {
+                if (c.getExpiring_date() != null && !c.getExpiring_date().isAfter(limit)) {
+                    long daysToExpiry = java.time.temporal.ChronoUnit.DAYS.between(now, c.getExpiring_date());
+                    java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
+                    map.put("type", "expiry");
+                    map.put("productId", p.getId());
+                    map.put("productName", p.getNome());
+                    map.put("brandName", p.getMarca() != null ? p.getMarca().getNome() : null);
+                    map.put("unitMeasurement", p.getUnidadeMedida() != null ? p.getUnidadeMedida().name() : "KG");
+                    map.put("purchaseId", c.getPurchase_id());
+                    map.put("expiringDate", c.getExpiring_date());
+                    map.put("quantity", c.getQuantity());
+                    map.put("daysToExpiry", daysToExpiry);
+                    // Human-friendly title and message
+                    String title = p.getNome() + (p.getMarca() != null && p.getMarca().getNome() != null ? " (" + p.getMarca().getNome() + ")" : "");
+                    map.put("title", title);
+                    String expDateStr = c.getExpiring_date() != null ? c.getExpiring_date().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) : null;
+                    map.put("message", "Lote " + c.getPurchase_id() + " vence em " + daysToExpiry + " dia(s) — " + expDateStr);
+                    expiryAlerts.add(map);
+                }
+            }
+        }
+
+        // Low-stock alerts: iterate all products and compare current stock to estoqueMinimo (default 5)
+        java.util.List<Produto> allProducts = ProdutoRepository.findAll();
+        for (Produto p : allProducts) {
+            Integer minStock = p.getEstoqueMinimo() != null ? p.getEstoqueMinimo() : 5;
+            java.math.BigDecimal total = movimentacaoRepository.sumQuantityByProdutoId(p.getId());
+            if (total == null) total = java.math.BigDecimal.ZERO;
+            if (total.compareTo(java.math.BigDecimal.valueOf(minStock)) < 0) {
+                java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
+                map.put("type", "low_stock");
+                map.put("productId", p.getId());
+                map.put("productName", p.getNome());
+                map.put("brandName", p.getMarca() != null ? p.getMarca().getNome() : null);
+                map.put("unitMeasurement", p.getUnidadeMedida() != null ? p.getUnidadeMedida().name() : "KG");
+                map.put("currentStock", total);
+                map.put("minStock", minStock);
+                // Human-friendly title and message
+                String title = p.getNome() + (p.getMarca() != null && p.getMarca().getNome() != null ? " (" + p.getMarca().getNome() + ")" : "");
+                map.put("title", title);
+                map.put("message", "Estoque atual: " + total + " — Mínimo definido: " + minStock);
+                lowStockAlerts.add(map);
+            }
+        }
+
+        java.util.Map<String, java.util.List<java.util.Map<String, Object>>> result = new java.util.LinkedHashMap<>();
+        result.put("expiryAlerts", expiryAlerts);
+        result.put("lowStockAlerts", lowStockAlerts);
+        return result;
     }
 
     public List<java.util.Map<String, Object>> getDiscards() {

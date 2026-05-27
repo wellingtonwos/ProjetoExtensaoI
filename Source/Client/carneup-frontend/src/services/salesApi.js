@@ -9,9 +9,19 @@ export const createSale = async (payload) => {
 
 export const getSale = (id) => api.get(`/sales/${id}`).then(r => r.data)
 export const searchClients = (q) => api.get('/clients/search', { params: { q, page: 0 } }).then(r => r.data?.content || [])
-export const createClient = (data) => {
+export const createClient = async (data) => {
   const payload = typeof data === 'string' ? { nickname: data } : data
-  return api.post('/clients', payload).then(r => r.headers?.location?.split('/').pop())
+  const r = await api.post('/clients', payload)
+  // try Location header first (recommended), otherwise check body, otherwise fallback to search by nickname
+  const loc = r.headers?.location || r.headers?.Location
+  if (loc) return loc.split('/').pop()
+  if (r.data && r.data.id) return String(r.data.id)
+  const q = payload.nickname || (typeof data === 'string' ? data : '')
+  if (q) {
+    const list = await api.get('/clients/search', { params: { q, page: 0 } }).then(rr => rr.data?.content || []).catch(() => [])
+    if (Array.isArray(list) && list.length > 0) return String(list[0].id)
+  }
+  return null
 }
 export const updateClient = (id, data) => api.put(`/clients/${id}`, data)
 export const getAllClients = () => api.get('/clients').then(r => r.data)
