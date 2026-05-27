@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class Produto {
     private String nome;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "unidade_medida")
+    @Column(name = "unidade_medida", columnDefinition = "unit_measurement")
     private UnitMeasurement unidadeMedida;
 
     @Column(name = "codigo")

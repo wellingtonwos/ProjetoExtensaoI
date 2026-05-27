@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -24,8 +25,8 @@ public class VendaPagamento {
     @JoinColumn(name = "fk_venda_id")
     private Venda venda;
 
-    @Convert(converter = PaymentMethodConverter.class)
-    @Column(name = "metodo_pagamento")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "metodo_pagamento", columnDefinition = "payment_method")
     private PaymentMethod metodoPagamento;
 
     @Column(name = "valor")

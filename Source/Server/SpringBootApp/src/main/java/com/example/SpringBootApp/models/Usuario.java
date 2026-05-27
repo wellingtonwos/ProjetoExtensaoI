@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class Usuario {
     private String senha;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "nivel_acesso")
+    @Column(name = "nivel_acesso", columnDefinition = "access_level")
     private AccessLevel accessLevel;
 
     @Column(name = "email")
