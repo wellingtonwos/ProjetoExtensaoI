@@ -39,6 +39,7 @@ public class VendaService {
     private final CompraRepository compraRepository;
     private final com.example.SpringBootApp.repositories.ClienteRepository clienteRepository;
     private final com.example.SpringBootApp.services.InventarioService inventarioService;
+    private final com.example.SpringBootApp.services.ConfiguracaoService configuracaoService;
     private static final java.math.BigDecimal AUTO_DISCARD_THRESHOLD_KG = new java.math.BigDecimal("0.1000");
     
     public Venda createSale(VendCreateDTO saleDTO) {
@@ -174,13 +175,26 @@ public class VendaService {
     private void persistPayments(com.example.SpringBootApp.DTOs.VendCreateDTO saleDTO, Venda savedSale, java.math.BigDecimal computedTotal) {
         java.util.List<com.example.SpringBootApp.DTOs.VendPaymentDTO> payments = saleDTO.getPayments();
         java.util.List<VendaPagamento> created = new java.util.ArrayList<>();
+
+        com.example.SpringBootApp.models.Configuracao config = null;
+        try {
+            config = configuracaoService.getConfiguracaoForDate(savedSale.getDataVenda());
+        } catch (Exception e) {
+            // best-effort fallback
+            try { config = configuracaoService.getLatestConfiguracao().orElse(null); } catch (Exception ex) { config = null; }
+        }
+
+        java.math.BigDecimal defaultCredit = new java.math.BigDecimal("5.00");
+        java.math.BigDecimal defaultDebit = java.math.BigDecimal.ZERO;
+        java.math.BigDecimal taxaCredito = config != null && config.getTaxaCredito() != null ? config.getTaxaCredito() : defaultCredit;
+        java.math.BigDecimal taxaDebito = config != null && config.getTaxaDebito() != null ? config.getTaxaDebito() : defaultDebit;
+
         if (payments == null || payments.isEmpty()) {
             // fallback to single payment from paymentMethod
             com.example.SpringBootApp.models.PaymentMethod pm = saleDTO.getPaymentMethod();
             java.math.BigDecimal valor = computedTotal != null ? computedTotal : java.math.BigDecimal.ZERO;
-            java.math.BigDecimal percent = (pm == com.example.SpringBootApp.models.PaymentMethod.CREDITO) ? new java.math.BigDecimal("5.00") : java.math.BigDecimal.ZERO;
-            java.math.BigDecimal acrescimo = valor.multiply(percent).divide(new java.math.BigDecimal("100"));
-            acrescimo = acrescimo.setScale(4, java.math.RoundingMode.HALF_UP);
+            java.math.BigDecimal percent = (pm == com.example.SpringBootApp.models.PaymentMethod.CREDITO) ? taxaCredito : (pm == com.example.SpringBootApp.models.PaymentMethod.DEBITO ? taxaDebito : java.math.BigDecimal.ZERO);
+            java.math.BigDecimal acrescimo = valor.multiply(percent).divide(new java.math.BigDecimal("100"), 4, java.math.RoundingMode.HALF_UP);
             java.math.BigDecimal valorPago = valor.add(acrescimo);
 
             VendaPagamento vp = new VendaPagamento();
@@ -196,9 +210,8 @@ public class VendaService {
             for (com.example.SpringBootApp.DTOs.VendPaymentDTO p : payments) {
                 com.example.SpringBootApp.models.PaymentMethod pm = p.getPaymentMethod();
                 java.math.BigDecimal valor = p.getValor() != null ? p.getValor() : java.math.BigDecimal.ZERO;
-                java.math.BigDecimal percent = (pm == com.example.SpringBootApp.models.PaymentMethod.CREDITO) ? new java.math.BigDecimal("5.00") : java.math.BigDecimal.ZERO;
-                java.math.BigDecimal acrescimo = valor.multiply(percent).divide(new java.math.BigDecimal("100"));
-                acrescimo = acrescimo.setScale(4, java.math.RoundingMode.HALF_UP);
+                java.math.BigDecimal percent = (pm == com.example.SpringBootApp.models.PaymentMethod.CREDITO) ? taxaCredito : (pm == com.example.SpringBootApp.models.PaymentMethod.DEBITO ? taxaDebito : java.math.BigDecimal.ZERO);
+                java.math.BigDecimal acrescimo = valor.multiply(percent).divide(new java.math.BigDecimal("100"), 4, java.math.RoundingMode.HALF_UP);
                 java.math.BigDecimal valorPago = valor.add(acrescimo);
 
                 VendaPagamento vp = new VendaPagamento();

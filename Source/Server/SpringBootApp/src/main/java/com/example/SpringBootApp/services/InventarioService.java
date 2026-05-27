@@ -29,6 +29,8 @@ public class InventarioService {
     private final MovimentacaoRepository movimentacaoRepository;
     private final ProdutoRepository ProdutoRepository;
     private final DecarteRepository decarteRepository;
+    private final com.example.SpringBootApp.repositories.VendaRepository vendaRepository;
+    private final com.example.SpringBootApp.services.ConfiguracaoService configuracaoService;
 
     public Compra createPurchase(CompraCreateDTO purchaseDTO) {
         for (CompraItemDTO itemDTO : purchaseDTO.getItems()) {
@@ -222,6 +224,7 @@ public class InventarioService {
 
         java.util.List<java.util.Map<String, Object>> expiryAlerts = new java.util.ArrayList<>();
         java.util.List<java.util.Map<String, Object>> lowStockAlerts = new java.util.ArrayList<>();
+        java.util.List<java.util.Map<String, Object>> profitAlerts = new java.util.ArrayList<>();
 
         // Expiry alerts: iterate products with items in stock and use grouped purchases
         java.util.List<Produto> productsWithItems = ProdutoRepository.findAllWithItems();
@@ -274,9 +277,62 @@ public class InventarioService {
             }
         }
 
+        // Profit alerts: evaluate today's sales and compare profit% to expected
+        java.time.LocalDateTime startOfDay = java.time.LocalDate.now().atStartOfDay();
+        java.time.LocalDateTime endOfDay = startOfDay.plusDays(1);
+        java.util.List<Venda> vendas = vendaRepository.findByDatavendaBetweenWithMovements(startOfDay, endOfDay);
+        for (Venda v : vendas) {
+            if (v.getValorTotal() == null || v.getValorTotal().compareTo(java.math.BigDecimal.ZERO) <= 0) continue;
+            com.example.SpringBootApp.models.Configuracao cfg = configuracaoService.getConfiguracaoForDate(v.getDataVenda());
+
+            java.math.BigDecimal totalCost = java.math.BigDecimal.ZERO;
+            if (v.getItens() != null) {
+                for (Movimentacao m : v.getItens()) {
+                    java.math.BigDecimal qty = m.getQuantidade() != null ? m.getQuantidade().abs() : java.math.BigDecimal.ZERO;
+                    java.math.BigDecimal unitCost = m.getPrecoUnitarioCompra() != null ? m.getPrecoUnitarioCompra() : java.math.BigDecimal.ZERO;
+                    totalCost = totalCost.add(qty.multiply(unitCost));
+                }
+            }
+
+            java.math.BigDecimal paymentFees = java.math.BigDecimal.ZERO;
+            if (v.getPagamentos() != null) {
+                for (VendaPagamento vp : v.getPagamentos()) {
+                    java.math.BigDecimal valor = vp.getValor() != null ? vp.getValor() : java.math.BigDecimal.ZERO;
+                    java.math.BigDecimal percent = java.math.BigDecimal.ZERO;
+                    if (vp.getMetodoPagamento() == com.example.SpringBootApp.models.PaymentMethod.CREDITO) {
+                        percent = cfg != null && cfg.getTaxaCredito() != null ? cfg.getTaxaCredito() : new java.math.BigDecimal("3.50");
+                    } else if (vp.getMetodoPagamento() == com.example.SpringBootApp.models.PaymentMethod.DEBITO) {
+                        percent = cfg != null && cfg.getTaxaDebito() != null ? cfg.getTaxaDebito() : new java.math.BigDecimal("2.50");
+                    }
+                    java.math.BigDecimal fee = valor.multiply(percent).divide(new java.math.BigDecimal("100"), 4, java.math.RoundingMode.HALF_UP);
+                    paymentFees = paymentFees.add(fee);
+                }
+            }
+
+            java.math.BigDecimal profit = v.getValorTotal().subtract(totalCost).subtract(paymentFees);
+            java.math.BigDecimal profitPct = v.getValorTotal().compareTo(java.math.BigDecimal.ZERO) == 0 ? java.math.BigDecimal.ZERO : profit.divide(v.getValorTotal(), 4, java.math.RoundingMode.HALF_UP).multiply(new java.math.BigDecimal("100"));
+            java.math.BigDecimal expected = cfg != null && cfg.getLucroEsperado() != null ? cfg.getLucroEsperado() : new java.math.BigDecimal("20.00");
+            if (profitPct.compareTo(expected) < 0) {
+                java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
+                map.put("type", "low_profit");
+                map.put("saleId", v.getId());
+                map.put("date", v.getDataVenda());
+                map.put("cliente", v.getCliente() != null ? v.getCliente().getNome() : null);
+                map.put("profit", profit);
+                map.put("profitPercent", profitPct.setScale(2, java.math.RoundingMode.HALF_UP));
+                map.put("expectedPercent", expected);
+                String title = "Venda #" + v.getId() + " com lucro abaixo do esperado";
+                map.put("title", title);
+                String message = "Lucro: " + map.get("profitPercent") + "% — Esperado: " + expected + "%";
+                map.put("message", message);
+                profitAlerts.add(map);
+            }
+        }
+
         java.util.Map<String, java.util.List<java.util.Map<String, Object>>> result = new java.util.LinkedHashMap<>();
         result.put("expiryAlerts", expiryAlerts);
         result.put("lowStockAlerts", lowStockAlerts);
+        result.put("profitAlerts", profitAlerts);
         return result;
     }
 

@@ -15,6 +15,10 @@ import java.util.Optional;
 public class ConfiguracaoService {
     private final ConfiguracaoRepository configuracaoRepository;
 
+    private static final java.math.BigDecimal DEFAULT_LUCRO_ESPERADO = new java.math.BigDecimal("20.00");
+    private static final java.math.BigDecimal DEFAULT_TAXA_DEBITO = new java.math.BigDecimal("2.50");
+    private static final java.math.BigDecimal DEFAULT_TAXA_CREDITO = new java.math.BigDecimal("3.50");
+
     public Configuracao createConfiguracao(ConfiguracaoCreateDTO dto) {
         Configuracao c = new Configuracao();
         c.setLucroEsperado(dto.getLucroEsperado());
@@ -31,5 +35,19 @@ public class ConfiguracaoService {
 
     public List<Configuracao> getAllConfiguracoes() {
         return configuracaoRepository.findAllByOrderByIdDesc();
+    }
+
+    public Configuracao getConfiguracaoForDate(LocalDateTime date) {
+        Optional<Configuracao> opt = configuracaoRepository.findFirstByCreatedAtLessThanEqualOrderByCreatedAtDesc(date);
+        if (opt.isPresent()) return opt.get();
+        Optional<Configuracao> latest = getLatestConfiguracao();
+        if (latest.isPresent()) return latest.get();
+        Configuracao c = new Configuracao();
+        c.setLucroEsperado(DEFAULT_LUCRO_ESPERADO);
+        c.setTaxaDebito(DEFAULT_TAXA_DEBITO);
+        c.setTaxaCredito(DEFAULT_TAXA_CREDITO);
+        c.setCreatedAt(LocalDateTime.now());
+        c.setUpdatedAt(LocalDateTime.now());
+        return c;
     }
 }
