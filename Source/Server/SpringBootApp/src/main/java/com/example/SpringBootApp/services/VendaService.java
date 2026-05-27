@@ -189,10 +189,12 @@ public class VendaService {
         java.math.BigDecimal taxaCredito = config != null && config.getTaxaCredito() != null ? config.getTaxaCredito() : defaultCredit;
         java.math.BigDecimal taxaDebito = config != null && config.getTaxaDebito() != null ? config.getTaxaDebito() : defaultDebit;
 
+        java.math.BigDecimal expectedTotal = computedTotal != null ? computedTotal.setScale(2, java.math.RoundingMode.HALF_UP) : java.math.BigDecimal.ZERO;
+
         if (payments == null || payments.isEmpty()) {
             // fallback to single payment from paymentMethod
             com.example.SpringBootApp.models.PaymentMethod pm = saleDTO.getPaymentMethod();
-            java.math.BigDecimal valor = computedTotal != null ? computedTotal : java.math.BigDecimal.ZERO;
+            java.math.BigDecimal valor = expectedTotal;
             java.math.BigDecimal percent = (pm == com.example.SpringBootApp.models.PaymentMethod.CREDITO) ? taxaCredito : (pm == com.example.SpringBootApp.models.PaymentMethod.DEBITO ? taxaDebito : java.math.BigDecimal.ZERO);
             java.math.BigDecimal acrescimo = valor.multiply(percent).divide(new java.math.BigDecimal("100"), 4, java.math.RoundingMode.HALF_UP);
             java.math.BigDecimal valorPago = valor.add(acrescimo);
@@ -207,9 +209,35 @@ public class VendaService {
             created.add(vp);
             if (vendaPagamentoRepository != null) vendaPagamentoRepository.save(vp);
         } else {
+            // sum payments and adjust last payment by cent difference so totals match
+            java.math.BigDecimal sum = java.math.BigDecimal.ZERO;
+            for (com.example.SpringBootApp.DTOs.VendPaymentDTO p : payments) {
+                java.math.BigDecimal v = p.getValor() != null ? p.getValor() : java.math.BigDecimal.ZERO;
+                sum = sum.add(v);
+            }
+            sum = sum.setScale(2, java.math.RoundingMode.HALF_UP);
+
+            long expectedCents = expectedTotal.multiply(new java.math.BigDecimal("100")).setScale(0, java.math.RoundingMode.HALF_UP).longValue();
+            long sumCents = sum.multiply(new java.math.BigDecimal("100")).setScale(0, java.math.RoundingMode.HALF_UP).longValue();
+
+            if (sumCents > expectedCents) {
+                throw new BusinessException("Total dos pagamentos excede o valor total da venda");
+            }
+
+            long diffCents = expectedCents - sumCents;
+            if (diffCents != 0 && !payments.isEmpty()) {
+                // add the cent difference to the last payment value
+                for (int i = payments.size() - 1; i >= 0; i--) {
+                    com.example.SpringBootApp.DTOs.VendPaymentDTO last = payments.get(i);
+                    if (last.getValor() == null) last.setValor(java.math.BigDecimal.ZERO);
+                    last.setValor(last.getValor().add(new java.math.BigDecimal(diffCents).divide(new java.math.BigDecimal("100")).setScale(2, java.math.RoundingMode.HALF_UP)));
+                    break;
+                }
+            }
+
             for (com.example.SpringBootApp.DTOs.VendPaymentDTO p : payments) {
                 com.example.SpringBootApp.models.PaymentMethod pm = p.getPaymentMethod();
-                java.math.BigDecimal valor = p.getValor() != null ? p.getValor() : java.math.BigDecimal.ZERO;
+                java.math.BigDecimal valor = p.getValor() != null ? p.getValor().setScale(2, java.math.RoundingMode.HALF_UP) : java.math.BigDecimal.ZERO;
                 java.math.BigDecimal percent = (pm == com.example.SpringBootApp.models.PaymentMethod.CREDITO) ? taxaCredito : (pm == com.example.SpringBootApp.models.PaymentMethod.DEBITO ? taxaDebito : java.math.BigDecimal.ZERO);
                 java.math.BigDecimal acrescimo = valor.multiply(percent).divide(new java.math.BigDecimal("100"), 4, java.math.RoundingMode.HALF_UP);
                 java.math.BigDecimal valorPago = valor.add(acrescimo);
