@@ -295,7 +295,7 @@ export const StockView = ({ navigate }) => {
 	const [totalItems, setTotalItems] = useState(0)
 
 	// product form state
-	const [form, setForm] = useState({ name: '', code: '', unit: 'KG', perecivel: false, price: '', categoryId: '', brandId: '', minStock: '5' })
+	const [form, setForm] = useState({ name: '', code: '', unit: 'KG', perecivel: true, price: '', categoryId: '', brandId: '', minStock: '5' })
 	const [formPriceDisplay, setFormPriceDisplay] = useState('')
 	const [submitting, setSubmitting] = useState(false)
 
@@ -477,7 +477,7 @@ export const StockView = ({ navigate }) => {
 				minStock: form.minStock !== undefined && form.minStock !== '' ? Number(form.minStock) : 5,
 			})
 			toast.success(`Produto "${form.name}" cadastrado com sucesso!`)
-			setForm({ name: '', code: '', unit: 'KG', perecivel: false, price: '', categoryId: '', brandId: '', minStock: '5' })
+			setForm({ name: '', code: '', unit: 'KG', perecivel: true, price: '', categoryId: '', brandId: '', minStock: '5' })
 			setFormPriceDisplay('')
 			setSearchQuery('')
 			setCurrentPage(1)
