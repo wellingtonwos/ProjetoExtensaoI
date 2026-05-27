@@ -67,7 +67,7 @@ class ClienteServiceCreateTest {
         fTermo.setAccessible(true);
         fTermo.set(service, termoService);
 
-        ClienteCreateDTO dto = new ClienteCreateDTO("Ana", "9999", LocalDate.now());
+        ClienteCreateDTO dto = new ClienteCreateDTO("Ana", "9999", LocalDate.now().minusYears(20));
         dto.setAceitaTermosServico(true);
         dto.setReceberPromocoes(true);
 
