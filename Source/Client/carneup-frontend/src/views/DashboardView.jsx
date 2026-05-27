@@ -303,7 +303,7 @@ export const DashboardView = ({ navigate }) => {
 	const [loading, setLoading] = useState(true)
 	const [hidden, setHidden] = useState(true)   // valores ocultos por padrão
 	const [birthdayClients, setBirthdayClients] = useState([])
-	const [alerts, setAlerts] = useState({ expiryAlerts: [], lowStockAlerts: [] })
+	const [alerts, setAlerts] = useState({ expiryAlerts: [], lowStockAlerts: [], profitAlerts: [] })
 		
 	const val = (formatted) => hidden ? MASK : formatted
 
@@ -350,7 +350,7 @@ export const DashboardView = ({ navigate }) => {
 				return md === todayMD && optedIn
 			})
 			setBirthdayClients(bdays)
-			setAlerts(alertsResp.data || { expiryAlerts: [], lowStockAlerts: [] })
+			setAlerts(alertsResp.data || { expiryAlerts: [], lowStockAlerts: [], profitAlerts: [] })
 		}).finally(() => setLoading(false))
 	}, [])
 
@@ -451,7 +451,7 @@ export const DashboardView = ({ navigate }) => {
 									</div>
 								)}
 
-								{!loading && (alerts.expiryAlerts?.length === 0 && alerts.lowStockAlerts?.length === 0) && (
+								{!loading && (alerts.expiryAlerts?.length === 0 && alerts.lowStockAlerts?.length === 0 && alerts.profitAlerts?.length === 0) && (
 									<div style={{ padding: 16 }}>
 										<EmptyMsg>
 											<span className='material-symbols-outlined'>campaign</span>
@@ -489,7 +489,25 @@ export const DashboardView = ({ navigate }) => {
 									</div>
 								)}
 
-								{!loading && (alerts.lowStockAlerts?.length > 0) && (
+								{!loading && (alerts.profitAlerts?.length > 0) && (
+							<div>
+								<SectionLabel style={{ padding: '12px 16px 0' }}>Lucro Abaixo do Esperado</SectionLabel>
+								{alerts.profitAlerts.map((a, idx) => {
+									return (
+										<SaleRow key={`profit-${idx}`}>
+											<SaleIcon><span className='material-symbols-outlined'>campaign</span></SaleIcon>
+											<SaleInfo>
+												<p className='date'><strong>{a.title || `Venda #${a.saleId}`}</strong> {a.cliente ? `· Cliente: ${a.cliente}` : ''} · Lucro: <strong>{(a.profitPercent != null ? Number(a.profitPercent) : 0).toFixed(2)}%</strong></p>
+											</SaleInfo>
+											<SaleRight>
+												<p className='value'>{a.profit != null ? fmt(Number(a.profit)) : ''}</p>
+											</SaleRight>
+											</SaleRow>
+									)
+								})}
+							</div>
+						)}
+						{!loading && (alerts.lowStockAlerts?.length > 0) && (
 									<div>
 										<SectionLabel style={{ padding: '12px 16px 0' }}>Estoque Baixo</SectionLabel>
 										{alerts.lowStockAlerts.map((a, idx) => {

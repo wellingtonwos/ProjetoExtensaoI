@@ -1,6 +1,8 @@
 package com.example.SpringBootApp.DTOs;
 
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,6 +16,8 @@ import java.math.BigDecimal;
 public class ConfiguracaoCreateDTO {
     @NotNull(message = "lucroEsperado is required")
     @DecimalMin(value = "0.0", inclusive = true, message = "lucroEsperado must be >= 0")
+    @DecimalMax(value = "100.0", inclusive = true, message = "lucroEsperado must be <= 100")
+    @Digits(integer = 3, fraction = 2, message = "lucroEsperado must have at most 2 decimals")
     private BigDecimal lucroEsperado;
 
     @NotNull(message = "taxaDebito is required")

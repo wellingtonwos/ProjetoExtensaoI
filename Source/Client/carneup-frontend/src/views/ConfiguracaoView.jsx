@@ -329,15 +329,15 @@ export const ConfiguracaoView = ({ navigate }) => {
                   <Grid $cols='1fr 1fr 1fr' style={{ marginBottom: 8 }}>
                     <Field>
                       <Label>Lucro Esperado (%)</Label>
-                      <Input value={financeConfig.lucroEsperado} onChange={e => setFinanceConfig(f => ({ ...f, lucroEsperado: e.target.value }))} placeholder='20.00' />
+                      <Input type='number' min='0' max='100' step='0.01' value={financeConfig.lucroEsperado} onChange={e => setFinanceConfig(f => ({ ...f, lucroEsperado: e.target.value }))} onBlur={e => setFinanceConfig(f => ({ ...f, lucroEsperado: e.target.value === '' ? '' : Number(e.target.value).toFixed(2) }))} placeholder='20.00' />
                     </Field>
                     <Field>
                       <Label>Taxa Débito (%)</Label>
-                      <Input value={financeConfig.taxaDebito} onChange={e => setFinanceConfig(f => ({ ...f, taxaDebito: e.target.value }))} placeholder='2.50' />
+                      <Input type='number' min='0' step='0.01' value={financeConfig.taxaDebito} onChange={e => setFinanceConfig(f => ({ ...f, taxaDebito: e.target.value }))} onBlur={e => setFinanceConfig(f => ({ ...f, taxaDebito: e.target.value === '' ? '' : Number(e.target.value).toFixed(2) }))} placeholder='2.50' />
                     </Field>
                     <Field>
                       <Label>Taxa Crédito (%)</Label>
-                      <Input value={financeConfig.taxaCredito} onChange={e => setFinanceConfig(f => ({ ...f, taxaCredito: e.target.value }))} placeholder='3.50' />
+                      <Input type='number' min='0' step='0.01' value={financeConfig.taxaCredito} onChange={e => setFinanceConfig(f => ({ ...f, taxaCredito: e.target.value }))} onBlur={e => setFinanceConfig(f => ({ ...f, taxaCredito: e.target.value === '' ? '' : Number(e.target.value).toFixed(2) }))} placeholder='3.50' />
                     </Field>
                   </Grid>
                   <div style={{ fontSize: 12, color: 'var(--muted)' }}>
