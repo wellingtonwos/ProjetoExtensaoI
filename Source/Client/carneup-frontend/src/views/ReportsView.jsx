@@ -4,6 +4,7 @@ import { Sidebar } from '../components/Sidebar'
 import api from '../services/apiClient'
 import { getAllClients, updateClient, getClientSales } from '../services/salesApi'
 import { toast } from 'react-toastify'
+import { toTitleCase, titleCaseHandler } from '../services/textUtils'
 import PaginationBar from '../components/PaginationBar'
 
 // ── Styles ─────────────────────────────────────────────────────────────────────
@@ -316,9 +317,48 @@ export const ReportsView = ({ navigate, initialTab }) => {
 
   // Client handlers
   const openEdit = (c) => { setEditClient(c); setEditForm({ nickname: c.nickname, telefone: c.telefone||'', aniversario: c.aniversario||'' }) }
+
+  const handleEditNicknameChange = titleCaseHandler((val) => setEditForm(f => ({ ...f, nickname: val })))
+
+  const formatPhoneDisplay = (raw) => {
+    if (!raw) return ''
+    const digits = String(raw).replace(/\D/g,'')
+    if (digits.length <= 2) return `(${digits}`
+    if (digits.length <= 6) return `(${digits.slice(0,2)}) ${digits.slice(2)}`
+    if (digits.length <= 10) return `(${digits.slice(0,2)}) ${digits.slice(2,6)}-${digits.slice(6)}`
+    return `(${digits.slice(0,2)}) ${digits.slice(2,7)}-${digits.slice(7,11)}`
+  }
+
+  const phoneIsValid = (raw) => {
+    if (!raw) return true
+    const d = String(raw).replace(/\D/g,'')
+    return d.length === 10 || d.length === 11
+  }
+
+  const handleEditPhoneChange = (e) => {
+    const digits = String(e.target.value || '').replace(/\D/g,'')
+    setEditForm(f => ({ ...f, telefone: digits }))
+  }
+
+  const isBirthdayUnder18 = (rawDate) => {
+    if (!rawDate) return false
+    try {
+      const parts = rawDate.split('-')
+      if (parts.length < 3) return false
+      const y = Number(parts[0]), m = Number(parts[1]) - 1, d = Number(parts[2])
+      const b = new Date(y,m,d)
+      const today = new Date()
+      let age = today.getFullYear() - b.getFullYear()
+      const mDiff = today.getMonth() - b.getMonth()
+      if (mDiff < 0 || (mDiff === 0 && today.getDate() < b.getDate())) age--
+      return age < 18
+    } catch { return false }
+  }
   const handleEditSave = async (e) => {
     e.preventDefault()
     if (!editForm.nickname?.trim()) return
+    if (editForm.telefone && !phoneIsValid(editForm.telefone)) { toast.error('Telefone inválido'); return }
+    if (isBirthdayUnder18(editForm.aniversario)) { toast.error('Cliente deve ser maior de 18 anos'); return }
     setEditSaving(true)
     try {
       await updateClient(editClient.id, { nickname: editForm.nickname.trim(), telefone: editForm.telefone||null, aniversario: editForm.aniversario||null })
@@ -842,21 +882,23 @@ export const ReportsView = ({ navigate, initialTab }) => {
             <EMBody>
               <EMField>
                 <label>Apelido / Nome *</label>
-                <input autoFocus value={editForm.nickname} onChange={e => setEditForm(f=>({...f,nickname:e.target.value}))} required />
+                <input autoFocus value={editForm.nickname} onChange={handleEditNicknameChange} required />
               </EMField>
               <EMField>
                 <label>Telefone</label>
-                <input value={editForm.telefone} onChange={e => setEditForm(f=>({...f,telefone:e.target.value}))} placeholder='(11) 99999-9999' />
+                <input value={formatPhoneDisplay(editForm.telefone)} onChange={handleEditPhoneChange} placeholder='(11) 99999-9999' />
+                {editForm.telefone && !phoneIsValid(editForm.telefone) && <small style={{color:'#dc2626'}}>Telefone inválido</small>}
               </EMField>
               <EMField>
                 <label>Aniversário</label>
                 <input type='date' value={editForm.aniversario} onChange={e => setEditForm(f=>({...f,aniversario:e.target.value}))} />
+                {editForm.aniversario && isBirthdayUnder18(editForm.aniversario) && <small style={{color:'#dc2626'}}>Cliente deve ser maior de 18 anos</small>}
                 <small>Todos os campos exceto o apelido são opcionais.</small>
               </EMField>
             </EMBody>
             <EMActions>
               <EMCancel type='button' onClick={() => setEditClient(null)}>Cancelar</EMCancel>
-              <EMSave type='submit' disabled={editSaving}>{editSaving?'Salvando...':'Salvar Alterações'}</EMSave>
+              <EMSave type='submit' disabled={editSaving || !editForm.nickname?.trim() || (editForm.telefone && !phoneIsValid(editForm.telefone)) || isBirthdayUnder18(editForm.aniversario)}>{editSaving?'Salvando...':'Salvar Alterações'}</EMSave>
             </EMActions>
           </form>
         </EditModal>

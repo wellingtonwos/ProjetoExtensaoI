@@ -6,6 +6,7 @@ import { createSale, getSale, searchClients, createClient, getAllClients } from 
 import api from '../services/apiClient'
 import { toast } from 'react-toastify'
 import { loadStoreConfig } from './ConfiguracaoView'
+import { toTitleCase, titleCaseHandler } from '../services/textUtils'
 
 // ── Animations ─────────────────────────────────────────────────────────────────
 const slideIn = keyframes`from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}`
@@ -450,8 +451,47 @@ export const SalesView = ({ navigate }) => {
   const [selectedClient, setSelectedClient] = useState(null)
   const [showClientDrop, setShowClientDrop] = useState(false)
   const [clientModal, setClientModal] = useState(false)
-  const [clientForm, setClientForm] = useState({ nickname: '' })
+  const [clientForm, setClientForm] = useState({ nickname: '', telefone: '', aniversario: '' })
   const [clientSaving, setClientSaving] = useState(false)
+
+  // Phone formatting helper (view-only formatting; backend receives raw digits)
+  const formatPhoneDisplay = (raw) => {
+    if (!raw) return ''
+    const digits = String(raw).replace(/\D/g,'')
+    if (digits.length <= 2) return `(${digits}`
+    if (digits.length <= 6) return `(${digits.slice(0,2)}) ${digits.slice(2)}`
+    if (digits.length <= 10) return `(${digits.slice(0,2)}) ${digits.slice(2,6)}-${digits.slice(6)}`
+    return `(${digits.slice(0,2)}) ${digits.slice(2,7)}-${digits.slice(7,11)}`
+  }
+
+  const phoneIsValid = (raw) => {
+    if (!raw) return true
+    const d = String(raw).replace(/\D/g,'')
+    return d.length === 10 || d.length === 11
+  }
+
+  // Title case handler (preserves cursor)
+  const handleNicknameChange = titleCaseHandler((val) => setClientForm(f => ({ ...f, nickname: val })))
+
+  const handlePhoneChange = (e) => {
+    const digits = String(e.target.value || '').replace(/\D/g,'')
+    setClientForm(f => ({ ...f, telefone: digits }))
+  }
+
+  const isClientBirthdayUnder18 = (rawDate) => {
+    if (!rawDate) return false
+    try {
+      const parts = rawDate.split('-')
+      if (parts.length < 3) return false
+      const y = Number(parts[0]), m = Number(parts[1]) - 1, d = Number(parts[2])
+      const b = new Date(y, m, d)
+      const today = new Date()
+      let age = today.getFullYear() - b.getFullYear()
+      const mDiff = today.getMonth() - b.getMonth()
+      if (mDiff < 0 || (mDiff === 0 && today.getDate() < b.getDate())) age--
+      return age < 18
+    } catch { return false }
+  }
   // Terms modal for client creation
   const [showTermosModal, setShowTermosModal] = useState(false)
   const [latestTermo, setLatestTermo] = useState(null)
@@ -607,6 +647,8 @@ export const SalesView = ({ navigate }) => {
   const handleConfirmTermos = async (e) => {
     e?.preventDefault()
     if (!aceitaTermos) { toast.warning('É necessário aceitar os Termos de Serviço para cadastrar o cliente.'); return }
+    if (clientForm.telefone && !phoneIsValid(clientForm.telefone)) { toast.error('Telefone inválido.'); return }
+    if (isClientBirthdayUnder18(clientForm.aniversario)) { toast.error('Cliente deve ser maior de 18 anos.'); return }
     setClientSaving(true)
     try {
       const nickname = clientForm.nickname.trim()
@@ -1033,7 +1075,7 @@ export const SalesView = ({ navigate }) => {
                     autoFocus
                     placeholder='Ex: João da Silva, Mesa 3...'
                     value={clientForm.nickname}
-                    onChange={e => setClientForm(f => ({ ...f, nickname: e.target.value }))}
+                    onChange={handleNicknameChange}
                     required
                   />
                   <small>Obrigatório — usado para identificar o cliente nos relatórios.</small>
@@ -1042,9 +1084,10 @@ export const SalesView = ({ navigate }) => {
                   <label>Telefone</label>
                   <input
                     placeholder='Ex: (11) 99999-9999'
-                    value={clientForm.telefone || ''}
-                    onChange={e => setClientForm(f => ({ ...f, telefone: e.target.value }))}
+                    value={formatPhoneDisplay(clientForm.telefone)}
+                    onChange={handlePhoneChange}
                   />
+                  {clientForm.telefone && !phoneIsValid(clientForm.telefone) && <small style={{color:'#dc2626'}}>Telefone inválido — use (XX) 99999-9999</small>}
                 </CModalField>
                 <CModalField>
                   <label>Aniversário</label>
@@ -1053,12 +1096,13 @@ export const SalesView = ({ navigate }) => {
                     value={clientForm.aniversario || ''}
                     onChange={e => setClientForm(f => ({ ...f, aniversario: e.target.value }))}
                   />
+                  {clientForm.aniversario && isClientBirthdayUnder18(clientForm.aniversario) && <small style={{color:'#dc2626'}}>Cliente deve ser maior de 18 anos</small>}
                   <small>Todos os campos acima são opcionais, exceto o apelido.</small>
                 </CModalField>
               </CModalBody>
               <CModalActions>
                 <CModalCancel type='button' onClick={() => setClientModal(false)}>Cancelar</CModalCancel>
-                <CModalConfirm type='submit' disabled={clientSaving || !clientForm.nickname.trim()}>
+                <CModalConfirm type='submit' disabled={clientSaving || !clientForm.nickname.trim() || (clientForm.telefone && !phoneIsValid(clientForm.telefone)) || isClientBirthdayUnder18(clientForm.aniversario)}>
                   {clientSaving ? 'Salvando...' : 'Confirmar Identificação'}
                 </CModalConfirm>
               </CModalActions>
@@ -1101,7 +1145,7 @@ export const SalesView = ({ navigate }) => {
 
               <CModalActions>
                 <CModalCancel type='button' onClick={() => setShowTermosModal(false)}>Cancelar</CModalCancel>
-                <CModalConfirm type='submit' disabled={!aceitaTermos || clientSaving}>
+                <CModalConfirm type='submit' disabled={!aceitaTermos || clientSaving || (clientForm.telefone && !phoneIsValid(clientForm.telefone)) || isClientBirthdayUnder18(clientForm.aniversario)}>
                   {clientSaving ? 'Salvando...' : 'Aceitar e Salvar'}
                 </CModalConfirm>
               </CModalActions>

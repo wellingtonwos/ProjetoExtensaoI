@@ -46,6 +46,14 @@ public class ClienteService {
             throw new BusinessException("Cliente deve aceitar os termos de serviço para cadastro");
         }
 
+        // Validate age if birthday provided: must be >= 18
+        if (dto.getAniversario() != null) {
+            java.time.Period p = java.time.Period.between(dto.getAniversario(), java.time.LocalDate.now());
+            if (p.getYears() < 18) {
+                throw new BusinessException("Cliente deve ser maior de 18 anos para cadastro");
+            }
+        }
+
         Cliente c = new Cliente();
         c.setNickname(dto.getNickname());
         c.setTelefone(dto.getTelefone());
@@ -76,6 +84,11 @@ public class ClienteService {
     public Cliente updateClient(Long id, ClienteCreateDTO dto) {
         Cliente c = clienteRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente not found: " + id));
+        // Validate age if provided
+        if (dto.getAniversario() != null) {
+            java.time.Period p = java.time.Period.between(dto.getAniversario(), java.time.LocalDate.now());
+            if (p.getYears() < 18) throw new BusinessException("Cliente deve ser maior de 18 anos");
+        }
         c.setNickname(dto.getNickname());
         c.setTelefone(dto.getTelefone());
         c.setAniversario(dto.getAniversario());
