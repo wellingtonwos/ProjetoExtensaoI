@@ -225,7 +225,8 @@ class ProdutoControllerTest {
 
         // Arrange
         when(catalogService.getAllProducts(0)).thenReturn(Page.empty(PageRequest.of(0, 10)));
-        // Act & Assert
+
+        // Act & Assert
         mockMvc.perform(get("/products").param("page","0"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())

@@ -1,10 +1,10 @@
 import styled, { keyframes } from 'styled-components'
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { Sidebar } from '../components/Sidebar'
-import productsApi, { getAllProductsUnpaged } from '../services/productsApi'
+import { getAllProductsUnpaged } from '../services/productsApi'
 import { createSale, getSale, searchClients, createClient } from '../services/salesApi'
 import { toast } from 'react-toastify'
-import { loadStoreConfig } from './ConfiguracaoView'
+import { loadStoreConfig } from '../services/storeConfig'
 
 // ── Animations ─────────────────────────────────────────────────────────────────
 const slideIn = keyframes`from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}`
@@ -900,7 +900,6 @@ export const SalesView = ({ navigate }) => {
       {receipt && (() => {
         const cfg = loadStoreConfig()
         const items = receipt.saleData?.items || receipt.cart
-        const subtotal = items.reduce((a,it) => a + (it.quantity||it.qty)*(it.precoUnitarioVenda||it.price), 0)
         const now = new Date().toLocaleString('pt-BR')
         return (
         <Overlay>

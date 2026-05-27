@@ -137,7 +137,7 @@ export const ClienteHistoricoView = ({ navigate, clientId }) => {
       setSales(clientSales)
     }).catch(() => toast.error('Erro ao carregar dados do cliente.'))
     .finally(() => setLoading(false))
-  }, [clientId])
+  }, [clientId, navigate])
 
   if (loading) return (
     <Wrapper>

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import styled from 'styled-components'
 import { login as loginRequest } from '../services/authApi'
 import { AuthShell } from '../components/AuthShell'
-import { useAttributes } from '../context/AttributesContext'
+import { useAttributes } from '../context/attributes'
 import { setToken } from '../services/cookieUtils'
 
 const WelcomeText = styled.p`

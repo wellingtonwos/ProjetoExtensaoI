@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import styled from 'styled-components'
 import { Sidebar } from '../components/Sidebar'
 import api from '../services/apiClient'
@@ -129,7 +129,6 @@ const AlertBadge = styled.span`
 const fmt  = v  => new Intl.NumberFormat('pt-BR', { style:'currency', currency:'BRL' }).format(v||0)
 const pct  = v  => `${Number(v||0).toFixed(1)}%`
 const today = () => new Date().toISOString().slice(0,10)
-const daysAgo = n => { const d = new Date(); d.setDate(d.getDate()-n); return d.toISOString().slice(0,10) }
 const firstOfMonth = () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0,10) }
 const daysUntil = dateStr => {
   if (!dateStr) return 999
@@ -303,7 +302,6 @@ export const ReportsView = ({ navigate }) => {
     catch { toast.error('Erro ao carregar histórico.') }
     finally { setHistoryLoading(false) }
   }
-
   // ── Render helpers ─────────────────────────────────────────────────────────
 
   const reloadClients = () => {
@@ -440,7 +438,6 @@ export const ReportsView = ({ navigate }) => {
     // ── ESTOQUE ─────────────────────────────────────────────────────────────────
     if (activeTab === 'estoque') {
       const products = data
-      const total = products.reduce((a,p) => a + (p.purchases||[]).reduce((b,l) => b+Number(l.quantity||0), 0), 0)
       const lowStock = products.filter(p => (p.purchases||[]).reduce((a,l)=>a+Number(l.quantity||0),0) < 5)
       return (
         <>
@@ -680,7 +677,7 @@ export const ReportsView = ({ navigate }) => {
                         <td style={{color:'var(--muted)'}}>{dtCad}</td>
                         <td style={{textAlign:'right'}}>
                           <div style={{display:'flex',gap:6,justifyContent:'flex-end'}}>
-                            <button onClick={() => navigate('cliente-historico', { clientId: c.id })}
+                            <button onClick={() => openHistory(c)}
                               style={{background:'none',border:'1px solid var(--border)',borderRadius:6,padding:'5px 10px',cursor:'pointer',fontSize:11,color:'var(--brand)',fontWeight:700}}>
                               Histórico
                             </button>

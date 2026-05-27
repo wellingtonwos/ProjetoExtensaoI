@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import styled from 'styled-components'
 import { Sidebar } from '../components/Sidebar'
 import { toast } from 'react-toastify'
+import { loadStoreConfig, saveStoreConfig } from '../services/storeConfig'
 
 const Wrapper = styled.div`
   display: flex; min-height: 100vh; background: var(--bg);
@@ -61,24 +62,6 @@ const Divider = styled.div`
   border-top: 1px dashed #444; margin: 6px 0;
 `
 
-const STORAGE_KEY = 'carneup_store_config'
-
-const DEFAULT_CONFIG = {
-  storeName:    'Açougue Bom Pedaço',
-  cnpj:         '12.345.678/0001-90',
-  address:      'Rua das Carnes, 42 - Centro',
-  city:         'São Paulo - SP',
-  phone:        '(11) 3456-7890',
-  footerMsg:    'Obrigado pela preferência!',
-}
-
-export const loadStoreConfig = () => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    return saved ? { ...DEFAULT_CONFIG, ...JSON.parse(saved) } : { ...DEFAULT_CONFIG }
-  } catch { return { ...DEFAULT_CONFIG } }
-}
-
 export const ConfiguracaoView = ({ navigate }) => {
   const [form, setForm] = useState(loadStoreConfig)
   const [saved, setSaved] = useState(false)
@@ -87,7 +70,7 @@ export const ConfiguracaoView = ({ navigate }) => {
 
   const handleSave = (e) => {
     e.preventDefault()
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(form))
+    saveStoreConfig(form)
     setSaved(true)
     toast.success('Configurações salvas com sucesso!')
     setTimeout(() => setSaved(false), 3000)
