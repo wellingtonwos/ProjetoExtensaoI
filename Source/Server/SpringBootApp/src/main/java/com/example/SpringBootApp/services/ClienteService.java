@@ -96,13 +96,13 @@ public class ClienteService {
     }
 
     public List<ClienteResponseDTO> listAll() {
-        return clienteRepository.findAll(Sort.by("nickname").ascending())
-                .stream().map(this::toDTO).toList();
+        return clienteRepository.findByNicknameNot("APAGADO", Sort.by("nickname")).stream().map(this::toDTO).toList();
     }
 
     public ClienteResponseDTO getById(Long id) {
         Cliente c = clienteRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente not found: " + id));
+        if (c.getNickname() != null && "APAGADO".equals(c.getNickname())) throw new ResourceNotFoundException("Cliente not found: " + id);
         return toDTO(c);
     }
 
@@ -110,8 +110,7 @@ public class ClienteService {
         var pageable = PageRequest.of(page, 10);
         if (q == null || q.trim().length() < 2) return Page.empty(pageable);
         String trimmed = q.trim();
-        return clienteRepository.findByNicknameContainingIgnoreCaseOrTelefoneContainingIgnoreCase(trimmed, trimmed, pageable)
-                .map(this::toDTO);
+        return clienteRepository.searchActive(trimmed, "APAGADO", pageable).map(this::toDTO);
     }
 
     private ClienteResponseDTO toDTO(Cliente c) {
@@ -123,6 +122,23 @@ public class ClienteService {
         r.setDataCadastro(c.getDataCadastro());
         r.setPermissoes(getPermissoesForCliente(c.getId()));
         return r;
+    }
+
+    public void anonymizeClient(Long id) {
+        Cliente c = clienteRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Cliente not found: " + id));
+        if (c.getNickname() != null && "APAGADO".equals(c.getNickname())) {
+            throw new BusinessException("Cliente já foi apagado/anonymizado");
+        }
+        // Overwrite identifiable fields
+        c.setNickname("APAGADO");
+        c.setTelefone(null);
+        c.setAniversario(null);
+        clienteRepository.save(c);
+
+        // Remove consentimentos to clear personal preference data (best-effort)
+        if (jdbcTemplate != null) {
+            try { jdbcTemplate.update("DELETE FROM consentimentos WHERE fk_cliente_id = ?", id); } catch (Exception ex) { /* ignore */ }
+        }
     }
 
     private List<Permissao> getPermissoesForCliente(Long clienteId) {

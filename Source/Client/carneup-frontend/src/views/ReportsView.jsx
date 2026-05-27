@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import styled from 'styled-components'
 import { Sidebar } from '../components/Sidebar'
 import api from '../services/apiClient'
-import { getAllClients, updateClient, getClientSales, getClientSpending, getSale } from '../services/salesApi'
+import { getAllClients, updateClient, getClientSales, getClientSpending, getSale, deleteClient } from '../services/salesApi'
 import { toast } from 'react-toastify'
 import { toTitleCase, titleCaseHandler } from '../services/textUtils'
 import PaginationBar from '../components/PaginationBar'
@@ -227,6 +227,13 @@ const EMCancel = styled.button`
   background:#fff;cursor:pointer;font-size:13px;color:var(--text-sub);
   &:hover{background:var(--bg);}
 `
+const EMDelete = styled.button`
+  flex:1;padding:10px;border:none;border-radius:var(--radius);
+  background:var(--danger);color:#fff;cursor:pointer;font-size:13px;
+  &:hover{background:#b91c1c;}
+  &:disabled{opacity:0.6;cursor:not-allowed;}
+`
+
 const EMSave = styled.button`
   flex:2;padding:10px;border:none;border-radius:var(--radius);
   background:var(--brand);color:#fff;cursor:pointer;
@@ -272,6 +279,7 @@ export const ReportsView = ({ navigate, initialTab }) => {
   const [editClient, setEditClient]     = useState(null)   // null = closed
   const [editForm, setEditForm]         = useState({})
   const [editSaving, setEditSaving]     = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
   const [historyClient, setHistoryClient] = useState(null) // null = closed
   const [historyData, setHistoryData]   = useState([])
   const [historyLoading, setHistoryLoading] = useState(false)
@@ -374,6 +382,23 @@ export const ReportsView = ({ navigate, initialTab }) => {
       setEditClient(null)
     } catch { toast.error('Erro ao atualizar cliente.') }
     finally { setEditSaving(false) }
+  }
+
+  const handleDeleteClient = async () => {
+    if (!editClient) return
+    const ok = window.confirm('Tem certeza que deseja apagar (anonymizar) este cliente? Isso não pode ser desfeito.')
+    if (!ok) return
+    setDeleteLoading(true)
+    try {
+      await deleteClient(editClient.id)
+      toast.success('Cliente apagado/anonymizado.')
+      setClients(prev => prev.filter(c => c.id !== editClient.id))
+      setEditClient(null)
+    } catch (e) {
+      toast.error('Erro ao apagar cliente.')
+    } finally {
+      setDeleteLoading(false)
+    }
   }
   const openHistory = async (c) => {
     setHistoryClient(c); setHistoryLoading(true); setHistoryData([])
@@ -1024,6 +1049,7 @@ export const ReportsView = ({ navigate, initialTab }) => {
               </EMField>
             </EMBody>
             <EMActions>
+              <EMDelete type='button' onClick={handleDeleteClient} disabled={deleteLoading}>{deleteLoading ? 'Apagando...' : 'Apagar Cliente'}</EMDelete>
               <EMCancel type='button' onClick={() => setEditClient(null)}>Cancelar</EMCancel>
               <EMSave type='submit' disabled={editSaving || !editForm.nickname?.trim() || (editForm.telefone && !phoneIsValid(editForm.telefone)) || isBirthdayUnder18(editForm.aniversario)}>{editSaving?'Salvando...':'Salvar Alterações'}</EMSave>
             </EMActions>

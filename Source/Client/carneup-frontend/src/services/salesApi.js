@@ -27,5 +27,6 @@ export const updateClient = (id, data) => api.put(`/clients/${id}`, data)
 export const getAllClients = () => api.get('/clients').then(r => r.data)
 export const getClientSales = (id) => api.get(`/clients/${id}/sales`).then(r => r.data)
 export const getClientSpending = (start, end) => api.get('/sales/clients-spend', { params: { startDate: start, endDate: end } }).then(r => r.data)
+export const deleteClient = (id) => api.delete(`/clients/${id}`)
 
-export default { createSale, getSale, searchClients, createClient, updateClient, getAllClients, getClientSales, getClientSpending }
+export default { createSale, getSale, searchClients, createClient, updateClient, getAllClients, getClientSales, getClientSpending, deleteClient }
