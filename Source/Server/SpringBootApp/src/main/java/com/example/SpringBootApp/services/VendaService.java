@@ -266,8 +266,6 @@ public class VendaService {
                 vp.setAcrescimoPercent(percent);
                 vp.setAcrescimoValor(acrescimo);
                 vp.setValorPago(valorPago);
-                vp.setParcelas(p.getParcelas());
-                vp.setReferencia(p.getReferencia());
                 created.add(vp);
                 if (vendaPagamentoRepository != null) vendaPagamentoRepository.save(vp);
             }

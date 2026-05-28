@@ -15,6 +15,7 @@ public class ConfiguracaoResponseDTO {
     private BigDecimal lucroEsperado;
     private BigDecimal taxaDebito;
     private BigDecimal taxaCredito;
+    private BigDecimal acrescimoCredito;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

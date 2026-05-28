@@ -24,7 +24,7 @@ public class Usuario {
     @Column(name = "nome")
     private String nome;
 
-    @Column(name = "senha")
+    @Column(name = "senha", columnDefinition = "CHAR(60)")
     private String senha;
 
     @Enumerated(EnumType.STRING)

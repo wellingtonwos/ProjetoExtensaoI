@@ -46,8 +46,6 @@ public class VendaMapper {
                     pd.setAcrescimoPercent(p.getAcrescimoPercent());
                     pd.setAcrescimoValor(p.getAcrescimoValor());
                     pd.setValorPago(p.getValorPago());
-                    pd.setParcelas(p.getParcelas());
-                    pd.setReferencia(p.getReferencia());
                     agg.put(methodName, pd);
                 } else {
                     pd.setValor((pd.getValor() != null ? pd.getValor() : BigDecimal.ZERO).add(p.getValor() != null ? p.getValor() : BigDecimal.ZERO));

@@ -26,17 +26,16 @@ public class DespesaService {
         d.setDescricao(dto.getDescricao());
         d.setCategoria(dto.getCategoria());
         d.setValor(dto.getValor().setScale(2, java.math.RoundingMode.HALF_UP));
-        d.setDataDespesa(dto.getDataDespesa() != null ? dto.getDataDespesa().atStartOfDay() : LocalDateTime.now());
-        d.setCreatedAt(LocalDateTime.now());
-        d.setUpdatedAt(LocalDateTime.now());
-        d.setCreatedBy(createdBy);
+        d.setDataDespesa(dto.getDataDespesa() != null ? dto.getDataDespesa() : java.time.LocalDate.now());
+        d.setCreatedAt(java.time.LocalDateTime.now());
+        d.setUpdatedAt(java.time.LocalDateTime.now());
 
         return despesaRepository.save(d);
     }
 
     public List<Despesa> listByDateRange(LocalDate startDate, LocalDate endDate) {
-        LocalDateTime start = startDate != null ? startDate.atStartOfDay() : LocalDate.now().atStartOfDay();
-        LocalDateTime end = endDate != null ? endDate.plusDays(1).atStartOfDay() : LocalDate.now().plusDays(1).atStartOfDay();
+        java.time.LocalDate start = startDate != null ? startDate : java.time.LocalDate.now();
+        java.time.LocalDate end = endDate != null ? endDate : java.time.LocalDate.now();
         return despesaRepository.findByDataDespesaBetween(start, end);
     }
 
@@ -46,8 +45,8 @@ public class DespesaService {
         if (dto.getDescricao() != null && !dto.getDescricao().isBlank()) existing.setDescricao(dto.getDescricao());
         if (dto.getCategoria() != null) existing.setCategoria(dto.getCategoria());
         if (dto.getValor() != null && dto.getValor().compareTo(BigDecimal.ZERO) > 0) existing.setValor(dto.getValor().setScale(2, java.math.RoundingMode.HALF_UP));
-        if (dto.getDataDespesa() != null) existing.setDataDespesa(dto.getDataDespesa().atStartOfDay());
-        existing.setUpdatedAt(LocalDateTime.now());
+        if (dto.getDataDespesa() != null) existing.setDataDespesa(dto.getDataDespesa());
+        existing.setUpdatedAt(java.time.LocalDateTime.now());
         return despesaRepository.save(existing);
     }
 

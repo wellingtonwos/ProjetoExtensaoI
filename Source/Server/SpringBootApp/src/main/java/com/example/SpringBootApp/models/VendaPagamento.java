@@ -41,16 +41,6 @@ public class VendaPagamento {
     @Column(name = "valor_pago")
     private BigDecimal valorPago;
 
-    @Column(name = "parcelas")
-    private Integer parcelas;
-
-    @Column(name = "referencia")
-    private String referencia;
-
-    @ManyToOne
-    @JoinColumn(name = "fk_usuario_id")
-    private Usuario usuario;
-
     @Column(name = "criado_em")
     private LocalDateTime criadoEm;
 }

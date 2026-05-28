@@ -27,4 +27,7 @@ public class ConfiguracaoCreateDTO {
     @NotNull(message = "taxaCredito is required")
     @DecimalMin(value = "0.0", inclusive = true, message = "taxaCredito must be >= 0")
     private BigDecimal taxaCredito;
+
+    // optional: additional credit surcharge configuration
+    private BigDecimal acrescimoCredito;
 }

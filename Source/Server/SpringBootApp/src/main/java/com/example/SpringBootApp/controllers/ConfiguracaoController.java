@@ -32,7 +32,7 @@ public class ConfiguracaoController {
     @GetMapping("/latest")
     public ResponseEntity<ConfiguracaoResponseDTO> getLatest() {
         return configuracaoService.getLatestConfiguracao()
-                .map(c -> new ConfiguracaoResponseDTO(c.getId(), c.getLucroEsperado(), c.getTaxaDebito(), c.getTaxaCredito(), c.getCreatedAt(), c.getUpdatedAt()))
+                .map(c -> new ConfiguracaoResponseDTO(c.getId(), c.getLucroEsperado(), c.getTaxaDebito(), c.getTaxaCredito(), c.getAcrescimoCredito(), c.getCreatedAt(), c.getUpdatedAt()))
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -40,7 +40,7 @@ public class ConfiguracaoController {
     @GetMapping
     public ResponseEntity<List<ConfiguracaoResponseDTO>> getAll() {
         List<ConfiguracaoResponseDTO> list = configuracaoService.getAllConfiguracoes().stream()
-                .map(c -> new ConfiguracaoResponseDTO(c.getId(), c.getLucroEsperado(), c.getTaxaDebito(), c.getTaxaCredito(), c.getCreatedAt(), c.getUpdatedAt()))
+                .map(c -> new ConfiguracaoResponseDTO(c.getId(), c.getLucroEsperado(), c.getTaxaDebito(), c.getTaxaCredito(), c.getAcrescimoCredito(), c.getCreatedAt(), c.getUpdatedAt()))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(list);
     }

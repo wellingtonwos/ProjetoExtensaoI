@@ -27,6 +27,9 @@ public class Configuracao {
     @Column(name = "taxa_credito")
     private BigDecimal taxaCredito;
 
+    @Column(name = "acrescimo_credito")
+    private BigDecimal acrescimoCredito;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

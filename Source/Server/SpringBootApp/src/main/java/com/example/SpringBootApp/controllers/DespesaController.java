@@ -38,7 +38,7 @@ public class DespesaController {
     public ResponseEntity<List<DespesaResponseDTO>> listDespesas(@RequestParam LocalDate startDate, @RequestParam LocalDate endDate) {
         List<Despesa> list = despesaService.listByDateRange(startDate, endDate);
         List<DespesaResponseDTO> dtos = list.stream()
-                .map(d -> new DespesaResponseDTO(d.getId(), d.getDescricao(), d.getCategoria(), d.getValor(), d.getDataDespesa(), d.getCreatedAt(), d.getCreatedBy()))
+                .map(d -> new DespesaResponseDTO(d.getId(), d.getDescricao(), d.getCategoria(), d.getValor(), d.getDataDespesa(), d.getCreatedAt()))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }

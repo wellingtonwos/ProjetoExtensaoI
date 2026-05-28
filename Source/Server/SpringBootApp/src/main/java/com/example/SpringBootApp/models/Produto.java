@@ -26,13 +26,13 @@ public class Produto {
     @Column(name = "unidade_medida", columnDefinition = "unit_measurement")
     private UnitMeasurement unidadeMedida;
 
-    @Column(name = "codigo")
+    @Column(name = "codigo", columnDefinition = "CHAR(6)")
     private String codigo;
 
     @Column(name = "perecivel")
     private Boolean perecivel;
 
-    @Column(name = "preco_venda")
+    @Column(name = "preco_venda", columnDefinition = "NUMERIC(10,2)")
     private BigDecimal precoVenda;
 
     @Column(name = "estoque_minimo")
