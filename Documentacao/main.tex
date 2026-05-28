@@ -913,7 +913,7 @@ O modelo é composto pelas seguintes entidades principais:
     \caption{Diagrama Entidade - Relacionamento (DER)}
     \label{fig:mer_conceitual}
     \centering
-    \includegraphics[width=0.9\textwidth]{Imagens/DER.jpeg}
+    \includegraphics[width=0.9\textwidth]{Imagens/DER.png}
     \fonte{Autoria própria (2026).}
 \end{figure}
 
@@ -929,7 +929,7 @@ A Figura \ref{fig:der_logico} apresenta o modelo lógico do sistema CarneUp.
     \caption{Modelo Lógico }
     \label{fig:der_logico}
     \centering
-    \includegraphics[width=0.9\textwidth]{Imagens/DiagramaLogico.jpeg} 
+    \includegraphics[width=0.9\textwidth]{Imagens/DiagramaLogico.png} 
     \fonte{Autoria própria (2026).}
 \end{figure}
 
@@ -1230,202 +1230,310 @@ O desenvolvimento subsequente das melhorias evolutivas deverá incorporar os rel
 \chapter{PROJETO DE BANCO DE DADOS E DICIONÁRIO DE DADOS}
 \label{apendice:banco_dados}
 
-O presente anexo detalha o projeto do banco de dados relacional (PostgreSQL) do sistema CarneUp, abrangendo os níveis de abstração, o modelo conceitual e o dicionário de dados (modelo lógico) completo.
+O presente apendice detalha o projeto do banco de dados relacional (PostgreSQL) do sistema CarneUp, abrangendo os níveis de abstração, o modelo conceitual e o dicionário de dados (modelo lógico) completo e atualizado conforme o ambiente de produção.
 
-% ---
 \section{Modelo Conceitual (MER)}
-% ---
 
-O modelo conceitual apresenta a representação de alto nível das entidades e seus relacionamentos, focando nas regras de negócio do sistema.
+O modelo conceitual apresenta a representação de alto nível das entidades e seus relacionamentos, focando nas regras de negócio e na integridade transacional do sistema.
 
 \subsection{Entidades Principais}
 
-A Tabela \ref{tab:entidades_principais} descreve as entidades fundamentais do sistema conforme o modelo conceitual atualizado.
+A Tabela 11 descreve as entidades fundamentais que compõem o ecossistema de dados do sistema CarneUp.
 
-\begin{longtable}{|>{\raggedright\arraybackslash}m{4cm}|>{\raggedright\arraybackslash}m{5cm}|>{\raggedright\arraybackslash}m{6cm}|}
-    \caption{Entidades Principais do Modelo Conceitual}
-    \label{tab:entidades_principais}\\
-    \hline
-    \textbf{Entidade} & \textbf{Descrição} & \textbf{Atributos Principais} \\
-    \hline
-    \endfirsthead
-    \multicolumn{3}{c}{{\bfseries \tablename\ \thetable{} -- continuação}} \\
-    \hline
-    \textbf{Entidade} & \textbf{Descrição} & \textbf{Atributos Principais} \\
-    \hline
-    \endhead
-    \hline
-    \endfoot
-    \hline
-    \endlastfoot
+\begin{table}[H]
+\centering
+\caption{Entidades Principais do Modelo Conceitual}
+\label{tab:entidades_principais}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|p{6cm}|p{6cm}|}
+\hline
+\textbf{Entidade} & \textbf{Descrição} & \textbf{Atributos Principais} \\ \hline
+PRODUTO & Itens comerciais comercializados no estabelecimento. & id, nome, unidade\_medida, codigo, perecivel, preco\_venda, estoque\_minimo. \\ \hline
+CATEGORIA & Classificação mercadológica dos produtos. & id, nome. \\ \hline
+MARCA & Identificação do fabricante ou marca do produto. & id, nome. \\ \hline
+USUARIO & Colaboradores com credenciais de acesso ao sistema. & id, nome, senha, nivel\_acesso, email, ultimo\_email\_alteracao. \\ \hline
+COMPRA & Registro de entrada de mercadorias no estoque. & id, data\_compra. \\ \hline
+VENDA & Registro consolidation de saídas comerciais no PDV. & id, data\_venda, valor\_total, metodo\_pagamento, desconto. \\ \hline
+MOVIMENTACAO & Histórico de fluxos físicos de estoque (entradas, saídas ou descartes). & id, quantidade, preco\_unitario\_compra, preco\_unitario\_venda, data\_validade, tipo\_movimentacao. \\ \hline
+DESCARTE & Registro de perdas de produtos motivadas por quebras ou vencimentos. & id, data\_descarte, motivo. \\ \hline
+CLIENTE & Registro simplificado e anonimizado para programas de fidelidade. & id, apelido, telefone, aniversario. \\ \hline
+DESPESA & Lançamentos operacionais de custos fixos e variáveis do comércio. & id, data\_despesa, valor, descricao, categoria. \\ \hline
+VENDA\_PAGAMENTO & Detalhamento financeiro das formas de pagamento de uma venda. & id, metodo\_pagamento, valor, valor\_pago, parcelas. \\ \hline
+RECUPERACAO\_SENHA\_TOKEN & Gerenciamento de tokens temporários para segurança e auditoria. & id, token, expiracao, utilizado, criado\_em. \\ \hline
+TERMOS & Textos de termos e políticas de privacidade vigentes. & id, conteudo, criado\_em. \\ \hline
+CONSENTIMENTOS & Registro de aceites específicos dos clientes em aderência à LGPD. & id, tipo, aceito, capturado\_em. \\ \hline
+CONFIGURACOES & Parâmetros administrativos globais de taxas e lucratividade. & id, lucro\_esperado, taxa\_debito, taxa\_credito. \\ \hline
+\end{tabular}
+}
+\end{table}
 
-    PRODUTO & Itens comercializados no sistema. & id, nome, unidade\_medida, codigo, perecivel, preco\_venda. \\
-    \hline
-    CATEGORIA & Classificação dos produtos. & id, nome. \\
-    \hline
-    MARCA & Fabricante ou marca vinculada ao produto. & id, nome. \\
-    \hline
-    USUARIO & Colaboradores com acesso ao sistema. & id, nome, senha, nivel\_acesso, email, ultimo\_email\_alteracao. \\
-    \hline
-    VENDA & Registro de saída financeira e produtos. & id, data\_venda, valor\_total, metodo\_pagamento, desconto. \\
-    \hline
-    COMPRA & Registro de entrada de estoque. & id, data\_compra. \\
-    \hline
-    MOVIMENTACAO & Item transacional que compõe vendas, compras ou descartes. & id, quantidade, preco\_unitario\_compra, preco\_unitario\_venda, data\_validade, tipo\_movimentacao. \\
-    \hline
-    CLIENTE & Identificação simplificada para fidelização. & id, apelido. \\
-    \hline
-    DESCARTE & Registro de perda de produtos. & id, data\_descarte, motivo. \\
-    \hline
-    DESPESA & Lançamentos de custos fixos e variáveis. & id, data, valor, tipo. \\
-    \hline
-    RECUPERACAO SENHA TOKEN & Gestão de segurança para alteração de senha. & id, token, expiracao, utilizado, criado\_em. \\
-    \hline
-\end{longtable}
-
-% ---
+\newpage
 \section{Modelo Lógico - Dicionário de Dados}
-% ---
 
-O Dicionário de Dados detalha a estrutura técnica de cada tabela, os tipos de dados nativos do PostgreSQL, chaves e restrições de integridade.
-
-\subsection{Tabela USUARIO}
-\begin{longtable}{|l|l|c|p{6cm}|}
-    \caption{Estrutura da Tabela USUARIO} \label{tab:dic_usuario} \\
-    \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
-    \endfirsthead
-    id & SERIAL & PK & NOT NULL \\ \hline
-    nome & VARCHAR(255) & & NOT NULL \\ \hline
-    senha & VARCHAR(60) & & NOT NULL (Armazenada com BCrypt) \\ \hline
-    nivel\_acesso & VARCHAR(3) & & NOT NULL (ADM, OPE) \\ \hline
-    email & VARCHAR(255) & & NOT NULL (Único) \\ \hline
-    ultimo\_email\_alteracao & TIMESTAMP & & NULL \\ \hline
-\end{longtable}
+O Dicionário de Dados detalha a estrutura técnica de cada tabela, os tipos de dados nativos do PostgreSQL, chaves primárias (PK), chaves estrangeiras (FK) e restrições de integridade. Todas as tabelas contam nativamente com os campos de auditoria temporal \texttt{created\_at} e \texttt{updated\_at} estruturados em formato \texttt{TIMESTAMP}.
 
 \subsection{Tabela PRODUTO}
-\begin{longtable}{|l|l|c|p{6cm}|}
-    \caption{Estrutura da Tabela PRODUTO} \label{tab:dic_produto} \\
-    \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
-    \endfirsthead % <-- ADICIONADO: Isola a primeira página
-
-    \caption[]{Estrutura da Tabela PRODUTO -- continuação} \\
-    \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
-    \endhead % <-- MOVIDO: Define o topo das páginas seguintes
-    id & SERIAL & PK & NOT NULL \\ \hline
-    nome & VARCHAR(255) & & NOT NULL \\ \hline
-    unidade\_medida & VARCHAR(2) & & NOT NULL (KG, UN, etc.) \\ \hline
-    codigo & VARCHAR(6) & & NULL \\ \hline
-    perecivel & BOOLEAN & & NOT NULL \\ \hline
-    preco\_venda & NUMERIC(10,4) & & NOT NULL \\ \hline
-    fk\_Categoria\_id & SERIAL & FK & NOT NULL (Ref. CATEGORIA) \\ \hline
-    fk\_Marca\_id & SERIAL & FK & NOT NULL (Ref. MARCA) \\ \hline
-\end{longtable}
-
-\subsection{Tabela MOVIMENTACAO}
-\begin{longtable}{|l|l|c|p{6cm}|}
-    \caption{Estrutura da Tabela MOVIMENTACAO} \label{tab:dic_movimentacao} \\
-    \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
-    \endhead
-    id & SERIAL & PK & NOT NULL \\ \hline
-    quantidade & NUMERIC(10,4) & & NOT NULL \\ \hline
-    preco\_unitario\_compra & NUMERIC(10,4) & & NULL \\ \hline
-    preco\_unitario\_venda & NUMERIC(10,4) & & NULL \\ \hline
-    data\_validade & DATE & & NULL \\ \hline
-    tipo\_movimentacao & VARCHAR(3) & & NOT NULL (ENT, SAI, DES) \\ \hline 
-    fk\_Produto\_id & SERIAL & FK & NOT NULL (Ref. PRODUTO) \\ \hline
-    fk\_Compra\_id & SERIAL & FK & NULL (Ref. COMPRA) \\ \hline
-    fk\_Descarte\_id & SERIAL & FK & NULL (Ref. DESCARTE) \\ \hline
-    fk\_Venda\_id & SERIAL & FK & NULL (Ref. VENDA) \\ \hline
-\end{longtable}
-
-\subsection{Tabela VENDA}
-\begin{longtable}{|l|l|c|p{6cm}|}
-    \caption{Estrutura da Tabela VENDA} \label{tab:dic_venda} \\
-    \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
-    \endhead
-    id & SERIAL & PK & NOT NULL \\ \hline
-    data\_venda & DATE & & NOT NULL \\ \hline
-    valor\_total & NUMERIC(10,4) & & NOT NULL \\ \hline
-    metodo\_pagamento & VARCHAR(3) & & NOT NULL (DIN, DEB, CRE) \\ \hline
-    desconto & BOOLEAN & & NULL \\ \hline
-    fk\_Usuario\_id & SERIAL & FK & NOT NULL (Ref. USUARIO) \\ \hline
-    fk\_cliente\_id & SERIAL & FK & NULL (Ref. CLIENTE) \\ \hline
-\end{longtable}
-
-\subsection{Tabela CLIENTE}
-\begin{longtable}{|l|l|c|p{6cm}|}
-    \caption{Estrutura da Tabela CLIENTE} \label{tab:dic_cliente} \\
-    \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
-    \endfirsthead
-
-    \caption{} \label{tab:dic_cliente} \\
-    \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
-    \endhead
-    
-    id & SERIAL & PK & NOT NULL \\ \hline
-    apelido & VARCHAR(255) & & NOT NULL (Anonimização p/ LGPD) \\ \hline
-\end{longtable}
-
-\subsection{Tabela RECUPERACAO SENHA TOKEN}
-\begin{longtable}{|l|l|c|p{6cm}|}
-    \caption{Estrutura da Tabela RECUPERACAO SENHA TOKEN} \label{tab:dic_token} \\
-    \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
-    \endhead
-    id & BIG SERIAL & PK & NOT NULL \\ \hline
-    token & VARCHAR(255) & & NOT NULL \\ \hline
-    expiracao & TIMESTAMP & & NOT NULL \\ \hline
-    utilizado & BOOLEAN & & NOT NULL \\ \hline
-    criado\_em & TIMESTAMP & & NOT NULL \\ \hline
-    fk\_usuario\_id & BIGINT & FK & NOT NULL (Ref. USUARIO) \\ \hline
-\end{longtable}
-
-\subsection{Tabela DESPESA}
-\begin{longtable}{|l|l|c|p{6cm}|}
-    \caption{Estrutura da Tabela DESPESA} \label{tab:dic_despesa} \\
-    \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
-    \endhead
-    id & SERIAL & PK & NOT NULL \\ \hline
-    data & DATE & & NOT NULL \\ \hline
-    valor & NUMERIC(10,4) & & NOT NULL \\ \hline
-    tipo & VARCHAR(255) & & NOT NULL \\ \hline
-\end{longtable}
-
-\subsection{Tabela DESCARTE}
-\begin{longtable}{|l|l|c|p{6cm}|}
-    \caption{Estrutura da Tabela DESCARTE} \label{tab:dic_descarte} \\
-    \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
-    \endhead
-    id & SERIAL & PK & NOT NULL \\ \hline
-    data\_descarte & DATE & & NOT NULL \\ \hline
-    motivo & VARCHAR(255) & & NOT NULL \\ \hline
-\end{longtable}
-
-\subsection{Tabela COMPRA}
-\begin{longtable}{|l|l|c|p{6cm}|}
-    \caption{Estrutura da Tabela COMPRA} \label{tab:dic_compra} \\
-    \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
-    \endhead
-    id & SERIAL & PK & NOT NULL \\ \hline
-    data\_compra & DATE & & NOT NULL \\ \hline
-\end{longtable}
+\begin{table}[H]
+\centering
+\caption{Estrutura da Tabela PRODUTO}
+\begin{tabular}{|l|p{4cm}|c|p{6cm}|}
+\hline
+\textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições / Observações} \\ \hline
+id & SERIAL & PK & NOT NULL \\ \hline
+nome & VARCHAR(255) & - & NOT NULL \\ \hline
+unidade\_medida & ENUM & - & DEFAULT 'KG' \\ \hline
+codigo & CHAR(6) & - & NULL \\ \hline
+perecivel & BOOLEAN & - & NOT NULL \\ \hline
+preco\_venda & NUMERIC(10,2) & - & NOT NULL \\ \hline
+fk\_categoria\_id & INTEGER & FK & NOT NULL (Ref. CATEGORIA.id) \\ \hline
+fk\_marca\_id & INTEGER & FK & NOT NULL (Ref. MARCA.id) \\ \hline
+estoque\_minimo & INTEGER & - & DEFAULT 5 NOT NULL \\ \hline
+created\_at & TIMESTAMP & - & DEFAULT CURRENT\_TIMESTAMP \\ \hline
+updated\_at & TIMESTAMP & - & DEFAULT CURRENT\_TIMESTAMP \\ \hline
+\end{tabular}
+\end{table}
 
 \subsection{Tabela CATEGORIA}
-\begin{longtable}{|l|l|c|p{6cm}|}
-    \caption{Estrutura da Tabela CATEGORIA} \label{tab:dic_categoria} \\
-    \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
-    \endhead
-    id & SERIAL & PK & NOT NULL \\ \hline
-    nome & VARCHAR(255) & & NOT NULL \\ \hline
-\end{longtable}
+\begin{table}[H]
+\centering
+\caption{Estrutura da Tabela CATEGORIA}
+\begin{tabular}{|l|p{4cm}|c|p{6cm}|}
+\hline
+\textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições / Observações} \\ \hline
+id & SERIAL & PK & NOT NULL \\ \hline
+nome & VARCHAR(255) & - & NOT NULL \\ \hline
+created\_at & TIMESTAMP & - & DEFAULT CURRENT\_TIMESTAMP \\ \hline
+updated\_at & TIMESTAMP & - & DEFAULT CURRENT\_TIMESTAMP \\ \hline
+\end{tabular}
+\end{table}
 
 \subsection{Tabela MARCA}
-\begin{longtable}{|l|l|c|p{6cm}|}
-    \caption{Estrutura da Tabela MARCA} \label{tab:dic_marca} \\
-    \hline \textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições} \\ \hline
-    \endhead
-    id & SERIAL & PK & NOT NULL \\ \hline
-    nome & VARCHAR(255) & & NOT NULL \\ \hline
-\end{longtable}
+\begin{table}[H]
+\centering
+\caption{Estrutura da Tabela MARCA}
+\begin{tabular}{|l|p{4cm}|c|p{6cm}|}
+\hline
+\textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições / Observações} \\ \hline
+id & SERIAL & PK & NOT NULL \\ \hline
+nome & VARCHAR(255) & - & NOT NULL \\ \hline
+created\_at & TIMESTAMP & - & DEFAULT CURRENT\_TIMESTAMP \\ \hline
+updated\_at & TIMESTAMP & - & DEFAULT CURRENT\_TIMESTAMP \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Tabela USUARIO}
+\begin{table}[H]
+\centering
+\caption{Estrutura da Tabela USUARIO}
+\begin{tabular}{|l|p{4cm}|c|p{6cm}|}
+\hline
+\textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições / Observações} \\ \hline
+id & SERIAL & PK & NOT NULL \\ \hline
+nome & VARCHAR(255) & - & NOT NULL \\ \hline
+senha & CHAR(60) & - & NOT NULL (Criptografia BCrypt) \\ \hline
+nivel\_acesso & ENUM & - & DEFAULT 'USUARIO' \\ \hline
+email & VARCHAR(255) & - & NOT NULL (Único) \\ \hline
+ultimo\_email\_alteracao & TIMESTAMP & - & NULL \\ \hline
+created\_at & TIMESTAMP & - & NOT NULL \\ \hline
+updated\_at & TIMESTAMP & - & NOT NULL \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Tabela COMPRA}
+\begin{table}[H]
+\centering
+\caption{Estrutura da Tabela COMPRA}
+\begin{tabular}{|l|p{4cm}|c|p{6cm}|}
+\hline
+\textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições / Observações} \\ \hline
+id & SERIAL & PK & NOT NULL \\ \hline
+data\_compra & DATE & - & NOT NULL \\ \hline
+created\_at & TIMESTAMP & - & NOT NULL \\ \hline
+updated\_at & TIMESTAMP & - & NOT NULL \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Tabela VENDA}
+\begin{table}[H]
+\centering
+\caption{Estrutura da Tabela VENDA}
+\begin{tabular}{|l|p{4cm}|c|p{6cm}|}
+\hline
+\textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições / Observações} \\ \hline
+id & SERIAL & PK & NOT NULL \\ \hline
+data\_venda & TIMESTAMP & - & DEFAULT CURRENT\_TIMESTAMP \\ \hline
+valor\_total & NUMERIC(10,2) & - & NOT NULL \\ \hline
+%metodo\_pagamento & VARCHAR(8) & - & NOT NULL \\ \hline
+desconto & BOOLEAN & - & NULL \\ \hline
+fk\_usuario\_id & INTEGER & FK & NOT NULL (Ref. USUARIO.id) \\ \hline
+fk\_cliente\_id & INTEGER & FK & NULL (Ref. CLIENTE.id) \\ \hline
+created\_at & TIMESTAMP & - & NOT NULL \\ \hline
+updated\_at & TIMESTAMP & - & NOT NULL \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Tabela MOVIMENTACAO}
+\begin{table}[H]
+\centering
+\caption{Estrutura da Tabela MOVIMENTACAO}
+\begin{tabular}{|l|p{4cm}|c|p{6cm}|}
+\hline
+\textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições / Observações} \\ \hline
+id & SERIAL & PK & NOT NULL \\ \hline
+quantidade & NUMERIC(10,4) & - & NOT NULL \\ \hline
+preco\_unitario\_compra & NUMERIC(10,4) & - & NULL \\ \hline
+preco\_unitario\_venda & NUMERIC(10,4) & - & NULL \\ \hline
+data\_validade & DATE & - & NULL \\ \hline
+tipo\_movimentacao & ENUM & - & NOT NULL \\ \hline
+fk\_produto\_id & INTEGER & FK & NOT NULL (Ref. PRODUTO.id) \\ \hline
+fk\_compra\_id & INTEGER & FK & NULL (Ref. COMPRA.id) \\ \hline
+fk\_descarte\_id & INTEGER & FK & NULL (Ref. DESCARTE.id) \\ \hline
+fk\_venda\_id & INTEGER & FK & NULL (Ref. VENDA.id) \\ \hline
+created\_at & TIMESTAMP & - & NOT NULL \\ \hline
+updated\_at & TIMESTAMP & - & NOT NULL \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Tabela DESCARTE}
+\begin{table}[H]
+\centering
+\caption{Estrutura da Tabela DESCARTE}
+\begin{tabular}{|l|p{4cm}|c|p{6cm}|}
+\hline
+\textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições / Observações} \\ \hline
+id & SERIAL & PK & NOT NULL \\ \hline
+data\_descarte & DATE & - & NOT NULL \\ \hline
+motivo & ENUM & - & NOT NULL \\ \hline
+created\_at & TIMESTAMP & - & NOT NULL \\ \hline
+updated\_at & TIMESTAMP & - & NOT NULL \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Tabela CLIENTE}
+\begin{table}[H]
+\centering
+\caption{Estrutura da Tabela CLIENTE}
+\begin{tabular}{|l|p{4cm}|c|p{6cm}|}
+\hline
+\textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições / Observações} \\ \hline
+id & SERIAL & PK & NOT NULL \\ \hline
+apelido & VARCHAR(255) & - & NOT NULL (Anonimização em conformidade com a LGPD) \\ \hline
+telefone & VARCHAR(20) & - & NULL \\ \hline
+aniversario & DATE & - & NULL \\ \hline
+created\_at & TIMESTAMP & - & NOT NULL \\ \hline
+updated\_at & TIMESTAMP & - & NOT NULL \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Tabela DESPESA}
+\begin{table}[H]
+\centering
+\caption{Estrutura da Tabela DESPESA}
+\begin{tabular}{|l|p{4cm}|c|p{6cm}|}
+\hline
+\textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições / Observações} \\ \hline
+id & SERIAL & PK & NOT NULL \\ \hline
+data\_despesa & DATE & - & NOT NULL \\ \hline
+valor & NUMERIC(10,2) & - & NOT NULL \\ \hline
+descricao & VARCHAR(255) & - & NOT NULL \\ \hline
+categoria & ENUM & - & NOT NULL \\ \hline
+created\_at & TIMESTAMP & - & NOT NULL \\ \hline
+updated\_at & TIMESTAMP & - & NOT NULL \\ \hline
+%created\_by & BIGINT & - & NOT NULL (ID do criador do registro) \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Tabela VENDA\_PAGAMENTO}
+\begin{table}[H]
+\centering
+\caption{Estrutura da Tabela VENDA\_PAGAMENTO}
+\begin{tabular}{|l|p{4cm}|c|p{6cm}|}
+\hline
+\textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições / Observações} \\ \hline
+id & SERIAL & PK & NOT NULL \\ \hline
+fk\_venda\_id & INTEGER & FK & NOT NULL (Ref. VENDA.id) \\ \hline
+metodo\_pagamento & ENUM & - & NOT NULL \\ \hline
+valor & NUMERIC(10,2) & - & NOT NULL \\ \hline
+acrescimo\_percent & NUMERIC(3,2) & - & DEFAULT 0.00 \\ \hline
+acrescimo\_valor & NUMERIC(10,2) & - & DEFAULT 0.00 \\ \hline
+valor\_pago & NUMERIC(10,2) & - & NOT NULL \\ \hline
+%parcelas & SMALLINT & - & NOT NULL DEFAULT 1 \\ \hline
+%referencia & VARCHAR(255) & - & NULL \\ \hline
+%fk\_usuario\_id & INTEGER & FK & NOT NULL (Ref. USUARIO.id) \\ \hline
+criado\_em & TIMESTAMP & - & DEFAULT CURRENT\_TIMESTAMP \\ \hline
+created\_at & TIMESTAMP & - & NOT NULL \\ \hline
+updated\_at & TIMESTAMP & - & NOT NULL \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Tabela RECUPERACAO\_SENHA\_TOKEN}
+\begin{table}[H]
+\centering
+\caption{Estrutura da Tabela RECUPERACAO\_SENHA\_TOKEN}
+\begin{tabular}{|l|p{4cm}|c|p{6cm}|}
+\hline
+\textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições / Observações} \\ \hline
+id & BIGSERIAL & PK & NOT NULL \\ \hline
+token & VARCHAR(255) & - & UNIQUE NOT NULL \\ \hline
+fk\_usuario\_id & INTEGER & FK & NOT NULL (Ref. USUARIO.id) \\ \hline
+expiracao & TIMESTAMP & - & NOT NULL \\ \hline
+utilizado & BOOLEAN & - & DEFAULT FALSE \\ \hline
+criado\_em & TIMESTAMP & - & DEFAULT CURRENT\_TIMESTAMP \\ \hline
+created\_at & TIMESTAMP & - & NOT NULL \\ \hline
+updated\_at & TIMESTAMP & - & NOT NULL \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Tabela TERMOS}
+\begin{table}[H]
+\centering
+\caption{Estrutura da Tabela TERMOS}
+\begin{tabular}{|l|p{4cm}|c|p{6cm}|}
+\hline
+\textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições / Observações} \\ \hline
+id & SERIAL & PK & NOT NULL \\ \hline
+conteudo & TEXT & - & NOT NULL \\ \hline
+criado\_em & TIMESTAMP & - & DEFAULT CURRENT\_TIMESTAMP \\ \hline
+created\_at & TIMESTAMP & - & NOT NULL \\ \hline
+updated\_at & TIMESTAMP & - & NOT NULL \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Tabela CONSENTIMENTOS}
+\begin{table}[H]
+\centering
+\caption{Estrutura da Tabela CONSENTIMENTOS}
+\begin{tabular}{|l|p{4cm}|c|p{6cm}|}
+\hline
+\textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições / Observações} \\ \hline
+id & SERIAL & PK & NOT NULL \\ \hline
+fk\_cliente\_id & INTEGER & FK & NOT NULL (Ref. CLIENTE.id) \\ \hline
+fk\_usuario\_id & INTEGER & FK & NOT NULL (Ref. USUARIO.id) \\ \hline
+tipo & VARCHAR(100) & - & NOT NULL \\ \hline
+aceito & BOOLEAN & - & NOT NULL \\ \hline
+fk\_termo\_id & INTEGER & FK & NOT NULL (Ref. TERMOS.id) \\ \hline
+capturado\_em & TIMESTAMP & - & DEFAULT CURRENT\_TIMESTAMP \\ \hline
+created\_at & TIMESTAMP & - & NOT NULL \\ \hline
+updated\_at & TIMESTAMP & - & NOT NULL \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Tabela CONFIGURACOES}
+\begin{table}[H]
+\centering
+\caption{Estrutura da Tabela CONFIGURACOES}
+\begin{tabular}{|l|p{4cm}|c|p{6cm}|}
+\hline
+\textbf{Coluna} & \textbf{Tipo de Dado} & \textbf{Chave} & \textbf{Restrições / Observações} \\ \hline
+id & SERIAL & PK & NOT NULL \\ \hline
+lucro\_esperado & NUMERIC(5,2) & - & DEFAULT 20.00 \\ \hline
+taxa\_debito & NUMERIC(5,2) & - & DEFAULT 2.50 \\ \hline
+taxa\_credito & NUMERIC(5,2) & - & DEFAULT 3.50 \\ \hline
+acrescimo\_credito & NUMERIC(5,2) & - & DEFAULT 5.00 \\ \hline
+created\_at & TIMESTAMP & - & NOT NULL \\ \hline
+updated\_at & TIMESTAMP & - & NOT NULL \\ \hline
+\end{tabular}
+\end{table}
 
 \end{apendicesenv}
 
