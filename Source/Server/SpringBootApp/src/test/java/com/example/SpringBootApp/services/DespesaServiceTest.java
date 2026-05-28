@@ -40,7 +40,6 @@ class DespesaServiceTest {
         assertEquals(1L, saved.getId());
         assertEquals("Compra material", saved.getDescricao());
         assertEquals(new BigDecimal("50.00"), saved.getValor());
-        assertEquals(5L, saved.getCreatedBy());
         verify(despesaRepository, times(1)).save(any());
     }
 

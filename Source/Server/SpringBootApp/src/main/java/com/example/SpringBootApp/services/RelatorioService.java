@@ -80,8 +80,7 @@ public class RelatorioService {
                 pd.setAcrescimoPercent(p.getAcrescimoPercent());
                 pd.setAcrescimoValor(p.getAcrescimoValor());
                 pd.setValorPago(p.getValorPago());
-                pd.setParcelas(p.getParcelas());
-                pd.setReferencia(p.getReferencia());
+                // parcelas and referencia were removed from VendaPagamento entity; not available anymore
                 return pd;
             }).collect(Collectors.toList());
             reportDTO.setPayments(payDTOs);

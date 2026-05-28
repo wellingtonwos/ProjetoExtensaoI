@@ -24,6 +24,7 @@ public class ConfiguracaoService {
         c.setLucroEsperado(dto.getLucroEsperado());
         c.setTaxaDebito(dto.getTaxaDebito());
         c.setTaxaCredito(dto.getTaxaCredito());
+        c.setAcrescimoCredito(dto.getAcrescimoCredito() != null ? dto.getAcrescimoCredito() : java.math.BigDecimal.ZERO);
         c.setCreatedAt(LocalDateTime.now());
         c.setUpdatedAt(LocalDateTime.now());
         return configuracaoRepository.save(c);
@@ -46,6 +47,7 @@ public class ConfiguracaoService {
         c.setLucroEsperado(DEFAULT_LUCRO_ESPERADO);
         c.setTaxaDebito(DEFAULT_TAXA_DEBITO);
         c.setTaxaCredito(DEFAULT_TAXA_CREDITO);
+        c.setAcrescimoCredito(java.math.BigDecimal.ZERO);
         c.setCreatedAt(LocalDateTime.now());
         c.setUpdatedAt(LocalDateTime.now());
         return c;
