@@ -37,7 +37,7 @@ class ClienteServicePermissoesTest {
         c.setId(5L);
         c.setNickname("Ana");
 
-        when(clienteRepository.findAll(org.mockito.ArgumentMatchers.any(org.springframework.data.domain.Sort.class))).thenReturn(List.of(c));
+        when(clienteRepository.findByNicknameNot(eq("APAGADO"), org.mockito.ArgumentMatchers.any(org.springframework.data.domain.Sort.class))).thenReturn(List.of(c));
 
         // construct service and inject jdbcTemplate mock via reflection
         com.example.SpringBootApp.services.ClienteService clienteService = new com.example.SpringBootApp.services.ClienteService(clienteRepository);
@@ -79,7 +79,7 @@ class ClienteServicePermissoesTest {
         c.setId(6L);
         c.setNickname("Bob");
 
-        when(clienteRepository.findAll(org.mockito.ArgumentMatchers.any(org.springframework.data.domain.Sort.class))).thenReturn(List.of(c));
+        when(clienteRepository.findByNicknameNot(eq("APAGADO"), org.mockito.ArgumentMatchers.any(org.springframework.data.domain.Sort.class))).thenReturn(List.of(c));
 
         // construct service and inject jdbcTemplate mock
         com.example.SpringBootApp.services.ClienteService clienteService = new com.example.SpringBootApp.services.ClienteService(clienteRepository);
