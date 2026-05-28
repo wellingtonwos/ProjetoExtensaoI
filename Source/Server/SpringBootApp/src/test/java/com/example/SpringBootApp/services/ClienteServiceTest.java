@@ -48,7 +48,7 @@ class ClienteServiceTest {
         c.setNickname("Maria");
 
         Page<Cliente> page = new PageImpl<>(List.of(c), PageRequest.of(0,10), 1);
-        when(clienteRepository.findByNicknameContainingIgnoreCaseOrTelefoneContainingIgnoreCase(eq("ma"), eq("ma"), any(Pageable.class))).thenReturn(page);
+        when(clienteRepository.searchActive(eq("ma"), eq("APAGADO"), any(Pageable.class))).thenReturn(page);
 
         var result = clienteService.searchClients("ma", 0);
         assertEquals(1, result.getTotalElements());
