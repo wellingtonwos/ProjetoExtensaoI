@@ -23,7 +23,7 @@ public class Produto {
     private String nome;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "unidade_medida", columnDefinition = "unit_measurement")
+    @Column(name = "unidade_medida", columnDefinition = "VARCHAR(10)")
     private UnitMeasurement unidadeMedida;
 
     @Column(name = "codigo", columnDefinition = "CHAR(6)")

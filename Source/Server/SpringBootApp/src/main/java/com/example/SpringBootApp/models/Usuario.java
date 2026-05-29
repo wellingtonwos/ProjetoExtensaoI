@@ -28,7 +28,7 @@ public class Usuario {
     private String senha;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "nivel_acesso", columnDefinition = "access_level")
+    @Column(name = "nivel_acesso", columnDefinition = "VARCHAR(7)")
     private AccessLevel accessLevel;
 
     @Column(name = "email")

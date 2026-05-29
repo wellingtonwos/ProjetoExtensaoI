@@ -25,7 +25,7 @@ public class Descarte {
     private LocalDate disposalDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "motivo", columnDefinition = "descarte_type")
+    @Column(name = "motivo", columnDefinition = "VARCHAR(20)")
     private DescarteType motivo;
 
     @OneToMany(mappedBy = "descarte", fetch = FetchType.LAZY)

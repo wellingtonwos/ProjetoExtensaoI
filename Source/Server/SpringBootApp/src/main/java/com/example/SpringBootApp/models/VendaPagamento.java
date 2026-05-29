@@ -26,7 +26,7 @@ public class VendaPagamento {
     private Venda venda;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "metodo_pagamento", columnDefinition = "payment_method")
+    @Column(name = "metodo_pagamento", columnDefinition = "VARCHAR(10)")
     private PaymentMethod metodoPagamento;
 
     @Column(name = "valor")

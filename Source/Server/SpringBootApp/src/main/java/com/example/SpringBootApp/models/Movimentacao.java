@@ -35,7 +35,7 @@ public class Movimentacao {
     private LocalDate dataValidade;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_movimentacao", columnDefinition = "movement_type")
+    @Column(name = "tipo_movimentacao", columnDefinition = "VARCHAR(20)")
     private MovementType tipoMovimentacao;
 
     @ManyToOne
