@@ -51,10 +51,22 @@ jobs:
           fi
 
       - name: Run tests (if present)
-        run: npm test --if-present
+        run: |
+          if [ -d "${{ env.FRONTEND_DIR }}" ]; then
+            cd "${{ env.FRONTEND_DIR }}"
+            npm test --if-present
+          else
+            echo "No frontend directory; skipping tests"
+          fi
 
       - name: Build (if present)
-        run: npm run build --if-present
+        run: |
+          if [ -d "${{ env.FRONTEND_DIR }}" ]; then
+            cd "${{ env.FRONTEND_DIR }}"
+            npm run build --if-present
+          else
+            echo "No frontend directory; skipping build"
+          fi
 
       - name: Analise SonarCloud
         env:
