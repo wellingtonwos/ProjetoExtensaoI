@@ -3,15 +3,10 @@ name: CI Frontend
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
-      - pipeline-only
     paths:
       - 'Source/Client/carneup-frontend/**'
       - '.github/workflows/ci-frontend.yml'
   pull_request:
-    branches:
-      - main
     paths:
       - 'Source/Client/carneup-frontend/**'
       - '.github/workflows/ci-frontend.yml'

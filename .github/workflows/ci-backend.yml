@@ -3,15 +3,10 @@ name: CI Backend
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
-      - pipeline-only
     paths:
       - 'Source/Server/SpringBootApp/**'
       - '.github/workflows/ci-backend.yml'
   pull_request:
-    branches:
-      - main
     paths:
       - 'Source/Server/SpringBootApp/**'
       - '.github/workflows/ci-backend.yml'
