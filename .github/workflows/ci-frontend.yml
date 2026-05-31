@@ -23,15 +23,13 @@ permissions:
 env:
   FRONTEND_DIR: Source/Client/carneup-frontend
   IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/projeto-frontend
+  SONAR_PROJECT_KEY_FRONTEND: Gh0st4v0_ProjetoExtensaoI_Frontend
+  SONAR_ORGANIZATION: gh0st4v0
 
 jobs:
   pipeline:
     name: Validate, build and push frontend
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ${{ env.FRONTEND_DIR }}
 
     steps:
       - name: Checkout code
@@ -43,16 +41,41 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          if [ -d "${{ env.FRONTEND_DIR }}" ]; then
+            cd "${{ env.FRONTEND_DIR }}"
+            if [ -f package-lock.json ]; then
+              npm ci
+            else
+              npm install
+            fi
+          else
+            echo "No frontend directory; skipping install"
+          fi
 
       - name: Run tests (if present)
         run: npm test --if-present
 
       - name: Build (if present)
         run: npm run build --if-present
+
+      - name: Analise SonarCloud
+        if: ${{ secrets.SONAR_TOKEN != '' }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          if [ -d "${{ env.FRONTEND_DIR }}" ]; then
+            cd "${{ env.FRONTEND_DIR }}"
+            test -n "$SONAR_TOKEN"
+            docker run --rm -e SONAR_HOST_URL="https://sonarcloud.io" -e SONAR_LOGIN="$SONAR_TOKEN" -v "$(pwd):/usr/src" sonarsource/sonar-scanner-cli \
+              -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY_FRONTEND }} \
+              -Dsonar.organization=${{ env.SONAR_ORGANIZATION }} \
+              -Dsonar.sources=/usr/src
+          else
+            echo "No frontend directory, skipping Sonar"
+          fi
 
       - name: Login to GitHub Container Registry
         if: github.event_name == 'push'
