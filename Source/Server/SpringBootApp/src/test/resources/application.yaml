@@ -1,6 +1,8 @@
 spring:
   application:
     name: JuniorPrimeBeef
+  flyway:
+    enabled: false
   datasource:
     url: ${DB_PATH:jdbc:postgresql://localhost:5432/JuniorPrimeBeef}
     username: ${DB_USERNAME:postgres}

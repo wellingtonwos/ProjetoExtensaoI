@@ -60,6 +60,7 @@ public class CatalogoService {
 		Produto.setPrecoVenda(productDTO.getPrecoVenda());
 		Produto.setCategoria(Categoria);
 		Produto.setMarca(Marca);
+		Produto.setEstoqueMinimo(productDTO.getMinStock() != null ? productDTO.getMinStock() : 5);
 
 		return ProdutoRepository.save(Produto);
 	}
@@ -167,6 +168,7 @@ public class CatalogoService {
 		produto.setPrecoVenda(productDTO.getPrecoVenda());
 		produto.setCategoria(categoria);
 		produto.setMarca(marca);
+		produto.setEstoqueMinimo(productDTO.getMinStock() != null ? productDTO.getMinStock() : 5);
 
 		return ProdutoRepository.save(produto);
 	}

@@ -29,6 +29,8 @@ public class InventarioService {
     private final MovimentacaoRepository movimentacaoRepository;
     private final ProdutoRepository ProdutoRepository;
     private final DecarteRepository decarteRepository;
+    private final com.example.SpringBootApp.repositories.VendaRepository vendaRepository;
+    private final com.example.SpringBootApp.services.ConfiguracaoService configuracaoService;
 
     public Compra createPurchase(CompraCreateDTO purchaseDTO) {
         for (CompraItemDTO itemDTO : purchaseDTO.getItems()) {
@@ -133,6 +135,11 @@ public class InventarioService {
                                     .map(Movimentacao::getQuantidade)
                                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+                    // Exclude fully-sold lots (net quantity <= 0)
+                    if (totalQuantity.compareTo(BigDecimal.ZERO) <= 0) {
+                        return null;
+                    }
+
                     CompraEmEstoqueDTO dto = new CompraEmEstoqueDTO();
                     dto.setPurchase_id(purchaseId);
                     dto.setPurchase_date(purchaseDate);
@@ -142,6 +149,7 @@ public class InventarioService {
 
                     return dto;
                 })
+                .filter(Objects::nonNull)
                 .toList();
     }
 
@@ -188,7 +196,7 @@ public class InventarioService {
             }
             for (Movimentacao m : group) {
                 if (m.getVenda() != null && m.getVenda().getDataVenda() != null) {
-                    LocalDate saleDate = m.getVenda().getDataVenda();
+                    java.time.LocalDate saleDate = m.getVenda().getDataVenda().toLocalDate();
                     if (newExpiringDate.isBefore(saleDate)) {
                         throw new BusinessException("Cannot set expiration date before existing sale date: " + saleDate);
                     }
@@ -207,6 +215,125 @@ public class InventarioService {
         purchaseMov.setQuantidade(newQuantity);
         if (newExpiringDate != null) purchaseMov.setDataValidade(newExpiringDate);
         return movimentacaoRepository.save(purchaseMov);
+    }
+
+    public java.util.Map<String, java.util.List<java.util.Map<String, Object>>> getAlerts(Integer expiryDays) {
+        int days = expiryDays != null ? expiryDays : 7;
+        java.time.LocalDate now = java.time.LocalDate.now();
+        java.time.LocalDate limit = now.plusDays(days);
+
+        java.util.List<java.util.Map<String, Object>> expiryAlerts = new java.util.ArrayList<>();
+        java.util.List<java.util.Map<String, Object>> lowStockAlerts = new java.util.ArrayList<>();
+        java.util.List<java.util.Map<String, Object>> profitAlerts = new java.util.ArrayList<>();
+
+        // Expiry alerts: iterate products with items in stock and use grouped purchases
+        java.util.List<Produto> productsWithItems = ProdutoRepository.findAllWithItems();
+        for (Produto p : productsWithItems) {
+            if (p.getItens() == null || p.getItens().isEmpty()) continue;
+            java.util.List<CompraEmEstoqueDTO> grouped = groupItemsByPurchase(p.getItens());
+            for (CompraEmEstoqueDTO c : grouped) {
+                if (c.getExpiring_date() != null && !c.getExpiring_date().isAfter(limit)) {
+                    long daysToExpiry = java.time.temporal.ChronoUnit.DAYS.between(now, c.getExpiring_date());
+                    java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
+                    map.put("type", "expiry");
+                    map.put("productId", p.getId());
+                    map.put("productName", p.getNome());
+                    map.put("brandName", p.getMarca() != null ? p.getMarca().getNome() : null);
+                    map.put("unitMeasurement", p.getUnidadeMedida() != null ? p.getUnidadeMedida().name() : "KG");
+                    map.put("purchaseId", c.getPurchase_id());
+                    map.put("expiringDate", c.getExpiring_date());
+                    map.put("quantity", c.getQuantity());
+                    map.put("daysToExpiry", daysToExpiry);
+                    // Human-friendly title and message
+                    String title = p.getNome() + (p.getMarca() != null && p.getMarca().getNome() != null ? " (" + p.getMarca().getNome() + ")" : "");
+                    map.put("title", title);
+                    String expDateStr = c.getExpiring_date() != null ? c.getExpiring_date().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) : null;
+                    map.put("message", "Lote " + c.getPurchase_id() + " vence em " + daysToExpiry + " dia(s) — " + expDateStr);
+                    expiryAlerts.add(map);
+                }
+            }
+        }
+
+        // Low-stock alerts: iterate all products and compare current stock to estoqueMinimo (default 5)
+        java.util.List<Produto> allProducts = ProdutoRepository.findAll();
+        for (Produto p : allProducts) {
+            Integer minStock = p.getEstoqueMinimo() != null ? p.getEstoqueMinimo() : 5;
+            java.math.BigDecimal total = movimentacaoRepository.sumQuantityByProdutoId(p.getId());
+            if (total == null) total = java.math.BigDecimal.ZERO;
+            if (total.compareTo(java.math.BigDecimal.valueOf(minStock)) < 0) {
+                java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
+                map.put("type", "low_stock");
+                map.put("productId", p.getId());
+                map.put("productName", p.getNome());
+                map.put("brandName", p.getMarca() != null ? p.getMarca().getNome() : null);
+                map.put("unitMeasurement", p.getUnidadeMedida() != null ? p.getUnidadeMedida().name() : "KG");
+                map.put("currentStock", total);
+                map.put("minStock", minStock);
+                // Human-friendly title and message
+                String title = p.getNome() + (p.getMarca() != null && p.getMarca().getNome() != null ? " (" + p.getMarca().getNome() + ")" : "");
+                map.put("title", title);
+                map.put("message", "Estoque atual: " + total + " — Mínimo definido: " + minStock);
+                lowStockAlerts.add(map);
+            }
+        }
+
+        // Profit alerts: evaluate today's sales and compare profit% to expected
+        java.time.LocalDateTime startOfDay = java.time.LocalDate.now().atStartOfDay();
+        java.time.LocalDateTime endOfDay = startOfDay.plusDays(1);
+        java.util.List<Venda> vendas = vendaRepository.findByDatavendaBetweenWithMovements(startOfDay, endOfDay);
+        for (Venda v : vendas) {
+            if (v.getValorTotal() == null || v.getValorTotal().compareTo(java.math.BigDecimal.ZERO) <= 0) continue;
+            com.example.SpringBootApp.models.Configuracao cfg = configuracaoService.getConfiguracaoForDate(v.getDataVenda());
+
+            java.math.BigDecimal totalCost = java.math.BigDecimal.ZERO;
+            if (v.getItens() != null) {
+                for (Movimentacao m : v.getItens()) {
+                    java.math.BigDecimal qty = m.getQuantidade() != null ? m.getQuantidade().abs() : java.math.BigDecimal.ZERO;
+                    java.math.BigDecimal unitCost = m.getPrecoUnitarioCompra() != null ? m.getPrecoUnitarioCompra() : java.math.BigDecimal.ZERO;
+                    totalCost = totalCost.add(qty.multiply(unitCost));
+                }
+            }
+
+            java.math.BigDecimal paymentFees = java.math.BigDecimal.ZERO;
+            if (v.getPagamentos() != null) {
+                for (VendaPagamento vp : v.getPagamentos()) {
+                    java.math.BigDecimal valor = vp.getValor() != null ? vp.getValor() : java.math.BigDecimal.ZERO;
+                    java.math.BigDecimal percent = java.math.BigDecimal.ZERO;
+                    if (vp.getMetodoPagamento() == com.example.SpringBootApp.models.PaymentMethod.CREDITO) {
+                        percent = cfg != null && cfg.getTaxaCredito() != null ? cfg.getTaxaCredito() : new java.math.BigDecimal("3.50");
+                    } else if (vp.getMetodoPagamento() == com.example.SpringBootApp.models.PaymentMethod.DEBITO) {
+                        percent = cfg != null && cfg.getTaxaDebito() != null ? cfg.getTaxaDebito() : new java.math.BigDecimal("2.50");
+                    }
+                    java.math.BigDecimal fee = valor.multiply(percent).divide(new java.math.BigDecimal("100"), 4, java.math.RoundingMode.HALF_UP);
+                    paymentFees = paymentFees.add(fee);
+                }
+            }
+
+            java.math.BigDecimal profit = v.getValorTotal().subtract(totalCost).subtract(paymentFees);
+            java.math.BigDecimal profitPct = v.getValorTotal().compareTo(java.math.BigDecimal.ZERO) == 0 ? java.math.BigDecimal.ZERO : profit.divide(v.getValorTotal(), 4, java.math.RoundingMode.HALF_UP).multiply(new java.math.BigDecimal("100"));
+            java.math.BigDecimal expected = cfg != null && cfg.getLucroEsperado() != null ? cfg.getLucroEsperado() : new java.math.BigDecimal("20.00");
+            if (profitPct.compareTo(expected) < 0) {
+                java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
+                map.put("type", "low_profit");
+                map.put("saleId", v.getId());
+                map.put("date", v.getDataVenda());
+                    map.put("cliente", v.getCliente() != null ? v.getCliente().getNickname() : null);
+                map.put("profit", profit);
+                map.put("profitPercent", profitPct.setScale(2, java.math.RoundingMode.HALF_UP));
+                map.put("expectedPercent", expected);
+                String title = "Venda #" + v.getId() + " com lucro abaixo do esperado";
+                map.put("title", title);
+                String message = "Lucro: " + map.get("profitPercent") + "% — Esperado: " + expected + "%";
+                map.put("message", message);
+                profitAlerts.add(map);
+            }
+        }
+
+        java.util.Map<String, java.util.List<java.util.Map<String, Object>>> result = new java.util.LinkedHashMap<>();
+        result.put("expiryAlerts", expiryAlerts);
+        result.put("lowStockAlerts", lowStockAlerts);
+        result.put("profitAlerts", profitAlerts);
+        return result;
     }
 
     public List<java.util.Map<String, Object>> getDiscards() {

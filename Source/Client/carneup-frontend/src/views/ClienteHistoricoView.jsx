@@ -116,7 +116,16 @@ const Loading = styled.div`padding: 32px; text-align: center; color: var(--muted
 
 const fmt  = v  => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0)
 const fmtDT = dt => dt ? new Date(dt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—'
-const fmtD  = d  => d  ? new Date(d ).toLocaleDateString('pt-BR') : '—'
+const fmtD  = d  => {
+  if (!d) return '—'
+  // Handle plain YYYY-MM-DD strings as local dates (avoid UTC shift when using new Date('YYYY-MM-DD'))
+  if (typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d)) {
+    const [y, m, day] = d.split('-')
+    return `${day}/${m}/${y}`
+  }
+  const date = new Date(d)
+  return isNaN(date) ? '—' : date.toLocaleDateString('pt-BR')
+}
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
@@ -153,7 +162,7 @@ export const ClienteHistoricoView = ({ navigate, clientId }) => {
     </Wrapper>
   )
 
-  const totalGasto  = sales.reduce((a, s) => a + Number(s.totalValue || 0), 0)
+  const totalGasto  = sales.reduce((a, s) => a + Number(s.totalValue || 0) + Number(s.surchargeTotal || 0), 0)
   const qtdCompras  = sales.length
   const ticketMedio = qtdCompras > 0 ? totalGasto / qtdCompras : 0
   const initials    = client.nickname?.trim().split(' ').slice(0, 2).map(w => w[0]?.toUpperCase()).join('') || '?'
@@ -194,17 +203,10 @@ export const ClienteHistoricoView = ({ navigate, clientId }) => {
                   </div>
                 </InfoRow>
                 <InfoRow>
-                  <span className='ic material-symbols-outlined'>badge</span>
+                  <span className='ic material-symbols-outlined'>cake</span>
                   <div>
-                    <div className='lbl'>CPF / CNPJ</div>
-                    <div className='val'>{client.documento || <EmptyInfo>Não informado</EmptyInfo>}</div>
-                  </div>
-                </InfoRow>
-                <InfoRow>
-                  <span className='ic material-symbols-outlined'>mail</span>
-                  <div>
-                    <div className='lbl'>E-mail</div>
-                    <div className='val'>{client.email || <EmptyInfo>Não informado</EmptyInfo>}</div>
+                    <div className='lbl'>Aniversário</div>
+                    <div className='val'>{fmtD(client.aniversario) || <EmptyInfo>Não informado</EmptyInfo>}</div>
                   </div>
                 </InfoRow>
               </CardBody>
@@ -240,11 +242,18 @@ export const ClienteHistoricoView = ({ navigate, clientId }) => {
                       <SaleHead>
                         <div className='left'>
                           <span className='id'>Venda #{s.id}</span>
-                          <Badge $m={s.paymentMethod}>{s.paymentMethod}</Badge>
+                          {s.payments && s.payments.length > 0 ? (
+                            s.payments.map((p, idx) => (
+                              <Badge key={idx} $m={p.paymentMethod} style={{ marginRight:6 }}>{p.paymentMethod}</Badge>
+                            ))
+                          ) : (
+                            <Badge $m={s.paymentMethod}>{s.paymentMethod}</Badge>
+                          )}
                           {s.hasDiscount && <Badge $m='DESCONTO' style={{ background:'#fffbeb', color:'#b45309' }}>5% OFF</Badge>}
+                          {s.surchargeTotal > 0 && <span style={{marginLeft:8,fontSize:12,color:'#1d4ed8'}}>+{fmt(s.surchargeTotal)} (taxa)</span>}
                         </div>
                         <div style={{ textAlign: 'right' }}>
-                          <div className='total'>{fmt(s.totalValue)}</div>
+                          <div className='total'>{fmt(Number(s.totalValue || 0) + Number(s.surchargeTotal || 0))}</div>
                           <div className='date'>{fmtD(s.dataVenda)}</div>
                         </div>
                       </SaleHead>
@@ -260,6 +269,18 @@ export const ClienteHistoricoView = ({ navigate, clientId }) => {
                             <span className='price'>{fmt(Number(it.quantity) * Number(it.precoUnitarioVenda))}</span>
                           </SaleItem>
                         ))}
+
+                        {/* Payments breakdown */}
+                        {s.payments && s.payments.length > 0 && (
+                          <div style={{marginTop:8}}>
+                            {s.payments.map((p, i) => (
+                              <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',fontSize:13}}>
+                                <div>{p.paymentMethod}{p.parcelas ? ` • ${p.parcelas}x` : ''}</div>
+                                <div>{fmt(Number(p.valorPago != null ? p.valorPago : p.valor))}{p.acrescimoValor ? ` (+${fmt(p.acrescimoValor)})` : ''}</div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </SaleItems>
                     </SaleCard>
                   ))
