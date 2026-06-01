@@ -60,17 +60,14 @@ public class CatalogoService {
 		Produto.setPrecoVenda(productDTO.getPrecoVenda());
 		Produto.setCategoria(Categoria);
 		Produto.setMarca(Marca);
+		Produto.setEstoqueMinimo(productDTO.getMinStock() != null ? productDTO.getMinStock() : 5);
 
 		return ProdutoRepository.save(Produto);
 	}
 
 	public Categoria createCategory(CategoriaCreateDTO CategoriaDTO) {
-		String normalized = normalize(CategoriaDTO.getName());
-		List<Categoria> existing = CategoriaRepository.findAll();
-		for (Categoria c : existing) {
-			if (normalize(c.getNome()).equals(normalized)) {
-				throw new ResourceAlreadyExistsException("Category name already exists");
-			}
+		if (CategoriaRepository.existsByNomeIgnoreCase(CategoriaDTO.getName())) {
+			throw new ResourceAlreadyExistsException("Category name already exists");
 		}
 
 		Categoria Categoria = new Categoria();
@@ -80,12 +77,8 @@ public class CatalogoService {
 	}
 
 	public Marca createBrand(MarcaCreateDTO MarcaDTO) {
-		String normalized = normalize(MarcaDTO.getName());
-		List<Marca> existing = MarcaRepository.findAll();
-		for (Marca m : existing) {
-			if (normalize(m.getNome()).equals(normalized)) {
-				throw new ResourceAlreadyExistsException("Brand name already exists");
-			}
+		if (MarcaRepository.existsByNomeIgnoreCase(MarcaDTO.getName())) {
+			throw new ResourceAlreadyExistsException("Brand name already exists");
 		}
 
 		Marca Marca = new Marca();
@@ -167,6 +160,7 @@ public class CatalogoService {
 		produto.setPrecoVenda(productDTO.getPrecoVenda());
 		produto.setCategoria(categoria);
 		produto.setMarca(marca);
+		produto.setEstoqueMinimo(productDTO.getMinStock() != null ? productDTO.getMinStock() : 5);
 
 		return ProdutoRepository.save(produto);
 	}
@@ -187,12 +181,8 @@ public class CatalogoService {
 		Categoria categoria = CategoriaRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
-		String normalized = normalize(CategoriaDTO.getName());
-		List<Categoria> existing = CategoriaRepository.findAll();
-		for (Categoria c : existing) {
-			if (!c.getId().equals(id) && normalize(c.getNome()).equals(normalized)) {
-				throw new ResourceAlreadyExistsException("Category name already exists");
-			}
+		if (CategoriaRepository.existsByNomeIgnoreCaseAndIdNot(CategoriaDTO.getName(), id)) {
+			throw new ResourceAlreadyExistsException("Category name already exists");
 		}
 
 		categoria.setNome(CategoriaDTO.getName());
@@ -203,12 +193,8 @@ public class CatalogoService {
 		Marca marca = MarcaRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Brand not found"));
 
-		String normalized = normalize(MarcaDTO.getName());
-		List<Marca> existing = MarcaRepository.findAll();
-		for (Marca m : existing) {
-			if (!m.getId().equals(id) && normalize(m.getNome()).equals(normalized)) {
-				throw new ResourceAlreadyExistsException("Brand name already exists");
-			}
+		if (MarcaRepository.existsByNomeIgnoreCaseAndIdNot(MarcaDTO.getName(), id)) {
+			throw new ResourceAlreadyExistsException("Brand name already exists");
 		}
 
 		marca.setNome(MarcaDTO.getName());
@@ -219,9 +205,7 @@ public class CatalogoService {
 		Categoria categoria = CategoriaRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
-		boolean used = ProdutoRepository.findAll().stream().anyMatch(p ->
-				p.getCategoria() != null && p.getCategoria().getId().equals(id));
-		if (used) {
+		if (ProdutoRepository.existsByCategoria_Id(id)) {
 			throw new BusinessException("Categoria vinculada a produtos e não pode ser excluída");
 		}
 
@@ -232,9 +216,7 @@ public class CatalogoService {
 		Marca marca = MarcaRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Brand not found"));
 
-		boolean used = ProdutoRepository.findAll().stream().anyMatch(p ->
-				p.getMarca() != null && p.getMarca().getId().equals(id));
-		if (used) {
+		if (ProdutoRepository.existsByMarca_Id(id)) {
 			throw new BusinessException("Marca vinculada a produtos e não pode ser excluída");
 		}
 

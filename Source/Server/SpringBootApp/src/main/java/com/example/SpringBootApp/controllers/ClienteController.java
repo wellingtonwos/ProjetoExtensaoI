@@ -58,4 +58,10 @@ public class ClienteController {
         List<VendaResponseDTO> sales = vendaService.getSalesByClientId(id);
         return ResponseEntity.ok(sales);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> anonymizeClient(@PathVariable Long id) {
+        clienteService.anonymizeClient(id);
+        return ResponseEntity.noContent().build();
+    }
 }
