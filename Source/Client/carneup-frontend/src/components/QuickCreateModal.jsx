@@ -7,11 +7,11 @@ import { toTitleCase, titleCaseHandler } from '../services/textUtils'
 const Backdrop = styled.div`
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.35);
+  background: rgba(0,0,0,0.45);
   display:flex;
   align-items:center;
   justify-content:center;
-  z-index:70;
+  z-index:300;
 `
 
 const Card = styled.div`

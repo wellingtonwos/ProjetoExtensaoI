@@ -39,4 +39,17 @@ public class DescarteController {
         List<Map<String, Object>> result = inventarioService.getDiscards();
         return ResponseEntity.ok(result);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateDiscard(@PathVariable Long id,
+                                           @RequestBody com.example.SpringBootApp.DTOs.DescarteUpdateDTO dto) {
+        inventarioService.updateDiscard(id, dto);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteDiscard(@PathVariable Long id) {
+        inventarioService.deleteDiscard(id);
+        return ResponseEntity.noContent().build();
+    }
 }

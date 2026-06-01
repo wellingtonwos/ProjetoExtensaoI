@@ -22,11 +22,11 @@ public class AlertsController {
     private int defaultExpiryDays;
 
     @GetMapping
-    public ResponseEntity<Map<String, java.util.List<java.util.Map<String, Object>>>> getAlerts(
+    public ResponseEntity<Map<String, Object>> getAlerts(
             @RequestParam(value = "expiryDays", required = false) Integer expiryDays
     ) {
         int days = expiryDays != null ? expiryDays : defaultExpiryDays;
-        Map<String, java.util.List<java.util.Map<String, Object>>> alerts = inventarioService.getAlerts(days);
+        Map<String, Object> alerts = inventarioService.getAlerts(days);
         return ResponseEntity.ok(alerts);
     }
 }

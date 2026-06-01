@@ -35,7 +35,7 @@ public class ConfiguracaoService {
     }
 
     public List<Configuracao> getAllConfiguracoes() {
-        return configuracaoRepository.findAllByOrderByIdDesc();
+        return configuracaoRepository.findTop20ByOrderByIdDesc();
     }
 
     public Configuracao getConfiguracaoForDate(LocalDateTime date) {

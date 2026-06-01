@@ -22,4 +22,5 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
     // List all clients excluding anonymized
     List<Cliente> findByNicknameNot(String nickname, Sort sort);
+    Page<Cliente> findByNicknameNot(String nickname, Pageable pageable);
 }

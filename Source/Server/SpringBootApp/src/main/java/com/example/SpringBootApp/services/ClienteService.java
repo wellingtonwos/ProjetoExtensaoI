@@ -96,7 +96,8 @@ public class ClienteService {
     }
 
     public List<ClienteResponseDTO> listAll() {
-        return clienteRepository.findByNicknameNot("APAGADO", Sort.by("nickname")).stream().map(this::toDTO).toList();
+        return clienteRepository.findByNicknameNot("APAGADO", PageRequest.of(0, 500, Sort.by("nickname")))
+                .getContent().stream().map(this::toDTO).toList();
     }
 
     public ClienteResponseDTO getById(Long id) {

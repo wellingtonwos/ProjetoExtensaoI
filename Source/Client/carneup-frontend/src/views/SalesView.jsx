@@ -155,45 +155,46 @@ const ClearB = styled.button`
   &:hover{color:#dc2626;}
 `
 const CartItems = styled.div`
-  flex:1; overflow-y:auto; padding:4px 0;
+  flex:1; overflow-y:auto; padding:4px 0; min-height:80px;
   &::-webkit-scrollbar{width:4px;}
   &::-webkit-scrollbar-thumb{background:#e7e5e4;border-radius:4px;}
 `
 const CItem = styled.div`
-  display:flex; align-items:flex-start; gap:10px;
-  padding:10px 16px; border-bottom:1px solid #f5f5f4;
+  padding:12px 16px; border-bottom:1px solid #f0eeed;
   &:hover{background:#fafaf9;}
 `
-const CIcon = styled.div`
-  width:32px; height:32px; border-radius:6px; background:#ffdad6;
-  display:flex; align-items:center; justify-content:center; flex-shrink:0;
-  span{color:#610005;font-size:16px;}
+const CItemRow1 = styled.div`
+  display:flex; align-items:flex-start; gap:8px; margin-bottom:8px;
 `
-const CInfo = styled.div`
-  flex:1; min-width:0;
-  .name{font-weight:700;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .detail{font-size:10px;color:#78716c;margin-top:2px;}
+const CItemName = styled.div`
+  flex:1; font-weight:700; font-size:14px; color:#1c1917;
+  line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 `
-const CRight = styled.div`
-  display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0;
+const CTotal = styled.div`
+  font-family:'Epilogue',sans-serif; font-weight:900; font-size:17px;
+  color:#610005; white-space:nowrap; flex-shrink:0;
 `
-const CTotal = styled.span`
-  font-family:'Epilogue',sans-serif; font-weight:900; font-size:13px; color:#1c1917;
+const CItemRow2 = styled.div`
+  display:flex; align-items:center; justify-content:space-between;
+`
+const CUnitPrice = styled.div`
+  font-size:11px; color:#a8a29e;
 `
 const QCtrl = styled.div`
-  display:flex; align-items:center; gap:3px;
-  button{width:22px;height:22px;border-radius:4px;border:1px solid #e7e5e4;
+  display:flex; align-items:center; gap:4px;
+  button{width:28px;height:28px;border-radius:6px;border:1px solid #e7e5e4;
     background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;
-    color:#57534e; span{font-size:13px;} &:hover{background:#f5f5f4;}}
+    color:#57534e; span{font-size:16px;} &:hover{background:#f5f5f4;border-color:#d6d3d1;}}
 `
 const QIn = styled.input`
-  width:72px; text-align:center; border:1px solid #e7e5e4; border-radius:4px;
-  padding:1px 6px; font-size:11px; font-family:'Work Sans',sans-serif;
+  width:68px; text-align:center; border:1px solid #e7e5e4; border-radius:6px;
+  padding:5px 6px; font-size:13px; font-family:'Work Sans',sans-serif;
   &:focus{outline:none;border-color:#610005;}
 `
 const RmBtn = styled.button`
-  background:none;border:none;cursor:pointer;color:#d6d3d1;padding:0;display:flex;align-items:center;
-  &:hover{color:#dc2626;} span{font-size:14px;}
+  background:none;border:none;cursor:pointer;color:#d6d3d1;padding:2px;
+  display:flex;align-items:center;flex-shrink:0;
+  &:hover{color:#dc2626;} span{font-size:18px;}
 `
 const EmptyCart = styled.div`
   padding:32px 16px; text-align:center; color:#a8a29e; font-size:13px;
@@ -202,7 +203,14 @@ const EmptyCart = styled.div`
 
 // ── Cart Footer ────────────────────────────────────────────────────────────────
 const CartFooter = styled.div`
-  border-top:2px solid #f5f5f4; display:flex; flex-direction:column; gap:0; flex-shrink:0;
+  display:flex; flex-direction:column; gap:0;
+  overflow-y:auto; flex-shrink:1; min-height:0;
+  border-top:2px solid #f5f5f4;
+  &::-webkit-scrollbar{width:4px;}
+  &::-webkit-scrollbar-thumb{background:#e7e5e4;border-radius:4px;}
+`
+const CartBottom = styled.div`
+  flex-shrink:0; border-top:1px solid #f5f5f4;
 `
 const Section = styled.div`
   padding:10px 16px; border-bottom:1px solid #f5f5f4;
@@ -342,6 +350,56 @@ const CModalConfirm = styled.button`
   font-family:'Epilogue',sans-serif;font-weight:900;font-size:13px;text-transform:uppercase;
   &:hover{background:#7f1d1d;}
   &:disabled{opacity:0.5;cursor:not-allowed;}
+`
+
+// ── Payment Modal ──────────────────────────────────────────────────────────────
+const PayModal = styled.div`
+  background:#fff; border-radius:16px; width:480px; max-width:calc(100% - 32px);
+  max-height:90vh; overflow-y:auto; box-shadow:0 24px 48px rgba(0,0,0,0.2);
+  animation:${slideIn} 0.2s ease;
+`
+const PayModalHead = styled.div`
+  padding:20px 24px 16px; border-bottom:1px solid #f5f5f4;
+  display:flex; justify-content:space-between; align-items:flex-start;
+  h2{font-family:'Epilogue',sans-serif;font-size:16px;font-weight:900;color:#1c1917;margin:0;text-transform:uppercase;letter-spacing:0.04em;}
+  .total{font-family:'Epilogue',sans-serif;font-size:32px;font-weight:900;color:#610005;margin:4px 0 0;line-height:1;}
+  button{background:none;border:none;cursor:pointer;color:#a8a29e;display:flex;align-items:center;padding:0;
+    &:hover{color:#dc2626;} span{font-size:22px;}}
+`
+const PayModalBody = styled.div`
+  padding:20px 24px; display:flex; flex-direction:column; gap:16px;
+`
+const PayModalLabel = styled.p`
+  font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.15em;
+  color:#a8a29e; margin:0 0 8px;
+`
+const PayModalInfo = styled.div`
+  background:#f5f5f4; border-radius:8px; padding:10px 14px;
+  font-size:12px; color:#57534e; display:flex; align-items:center; gap:8px;
+  span{font-size:16px;color:#610005;}
+`
+const PayModalActions = styled.div`
+  display:flex; gap:8px; padding:0 24px 22px;
+`
+const PayModalCancel = styled.button`
+  flex:1; padding:12px; border:1px solid #e5e7eb; border-radius:10px;
+  background:#fff; cursor:pointer; font-size:13px; font-family:'Work Sans',sans-serif; color:#78716c;
+  &:hover{background:#f5f5f4;}
+`
+const PayModalConfirm = styled.button`
+  flex:2; padding:12px; border:none; border-radius:10px;
+  background:#610005; color:#fff; cursor:pointer;
+  font-family:'Epilogue',sans-serif; font-weight:900; font-size:13px;
+  text-transform:uppercase; letter-spacing:0.08em;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  &:hover:not(:disabled){background:#7f1d1d;}
+  &:disabled{opacity:0.5;cursor:not-allowed;}
+`
+const SplitRow = styled.div`
+  display:flex; gap:8px; align-items:center;
+  select{padding:8px 10px;border:1px solid #e7e5e4;border-radius:8px;font-size:13px;font-family:'Work Sans',sans-serif;background:#fff;}
+  input{padding:8px 10px;border:1px solid #e7e5e4;border-radius:8px;font-size:13px;width:110px;font-family:'Work Sans',sans-serif;
+    &:focus{outline:none;border-color:#610005;}}
 `
 
 // ── Receipt Modal (formato térmico 80mm) ───────────────────────────────────────
@@ -510,6 +568,14 @@ export const SalesView = ({ navigate }) => {
   // Sale state
   const [submitting, setSubmitting] = useState(false)
   const [receipt, setReceipt] = useState(null)
+  const [paymentModal, setPaymentModal] = useState(false)
+
+  const openPaymentModal = () => {
+    if (!cart.length) return
+    setSplitPayments(false)
+    setPaymentsList([])
+    setPaymentModal(true)
+  }
 
   const searchRef = useRef(null)
   const qtyRef = useRef(null)
@@ -722,6 +788,7 @@ export const SalesView = ({ navigate }) => {
       // Fetch full receipt
       let saleData = null
       if (saleId) saleData = await getSale(saleId).catch(() => null)
+      setPaymentModal(false)
       setReceipt({ saleId, saleData, cart: [...cart], total, payment, discount: hasDiscount ? discount : 0, client: !anonymous && selectedClient ? selectedClient : null, paymentsSent: paymentsPayload })
       setCart([]); setHasDiscount(false); setSelectedClient(null); setAnonymous(true)
     } catch (e) {
@@ -866,13 +933,14 @@ export const SalesView = ({ navigate }) => {
               {cart.length === 0 && <EmptyCart><span className='material-symbols-outlined'>shopping_cart</span>Clique em um produto para adicionar.</EmptyCart>}
               {cart.map(it => (
                 <CItem key={it.key}>
-                  <CIcon><span className='material-symbols-outlined'>restaurant</span></CIcon>
-                  <CInfo>
-                    <div className='name'>{it.name}</div>
-                    <div className='detail'>{fmt(it.price)}/{it.unit}</div>
-                  </CInfo>
-                  <CRight>
+                  <CItemRow1>
+                    <CItemName title={it.name}>{it.name}</CItemName>
                     <CTotal>{fmt(it.qty * it.price)}</CTotal>
+                    <RmBtn onClick={() => removeItem(it.key)} title='Remover'>
+                      <span className='material-symbols-outlined'>close</span>
+                    </RmBtn>
+                  </CItemRow1>
+                  <CItemRow2>
                     <QCtrl>
                       <button onClick={() => updateQty(it.key, Math.max(0, it.qty - (it.unit==='UN'?1:0.05)).toFixed(it.unit==='UN'?0:3))}>
                         <span className='material-symbols-outlined'>remove</span>
@@ -882,9 +950,9 @@ export const SalesView = ({ navigate }) => {
                       <button onClick={() => updateQty(it.key, it.qty + (it.unit==='UN'?1:0.05))}>
                         <span className='material-symbols-outlined'>add</span>
                       </button>
-                      <RmBtn onClick={() => removeItem(it.key)}><span className='material-symbols-outlined'>close</span></RmBtn>
                     </QCtrl>
-                  </CRight>
+                    <CUnitPrice>{fmt(it.price)}/{it.unit}</CUnitPrice>
+                  </CItemRow2>
                 </CItem>
               ))}
             </CartItems>
@@ -947,92 +1015,6 @@ export const SalesView = ({ navigate }) => {
                 )}
               </Section>
 
-              {/* Pagamento */}
-              <Section>
-                <SLabel>Forma de Pagamento</SLabel>
-                {!splitPayments && (
-                  <PayGrid>
-                    {PAYMENTS.map(opt => (
-                      <PayBtn key={opt.id} $a={payment === opt.id} onClick={() => setPayment(opt.id)}>
-                        <span className={`material-symbols-outlined icon${payment===opt.id?" fill":""}`}
-                          style={payment===opt.id?{fontVariationSettings:"'FILL' 1"}:{}}>{opt.icon}</span>
-                        <span className='txt'>{opt.label}</span>
-                      </PayBtn>
-                    ))}
-                  </PayGrid>
-                )}
-
-                <div style={{marginTop:10, display:'flex', gap:8, alignItems:'center'}}>
-                  <button type='button' style={{padding:'6px 10px',borderRadius:8,border:'1px solid #e7e5e4',background:splitPayments ? '#fff8f8':'#fff'}} onClick={() => {
-                    if (!splitPayments) {
-                      setSplitPayments(true)
-                      setPaymentsList([{ id: Date.now(), paymentMethod: payment, valor: formatPriceDisplay(total) }])
-                    } else {
-                      setSplitPayments(false)
-                      setPaymentsList([])
-                    }
-                  }}>{splitPayments ? 'Cancelar divisão' : 'Dividir pagamento'}</button>
-
-                  {splitPayments && (
-                    <div style={{display:'flex', gap:8, alignItems:'center'}}>
-                      <div style={{fontSize:12,color:'#78716c'}}>Dividir igualmente</div>
-                      {[2,3,4].map(n => (
-                        <button key={n} type='button' style={{padding:'6px 8px',borderRadius:6,border:'1px solid #e7e5e4'}} onClick={() => equalSplit(n)}>{n}x</button>
-                      ))}
-                    </div>
-                  )}
-
-                  { (splitPayments || payment === 'CREDITO') && (
-                    <div style={{fontSize:12,color:'#78716c'}}>
-                      {splitPayments
-                        ? `Atribuído: ${fmt(paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0))} — Restante: ${fmt(Math.max(0, total - paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0)))}`
-                        : payment === 'CREDITO' ? `Acréscimo no crédito: ${fmt(total * 0.05)}` : null
-                      }
-                    </div>
-                  )}
-                </div>
-
-                {splitPayments && paymentsList.map((p, idx) => (
-                  <div key={p.id} style={{marginTop:8, display:'flex', gap:8, alignItems:'center'}}>
-                    <select value={p.paymentMethod} onChange={e => {
-                      const v = e.target.value
-                      setPaymentsList(prev => prev.map(it => it.id === p.id ? {...it, paymentMethod: v} : it))
-                    }}>
-                      {PAYMENTS.map(opt => <option key={opt.id} value={opt.id}>{opt.label}</option>)}
-                    </select>
-                    <input type='text' inputMode='numeric' placeholder='0,00' value={p.valor}
-                      onChange={e => {
-                        const digits = String(e.target.value || '').replace(/\D/g, '')
-                        let cents = parseInt(digits || '0', 10)
-                        const otherAssignedCents = paymentsList.reduce((s, it) => it.id === p.id ? s : s + Math.round(parseBRL(it.valor) * 100), 0)
-                        const totalCents = Math.round(total * 100)
-                        if (otherAssignedCents + cents > totalCents) {
-                          const cap = Math.max(0, totalCents - otherAssignedCents)
-                          cents = cap
-                          toast.error('Valor ajustado para o restante disponível.')
-                        }
-                        const str = cents === 0 ? '' : (cents / 100).toFixed(2).replace('.', ',')
-                        setPaymentsList(prev => prev.map(it => it.id === p.id ? {...it, valor: str} : it))
-                      }}
-                      style={{padding:'8px 10px', border:'1px solid #e7e5e4', borderRadius:6, width:120}}
-                    />
-                    {p.paymentMethod === 'CREDITO' && <span style={{fontSize:12,color:'#1d4ed8'}}>{`+${fmt(parseBRL(p.valor)*0.05)} (5%)`}</span>}
-                    <button type='button' onClick={() => setPaymentsList(prev => prev.filter(it => it.id !== p.id))} style={{border:'none',background:'none',color:'#dc2626',cursor:'pointer'}}>Remover</button>
-                  </div>
-                ))}
-
-                {splitPayments && <div style={{marginTop:8}}><button type='button' onClick={() => {
-                  const assigned = paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0)
-                  const remaining = Math.max(0, total - assigned)
-                  if (remaining <= 0) {
-                    toast.error('Total já coberto. Não é possível adicionar mais formas.')
-                    return
-                  }
-                  setPaymentsList(prev => [...prev, { id: Date.now()+Math.random(), paymentMethod: payment, valor: formatPriceDisplay(remaining) }])
-                }} style={{padding:'6px 10px', borderRadius:8, border:'1px solid #e7e5e4'}}>Adicionar forma</button></div>}
-
-              </Section>
-
               {/* Opções avançadas (desconto escondido) */}
               <Section>
                 <AdvTrigger $open={advOpen} onClick={() => setAdvOpen(o => !o)}>
@@ -1050,6 +1032,9 @@ export const SalesView = ({ navigate }) => {
                 </AdvPanel>
               </Section>
 
+            </CartFooter>
+
+            <CartBottom>
               {/* Total */}
               <TotalBox>
                 <div>
@@ -1061,15 +1046,155 @@ export const SalesView = ({ navigate }) => {
                 {surchargeTotal > 0 && <p style={{fontSize:11,color:'#fff',opacity:0.95,marginTop:6}}>A pagar (com acréscimos): {fmt(totalWithSurcharge)}</p>}
               </TotalBox>
 
-              <FinalBtn $empty={cart.length === 0} onClick={handleFinalize}
-                disabled={cart.length === 0 || submitting}>
-                {submitting ? <Spinner /> : <span className='material-symbols-outlined'>check_circle</span>}
-                {submitting ? 'Processando...' : 'Finalizar Venda'}
+              <FinalBtn $empty={cart.length === 0} onClick={openPaymentModal}
+                disabled={cart.length === 0}>
+                <span className='material-symbols-outlined'>point_of_sale</span>
+                Finalizar Venda
               </FinalBtn>
-            </CartFooter>
+            </CartBottom>
           </CartPanel>
         </Body>
       </PdvArea>
+
+      {/* ── MODAL PAGAMENTO ── */}
+      {paymentModal && (
+        <Overlay onClick={() => !submitting && setPaymentModal(false)}>
+          <PayModal onClick={e => e.stopPropagation()}>
+            <PayModalHead>
+              <div>
+                <h2>Forma de Pagamento</h2>
+                <p className='total'>{fmt(total)}</p>
+                {hasDiscount && <p style={{fontSize:12,color:'#b45309',margin:'2px 0 0'}}>Desconto de {fmt(discount)} aplicado</p>}
+              </div>
+              <button onClick={() => setPaymentModal(false)} disabled={submitting}>
+                <span className='material-symbols-outlined'>close</span>
+              </button>
+            </PayModalHead>
+
+            <PayModalBody>
+              {/* Método único */}
+              {!splitPayments && (
+                <div>
+                  <PayModalLabel>Selecione o método</PayModalLabel>
+                  <PayGrid>
+                    {PAYMENTS.map(opt => (
+                      <PayBtn key={opt.id} $a={payment === opt.id} onClick={() => setPayment(opt.id)}>
+                        <span className='material-symbols-outlined icon'
+                          style={payment===opt.id?{fontVariationSettings:"'FILL' 1"}:{}}>{opt.icon}</span>
+                        <span className='txt'>{opt.label}</span>
+                      </PayBtn>
+                    ))}
+                  </PayGrid>
+                  {payment === 'CREDITO' && (
+                    <PayModalInfo style={{marginTop:10}}>
+                      <span className='material-symbols-outlined'>info</span>
+                      Acréscimo de 5% no crédito: +{fmt(total * 0.05)} → Total: {fmt(total * 1.05)}
+                    </PayModalInfo>
+                  )}
+                </div>
+              )}
+
+              {/* Dividir pagamento */}
+              <div>
+                <PayModalLabel>Divisão</PayModalLabel>
+                <div style={{display:'flex', gap:8, alignItems:'center', flexWrap:'wrap'}}>
+                  <button type='button'
+                    style={{padding:'7px 14px',borderRadius:8,border:'1px solid #e7e5e4',
+                      background:splitPayments?'#fef2f2':'#fff',
+                      color:splitPayments?'#610005':'#57534e',
+                      fontWeight:splitPayments?700:400,fontSize:13,cursor:'pointer'}}
+                    onClick={() => {
+                      if (!splitPayments) {
+                        setSplitPayments(true)
+                        setPaymentsList([{ id: Date.now(), paymentMethod: payment, valor: formatPriceDisplay(total) }])
+                      } else {
+                        setSplitPayments(false)
+                        setPaymentsList([])
+                      }
+                    }}>
+                    {splitPayments ? '✕ Cancelar divisão' : 'Dividir pagamento'}
+                  </button>
+
+                  {splitPayments && (
+                    <>
+                      <span style={{fontSize:12,color:'#a8a29e'}}>Dividir igualmente em</span>
+                      {[2, 3, 4].map(n => (
+                        <button key={n} type='button'
+                          style={{padding:'7px 12px',borderRadius:8,border:'1px solid #e7e5e4',fontSize:13,cursor:'pointer',fontWeight:600}}
+                          onClick={() => equalSplit(n)}>{n}x</button>
+                      ))}
+                    </>
+                  )}
+                </div>
+
+                {splitPayments && (
+                  <PayModalInfo style={{marginTop:10}}>
+                    <span className='material-symbols-outlined'>calculate</span>
+                    Atribuído: <strong>{fmt(paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0))}</strong>
+                    &nbsp;— Restante: <strong>{fmt(Math.max(0, total - paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0)))}</strong>
+                  </PayModalInfo>
+                )}
+              </div>
+
+              {/* Linhas de split */}
+              {splitPayments && (
+                <div style={{display:'flex',flexDirection:'column',gap:8}}>
+                  {paymentsList.map((p) => (
+                    <SplitRow key={p.id}>
+                      <select value={p.paymentMethod} onChange={e => {
+                        const v = e.target.value
+                        setPaymentsList(prev => prev.map(it => it.id === p.id ? {...it, paymentMethod: v} : it))
+                      }}>
+                        {PAYMENTS.map(opt => <option key={opt.id} value={opt.id}>{opt.label}</option>)}
+                      </select>
+                      <input type='text' inputMode='numeric' placeholder='0,00' value={p.valor}
+                        onChange={e => {
+                          const digits = String(e.target.value || '').replace(/\D/g, '')
+                          let cents = parseInt(digits || '0', 10)
+                          const otherCents = paymentsList.reduce((s, it) => it.id === p.id ? s : s + Math.round(parseBRL(it.valor) * 100), 0)
+                          const totalCents = Math.round(total * 100)
+                          if (otherCents + cents > totalCents) {
+                            cents = Math.max(0, totalCents - otherCents)
+                            toast.error('Valor ajustado para o restante disponível.')
+                          }
+                          const str = cents === 0 ? '' : (cents / 100).toFixed(2).replace('.', ',')
+                          setPaymentsList(prev => prev.map(it => it.id === p.id ? {...it, valor: str} : it))
+                        }}
+                      />
+                      {p.paymentMethod === 'CREDITO' && (
+                        <span style={{fontSize:11,color:'#1d4ed8',whiteSpace:'nowrap'}}>+{fmt(parseBRL(p.valor)*0.05)}</span>
+                      )}
+                      <button type='button'
+                        onClick={() => setPaymentsList(prev => prev.filter(it => it.id !== p.id))}
+                        style={{border:'none',background:'none',color:'#dc2626',cursor:'pointer',fontSize:12,whiteSpace:'nowrap'}}>
+                        Remover
+                      </button>
+                    </SplitRow>
+                  ))}
+                  <button type='button' onClick={() => {
+                    const assigned = paymentsList.reduce((s,p)=>s+parseBRL(p.valor),0)
+                    const remaining = Math.max(0, total - assigned)
+                    if (remaining <= 0) { toast.error('Total já coberto.'); return }
+                    setPaymentsList(prev => [...prev, { id: Date.now()+Math.random(), paymentMethod: 'DINHEIRO', valor: formatPriceDisplay(remaining) }])
+                  }} style={{padding:'7px 14px',borderRadius:8,border:'1px dashed #e7e5e4',fontSize:13,cursor:'pointer',color:'#610005',fontWeight:600,background:'#fff8f8'}}>
+                    + Adicionar forma
+                  </button>
+                </div>
+              )}
+            </PayModalBody>
+
+            <PayModalActions>
+              <PayModalCancel onClick={() => setPaymentModal(false)} disabled={submitting}>
+                Cancelar
+              </PayModalCancel>
+              <PayModalConfirm onClick={handleFinalize} disabled={submitting}>
+                {submitting ? <Spinner /> : <span className='material-symbols-outlined'>check_circle</span>}
+                {submitting ? 'Processando...' : 'Confirmar Venda'}
+              </PayModalConfirm>
+            </PayModalActions>
+          </PayModal>
+        </Overlay>
+      )}
 
       {/* ── MODAL CADASTRO CLIENTE ── */}
       {clientModal && (

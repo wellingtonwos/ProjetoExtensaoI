@@ -83,18 +83,12 @@ public class VendaService {
                 throw new BusinessException("Quantidade insuficiente em estoque para o produto id: " + produto.getId());
             }
 
-            List<Compra> allCompras = new ArrayList<>(compraRepository.findAll());
-            allCompras.sort((a, b) -> {
-                if (a.getDataCompra() == null && b.getDataCompra() == null) return 0;
-                if (a.getDataCompra() == null) return 1;
-                if (b.getDataCompra() == null) return -1;
-                return a.getDataCompra().compareTo(b.getDataCompra());
-            });
+            List<Compra> allCompras = compraRepository.findComprasWithStockForProduct(produto.getId());
 
             BigDecimal remaining = requiredQty;
             for (Compra compra : allCompras) {
                 if (remaining.compareTo(BigDecimal.ZERO) <= 0) break;
-                BigDecimal available = movimentacaoRepository.sumQuantityByPurchaseId(compra.getId());
+                BigDecimal available = movimentacaoRepository.sumQuantityByPurchaseAndProduct(compra.getId(), produto.getId());
                 if (available == null) available = BigDecimal.ZERO;
                 if (available.compareTo(BigDecimal.ZERO) <= 0) continue;
 

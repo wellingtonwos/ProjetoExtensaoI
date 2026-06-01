@@ -525,8 +525,8 @@ export const StockView = ({ navigate }) => {
 			style: { textAlign: 'right' },
 			render: r => (
 				<div style={{ textAlign: 'right' }}>
-					<StockBadge $low={r.stock < 5}>{r.stock.toFixed(2)} {r.unit}</StockBadge>
-					{r.stock > 0 && r.stock < 5 && <div style={{ fontSize: 10, color: '#ba1a1a', fontWeight: 700 }}>BAIXO</div>}
+					<StockBadge $low={r.stock < (r.minStock ?? 5)}>{r.stock.toFixed(2)} {r.unit}</StockBadge>
+					{r.stock > 0 && r.stock < (r.minStock ?? 5) && <div style={{ fontSize: 10, color: '#ba1a1a', fontWeight: 700 }}>BAIXO</div>}
 					{r.stock === 0 && <div style={{ fontSize: 10, color: '#ba1a1a', fontWeight: 700 }}>SEM ESTOQUE</div>}
 				</div>
 			),

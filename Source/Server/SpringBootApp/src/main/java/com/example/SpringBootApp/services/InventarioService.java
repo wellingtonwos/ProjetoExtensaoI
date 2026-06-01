@@ -98,6 +98,7 @@ public class InventarioService {
                     dto.setProduct_name(Produto.getNome());
                     dto.setBrand_name(Produto.getMarca() != null ? Produto.getMarca().getNome() : null);
                     dto.setUnitMeasurement(Produto.getUnidadeMedida());
+                    dto.setMinStock(Produto.getEstoqueMinimo());
 
                     List<CompraEmEstoqueDTO> groupedPurchases = groupItemsByPurchase(Produto.getItens());
                     dto.setPurchases(groupedPurchases);
@@ -217,14 +218,13 @@ public class InventarioService {
         return movimentacaoRepository.save(purchaseMov);
     }
 
-    public java.util.Map<String, java.util.List<java.util.Map<String, Object>>> getAlerts(Integer expiryDays) {
+    public java.util.Map<String, Object> getAlerts(Integer expiryDays) {
         int days = expiryDays != null ? expiryDays : 7;
         java.time.LocalDate now = java.time.LocalDate.now();
         java.time.LocalDate limit = now.plusDays(days);
 
         java.util.List<java.util.Map<String, Object>> expiryAlerts = new java.util.ArrayList<>();
         java.util.List<java.util.Map<String, Object>> lowStockAlerts = new java.util.ArrayList<>();
-        java.util.List<java.util.Map<String, Object>> profitAlerts = new java.util.ArrayList<>();
 
         // Expiry alerts: iterate products with items in stock and use grouped purchases
         java.util.List<Produto> productsWithItems = ProdutoRepository.findAllWithItems();
@@ -254,6 +254,8 @@ public class InventarioService {
             }
         }
 
+        expiryAlerts.sort(java.util.Comparator.comparingLong(m -> (long) m.get("daysToExpiry")));
+
         // Low-stock alerts: iterate all products and compare current stock to estoqueMinimo (default 5)
         java.util.List<Produto> allProducts = ProdutoRepository.findAll();
         for (Produto p : allProducts) {
@@ -277,68 +279,69 @@ public class InventarioService {
             }
         }
 
-        // Profit alerts: evaluate today's sales and compare profit% to expected
+        // Daily margin summary: aggregate all of today's sales into a single metric
         java.time.LocalDateTime startOfDay = java.time.LocalDate.now().atStartOfDay();
         java.time.LocalDateTime endOfDay = startOfDay.plusDays(1);
         java.util.List<Venda> vendas = vendaRepository.findByDatavendaBetweenWithMovements(startOfDay, endOfDay);
+
+        java.math.BigDecimal totalRevenue = java.math.BigDecimal.ZERO;
+        java.math.BigDecimal totalCost    = java.math.BigDecimal.ZERO;
+        java.math.BigDecimal totalFees    = java.math.BigDecimal.ZERO;
+        com.example.SpringBootApp.models.Configuracao latestCfg = null;
+
         for (Venda v : vendas) {
             if (v.getValorTotal() == null || v.getValorTotal().compareTo(java.math.BigDecimal.ZERO) <= 0) continue;
             com.example.SpringBootApp.models.Configuracao cfg = configuracaoService.getConfiguracaoForDate(v.getDataVenda());
-
-            java.math.BigDecimal totalCost = java.math.BigDecimal.ZERO;
+            if (latestCfg == null) latestCfg = cfg;
+            totalRevenue = totalRevenue.add(v.getValorTotal());
             if (v.getItens() != null) {
                 for (Movimentacao m : v.getItens()) {
-                    java.math.BigDecimal qty = m.getQuantidade() != null ? m.getQuantidade().abs() : java.math.BigDecimal.ZERO;
+                    java.math.BigDecimal qty      = m.getQuantidade() != null ? m.getQuantidade().abs() : java.math.BigDecimal.ZERO;
                     java.math.BigDecimal unitCost = m.getPrecoUnitarioCompra() != null ? m.getPrecoUnitarioCompra() : java.math.BigDecimal.ZERO;
                     totalCost = totalCost.add(qty.multiply(unitCost));
                 }
             }
-
-            java.math.BigDecimal paymentFees = java.math.BigDecimal.ZERO;
             if (v.getPagamentos() != null) {
                 for (VendaPagamento vp : v.getPagamentos()) {
-                    java.math.BigDecimal valor = vp.getValor() != null ? vp.getValor() : java.math.BigDecimal.ZERO;
+                    java.math.BigDecimal valor   = vp.getValor() != null ? vp.getValor() : java.math.BigDecimal.ZERO;
                     java.math.BigDecimal percent = java.math.BigDecimal.ZERO;
                     if (vp.getMetodoPagamento() == com.example.SpringBootApp.models.PaymentMethod.CREDITO) {
                         percent = cfg != null && cfg.getTaxaCredito() != null ? cfg.getTaxaCredito() : new java.math.BigDecimal("3.50");
                     } else if (vp.getMetodoPagamento() == com.example.SpringBootApp.models.PaymentMethod.DEBITO) {
                         percent = cfg != null && cfg.getTaxaDebito() != null ? cfg.getTaxaDebito() : new java.math.BigDecimal("2.50");
                     }
-                    java.math.BigDecimal fee = valor.multiply(percent).divide(new java.math.BigDecimal("100"), 4, java.math.RoundingMode.HALF_UP);
-                    paymentFees = paymentFees.add(fee);
+                    totalFees = totalFees.add(valor.multiply(percent).divide(new java.math.BigDecimal("100"), 4, java.math.RoundingMode.HALF_UP));
                 }
-            }
-
-            java.math.BigDecimal profit = v.getValorTotal().subtract(totalCost).subtract(paymentFees);
-            java.math.BigDecimal profitPct = v.getValorTotal().compareTo(java.math.BigDecimal.ZERO) == 0 ? java.math.BigDecimal.ZERO : profit.divide(v.getValorTotal(), 4, java.math.RoundingMode.HALF_UP).multiply(new java.math.BigDecimal("100"));
-            java.math.BigDecimal expected = cfg != null && cfg.getLucroEsperado() != null ? cfg.getLucroEsperado() : new java.math.BigDecimal("20.00");
-            if (profitPct.compareTo(expected) < 0) {
-                java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
-                map.put("type", "low_profit");
-                map.put("saleId", v.getId());
-                map.put("date", v.getDataVenda());
-                    map.put("cliente", v.getCliente() != null ? v.getCliente().getNickname() : null);
-                map.put("profit", profit);
-                map.put("profitPercent", profitPct.setScale(2, java.math.RoundingMode.HALF_UP));
-                map.put("expectedPercent", expected);
-                String title = "Venda #" + v.getId() + " com lucro abaixo do esperado";
-                map.put("title", title);
-                String message = "Lucro: " + map.get("profitPercent") + "% — Esperado: " + expected + "%";
-                map.put("message", message);
-                profitAlerts.add(map);
             }
         }
 
-        java.util.Map<String, java.util.List<java.util.Map<String, Object>>> result = new java.util.LinkedHashMap<>();
-        result.put("expiryAlerts", expiryAlerts);
-        result.put("lowStockAlerts", lowStockAlerts);
-        result.put("profitAlerts", profitAlerts);
+        java.math.BigDecimal expectedMargin = latestCfg != null && latestCfg.getLucroEsperado() != null
+                ? latestCfg.getLucroEsperado() : new java.math.BigDecimal("20.00");
+        java.math.BigDecimal grossProfit = totalRevenue.subtract(totalCost).subtract(totalFees);
+        java.math.BigDecimal grossMarginPct = totalRevenue.compareTo(java.math.BigDecimal.ZERO) == 0
+                ? java.math.BigDecimal.ZERO
+                : grossProfit.divide(totalRevenue, 4, java.math.RoundingMode.HALF_UP).multiply(new java.math.BigDecimal("100"));
+
+        java.util.Map<String, Object> dailyMarginSummary = new java.util.LinkedHashMap<>();
+        dailyMarginSummary.put("hasData",       !vendas.isEmpty());
+        dailyMarginSummary.put("salesCount",    vendas.size());
+        dailyMarginSummary.put("revenue",       totalRevenue.setScale(2, java.math.RoundingMode.HALF_UP));
+        dailyMarginSummary.put("cost",          totalCost.setScale(2, java.math.RoundingMode.HALF_UP));
+        dailyMarginSummary.put("grossMargin",   grossMarginPct.setScale(2, java.math.RoundingMode.HALF_UP));
+        dailyMarginSummary.put("expectedMargin",expectedMargin.setScale(2, java.math.RoundingMode.HALF_UP));
+        dailyMarginSummary.put("belowTarget",   !vendas.isEmpty() && grossMarginPct.compareTo(expectedMargin) < 0);
+
+        java.util.Map<String, Object> result = new java.util.LinkedHashMap<>();
+        result.put("expiryAlerts",       expiryAlerts);
+        result.put("lowStockAlerts",     lowStockAlerts);
+        result.put("dailyMarginSummary", dailyMarginSummary);
         return result;
     }
 
     public List<java.util.Map<String, Object>> getDiscards() {
-        return decarteRepository.findAll(org.springframework.data.domain.Sort.by(
-                org.springframework.data.domain.Sort.Direction.DESC, "disposalDate")).stream()
+        return decarteRepository.findAll(org.springframework.data.domain.PageRequest.of(
+                0, 200, org.springframework.data.domain.Sort.by(
+                        org.springframework.data.domain.Sort.Direction.DESC, "disposalDate"))).getContent().stream()
             .map(d -> {
                 java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
                 map.put("id", d.getId());
@@ -360,6 +363,22 @@ public class InventarioService {
                 map.put("items", items);
                 return map;
             }).collect(Collectors.toList());
+    }
+
+    public Descarte updateDiscard(Long id, com.example.SpringBootApp.DTOs.DescarteUpdateDTO dto) {
+        Descarte descarte = decarteRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Descarte not found: " + id));
+        if (dto.getDate() != null) descarte.setDisposalDate(dto.getDate());
+        if (dto.getType() != null) descarte.setMotivo(dto.getType());
+        return decarteRepository.save(descarte);
+    }
+
+    public void deleteDiscard(Long id) {
+        Descarte descarte = decarteRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Descarte not found: " + id));
+        java.util.List<Movimentacao> movements = movimentacaoRepository.findByDescarte_Id(id);
+        movimentacaoRepository.deleteAll(movements);
+        decarteRepository.delete(descarte);
     }
 
     public Descarte createDiscard(com.example.SpringBootApp.DTOs.DescarteCreateDTO discardDTO) {

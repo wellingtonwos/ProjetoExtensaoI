@@ -9,6 +9,6 @@ import java.util.Optional;
 
 public interface ConfiguracaoRepository extends JpaRepository<Configuracao, Long> {
     Optional<Configuracao> findFirstByOrderByIdDesc();
-    List<Configuracao> findAllByOrderByIdDesc();
+    List<Configuracao> findTop20ByOrderByIdDesc();
     Optional<Configuracao> findFirstByCreatedAtLessThanEqualOrderByCreatedAtDesc(LocalDateTime date);
 }
